@@ -43,7 +43,7 @@ The npm package is only the runtime. The playground is where the *know-how* live
 | WebSDK runtime | ✅ `@jumio/websdk` | consume |
 | Design tokens (`variables.scss`) | ❌ | already abstracted → [`customization-reference.md`](./customization-reference.md) |
 | Embedding patterns (`websdk-client`, `sample-app`) | ❌ | reference → reproduce a minimal version in `/microsite` |
-| **Mock / virtual-camera assets** | ❌ | reference → demo without a live camera/session (see below) |
+| Session wiring (`.env` token/baseUrl, setup utils) | ❌ | reference → how to start a session with a token |
 | i18n text keys | partially | reference → so the messaging team knows what copy exists |
 | Playwright e2e patterns | ❌ | reference → for the WP1 crawler |
 | Config (`.env`: token, DC, baseUrl) | ❌ | reference → how to point the SDK at a session |
@@ -55,17 +55,26 @@ the playground and write our own equivalents (that's why we wrote our *own* refe
 copying `variables.scss`). **Do not** bulk-copy the playground's source, test assets, or translations
 into this repo.
 
-## The most valuable extra → mocks
+## Sessions: pre-created tokens now, auto-creation later
 
-The playground can run the full ID + selfie flow **without a real camera or live backend session** (mock
-/ virtual-camera mode). For a distributed hackathon demo that's gold — it makes the demo **reliable and
-repeatable**. **Day-1 builder task: get a mocked SDK session running**, learned from the playground.
+The SDK needs a **session token + baseUrl** to run a real flow, and we **always use the real device
+camera** — no mocking.
+
+- **Now (hackathon):** use a handful of **pre-created session tokens**. Someone with Jumio test-account
+  access generates a few valid tokens up front; we drop them into the microsite/studio to start a
+  session. Tokens can expire, so keep a couple of fresh ones ready on demo day.
+- **Later:** wire a small backend that calls the session-init API to **mint tokens on demand** — a
+  natural job for the Studio's "Generate" button. Deliberately **out of scope** for the 2-day build.
+
+This keeps the prototype tiny (no backend) while still being a real session on a real camera, with a
+clean seam to automate token creation afterwards.
 
 ## Two setup unknowns to resolve on Day 1
 
 1. **Is `@jumio/websdk` publicly installable, or a private/scoped npm package needing registry auth?**
    If private, the microsite build needs credentials. Confirm before building.
-2. **How do we drive a session for the demo** — real test tokens, or the playground's mock mode? Decide early.
+2. **Who generates the pre-created session tokens** (token + baseUrl), and how many do we need for the
+   demo? They can expire — assign one person to have fresh ones ready on demo day.
 
 ## How this is "leverageable later" (beyond the hackathon)
 
