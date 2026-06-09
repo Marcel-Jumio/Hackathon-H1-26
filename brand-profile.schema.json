@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Marcel-Jumio/Hackathon-H1-26/brand-profile.schema.json",
+  "title": "BrandMatch — Brand Profile",
+  "description": "The single contract between brand harvesting (WP1) and the theming engine (WP3). Light mode only for now. See customization-reference.md for how each field maps to WebSDK tokens.",
+  "type": "object",
+  "required": ["brand"],
+  "additionalProperties": false,
+  "properties": {
+    "themeMode": {
+      "type": "string",
+      "enum": ["light"],
+      "default": "light",
+      "description": "Locked to light for the hackathon (maps to <jumio-sdk-theme data-color>)."
+    },
+    "brand": {
+      "type": "object",
+      "required": ["name", "colors"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "Display name, e.g. \"Acme Bank\"." },
+        "sourceUrl": { "type": "string", "format": "uri", "description": "Where the brand was harvested from." },
+        "logo": {
+          "type": "string",
+          "description": "URL or base64 data URI. Rendered via the jumio-logotype-light template."
+        },
+        "fontFamily": { "type": "string", "default": "IBM Plex Sans", "description": "Maps to --jumio-sdk-font-family." },
+        "fontUrl": { "type": "string", "format": "uri", "description": "Stylesheet href injected as a <link> (e.g. Google Fonts)." },
+        "colors": {
+          "type": "object",
+          "required": ["primary", "onPrimary"],
+          "additionalProperties": false,
+          "description": "Hex colors with leading '#'. Drive the generated token set.",
+          "properties": {
+            "primary": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "Brand color -> color-primary1..7 ramp." },
+            "onPrimary": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "Readable label color on the primary button." },
+            "text": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "-> theme-light-text-color." },
+            "pageBackground": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "-> theme-light-page-bg-color." },
+            "cardBackground": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "-> theme-light-app-container-bg-color." },
+            "destructive": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$", "description": "Optional -> clickable-destructive-*." }
+          }
+        },
+        "radius": { "type": "string", "description": "Corner radius, e.g. \"12px\"." }
+      }
+    },
+    "journey": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Shapes the microsite shell (WP4), not the SDK theming.",
+      "properties": {
+        "vertical": { "type": "string", "description": "e.g. banking, crypto, mobility." },
+        "steps": { "type": "array", "items": { "type": "string" }, "description": "Onboarding stepper labels." },
+        "idvStepIndex": { "type": "integer", "minimum": 0, "description": "Which step embeds the WebSDK." },
+        "ctaLabel": { "type": "string", "description": "Call-to-action on the IDV step." }
+      }
+    },
+    "sdk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workflow": { "type": "string", "description": "e.g. \"id+selfie\"." },
+        "locale": { "type": "string", "default": "en" }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "containerPadding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top": { "type": "string" },
+            "right": { "type": "string" },
+            "bottom": { "type": "string" },
+            "left": { "type": "string" }
+          }
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional copy/markup overrides keyed by WebSDK template slot id (see customization-reference.md, Channel 3).",
+      "properties": {
+        "templates": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "advanced": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Escape hatch: any of the 342 raw tokens, passed through verbatim.",
+      "properties": {
+        "tokenOverrides": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Keys are full custom-property names, e.g. \"--jumio-sdk-theme-light-page-bg-color\"."
+        }
+      }
+    }
+  }
+}

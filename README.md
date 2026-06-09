@@ -10,6 +10,12 @@ to lower the barrier to attention.
 📄 **Full briefing:** open [`index.html`](./index.html) locally, or publish it via GitHub Pages (below).
 This README mirrors that page so you can read everything straight from GitHub.
 
+### 🛠️ For the build teams
+- **[`customization-reference.md`](./customization-reference.md)** — the authoritative catalog of every
+  WebSDK customization knob (342 tokens, ~45 template slots) + the ramp-generator algorithm. **WP1/3/4/6 start here.**
+- **[`brand-profile.schema.json`](./brand-profile.schema.json)** — the validatable contract schema (light mode only for now).
+- **[`brand-profile.sample.json`](./brand-profile.sample.json)** — a worked example to build against.
+
 ---
 
 ## The idea
