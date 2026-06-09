@@ -10,13 +10,26 @@ Turn a `brand-profile.json` into the styling the WebSDK consumes: a `<style>` bl
 - **In:** [`../brand-profile.sample.json`](../brand-profile.sample.json) (start with this mock)
 - **Out:** an HTML snippet (`<link>` font + `<style>` tokens + `<template>` logo) the microsite drops into its `<head>`/`<body>`
 
-## First move (Day 1)
-1. Implement the `ramp()` function from [`../customization-reference.md`](../customization-reference.md) §1d.
-2. Map the brand inputs → `theme-light-*` tokens using the mapping table in that doc.
-3. Feed it the sample JSON, print the `<style>` block, eyeball it.
+## What's here (WIP starter — extend it)
+A working baseline already exists so you don't start from a blank page:
+- **`brand-to-theme.mjs`** — `mix()`, `ramp()`, `buildTokens()`, `buildHtml()`, `applyTheme()`. Zero deps, runs in browser + Node.
+- **`demo.mjs`** — feeds the sample profile through and prints the generated snippet.
+
+Try it from the repo root:
+```bash
+node engine/demo.mjs
+```
+
+> ⚠️ This is **WIP / a baseline**, not finished. Treat the ramp stops and token mapping as a starting
+> point to tune — but freeze the *output shape* before Sales/Marketing rely on it.
+
+## Your job (extend the starter)
+1. Verify the generated tokens actually theme a real `<jumio-sdk>` (with Colombia's microsite).
+2. Tune the `ramp()` stops so brand colors look good across the SDK.
+3. Decide the exact snippet hand-off format with `/microsite`.
 
 ## Done when…
-Mock JSON in → correct light-mode CSS + logo template out. Bonus: a tiny demo page proving it themes a real `<jumio-sdk>`.
+A real `brand-profile.json` in → styling that visibly re-skins a live `<jumio-sdk>`.
 
 ## Scope guardrails
 - **Light mode only** for now — emit `theme-light-*`, lock `<jumio-sdk-theme data-color="light">`.
