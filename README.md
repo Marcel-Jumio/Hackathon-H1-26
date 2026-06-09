@@ -10,9 +10,10 @@ to lower the barrier to attention.
 📄 **Full briefing:** open [`index.html`](./index.html) locally, or publish it via GitHub Pages (below).
 This README mirrors that page so you can read everything straight from GitHub.
 
-## 👋 New here? Start with these two
+## 👋 New here? Start with these
 1. **[COLLABORATION.md](./COLLABORATION.md)** — who owns what, and the one rule. **Find your name, open your folder.**
 2. **[CONTRIBUTING.md](./CONTRIBUTING.md)** — how to push your work *safely* (incl. a no-Git, website-only path for non-coders).
+3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** — how the pieces fit: npm runtime vs. the playground reference, and what "styling the SDK" actually means.
 
 Your track lives in its own folder, each with a README telling you your first move:
 [`/engine`](./engine) · [`/microsite`](./microsite) · [`/studio`](./studio) · [`/harvest`](./harvest) · [`/brands`](./brands) · [`/pitch`](./pitch) · [`/messaging`](./messaging).
