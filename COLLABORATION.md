@@ -13,6 +13,26 @@ anyone. That's it. That's the whole coordination model.
 - 📐 The exact data shape → [`brand-profile.schema.json`](./brand-profile.schema.json)
 - 📄 A worked example → [`brand-profile.sample.json`](./brand-profile.sample.json)
 
+## 🚧 Project status & when each track starts
+
+**Everything is WIP right now.** The project runs in two phases:
+
+1. **Foundation first (builders).** Stabilize the `brand-profile.json` contract/schema, the theming
+   engine, and the folder structure — until a real brand profile produces a visibly themed `<jumio-sdk>`.
+   Then we **freeze the contract**.
+2. **Then Sales & Marketing start.** Once the shape is frozen, `/brands` and `/messaging` are safe to
+   fill — their work plugs into the locked schema, so nothing they produce gets invalidated by churn.
+
+> If you're Sales/PMM: **read and plan now**, but hold on producing brand profiles / final copy until the
+> foundation is marked **stable** (watch this section + the team channel).
+
+**Freeze checklist — what "stable" means:**
+- [ ] schema fields locked
+- [ ] engine emits the agreed snippet shape
+- [ ] microsite renders a themed SDK from one real profile
+
+✅ all three → **green light for Sales & Marketing.**
+
 ## Who owns what
 
 | You are… | Your job | Your folder | Work package |

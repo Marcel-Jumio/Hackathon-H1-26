@@ -2,6 +2,12 @@
 
 > Working name — change freely.
 
+> 🚧 **Status: WORK IN PROGRESS.** Everything here is a fast-moving draft. The **technical foundation**
+> (the `brand-profile.json` contract/schema + the theming engine + folder structure) is being
+> **stabilized first**. Once it's locked we mark it **stable** — and *that's* when **Sales & Marketing
+> should start** filling `/brands` and `/messaging`, so they're never building on a shifting shape.
+> Builders: expect churn until then. Details → [COLLABORATION.md](./COLLABORATION.md#-project-status--when-each-track-starts).
+
 **Turn any customer URL into an on-brand IDV demo.**
 Paste a prospect's website → get a shareable microsite that mimics their onboarding, with a live,
 brand-themed **Jumio WebSDK** embedded at the identity-verification step. Built for sales & pre-sales
