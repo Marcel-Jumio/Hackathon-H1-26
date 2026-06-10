@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BrandMatch — Hackathon H1/26</title>
+    <meta
+      name="description"
+      content="Paste a customer URL, get a shareable on-brand IDV microsite with a live, brand-themed Jumio WebSDK embedded — in seconds."
+    />
+    <style>
+      :root {
+        --bg: #0d0f12;
+        --surface: #151a21;
+        --surface-2: #1c232c;
+        --border: #2a323d;
+        --text: #e7ecf2;
+        --muted: #9aa7b5;
+        --accent: #5b8cff;
+        --accent-soft: #5b8cff22;
+        --green: #36d399;
+        --amber: #fbbd23;
+        --red: #f87272;
+        --radius: 14px;
+        --maxw: 1040px;
+        --font: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      code, pre { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+      /* Nav */
+      nav {
+        position: sticky; top: 0; z-index: 50;
+        background: #0d0f12cc; backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+      }
+      nav .wrap {
+        max-width: var(--maxw); margin: 0 auto; padding: 0.75rem 1.25rem;
+        display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+      }
+      nav .brand { font-weight: 600; letter-spacing: -0.01em; margin-right: auto; }
+      nav .brand b { color: var(--accent); }
+      nav a.link { color: var(--muted); font-size: 0.9rem; }
+      nav a.link:hover { color: var(--text); text-decoration: none; }
+
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
+      section { padding: 3.5rem 0; border-bottom: 1px solid var(--border); }
+      section:last-of-type { border-bottom: 0; }
+      h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.2; }
+      h2 { font-size: 1.7rem; margin: 0 0 0.4rem; }
+      h2 .eyebrow { display: block; font-size: 0.8rem; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+      h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+      p { color: var(--text); }
+      .muted { color: var(--muted); }
+
+      /* Hero */
+      .hero { padding: 5rem 0 4rem; border-bottom: 1px solid var(--border);
+        background:
+          radial-gradient(900px 400px at 80% -10%, #5b8cff22, transparent),
+          radial-gradient(700px 350px at 0% 0%, #36d39915, transparent);
+      }
+      .badge {
+        display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--accent);
+        background: var(--accent-soft); border: 1px solid #5b8cff44;
+        padding: 0.3rem 0.7rem; border-radius: 999px; margin-bottom: 1.25rem;
+      }
+      .hero h1 { font-size: clamp(2.1rem, 5vw, 3.3rem); margin: 0 0 1rem; max-width: 18ch; }
+      .hero .lead { font-size: 1.2rem; color: var(--muted); max-width: 60ch; margin: 0 0 1.5rem; }
+      .hero .lead b { color: var(--text); font-weight: 600; }
+      .pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pill { font-size: 0.85rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 999px; }
+
+      /* Cards */
+      .grid { display: grid; gap: 1rem; }
+      .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+      .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.35rem; }
+      .card h3 { margin-top: 0; }
+      .card p:last-child { margin-bottom: 0; }
+
+      .tier { border-left: 3px solid var(--border); }
+      .tier.must { border-left-color: var(--green); }
+      .tier.should { border-left-color: var(--amber); }
+      .tier.could { border-left-color: var(--accent); }
+      .tier .tag { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+      .tier.must .tag { color: var(--green); }
+      .tier.should .tag { color: var(--amber); }
+      .tier.could .tag { color: var(--accent); }
+
+      /* Tables */
+      .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+      table { width: 100%; border-collapse: collapse; font-size: 0.92rem; min-width: 640px; }
+      th, td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+      th { background: var(--surface-2); color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      tr:last-child td { border-bottom: 0; }
+      .lvl { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+      .lvl.low { background: #36d39922; color: var(--green); }
+      .lvl.mid { background: #fbbd2322; color: var(--amber); }
+      .lvl.high { background: #f8727222; color: var(--red); }
+
+      /* Code */
+      pre { background: #0a0c0f; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.55; }
+      pre code { color: #cdd6e0; }
+      .k { color: var(--accent); } .s { color: var(--green); } .c { color: var(--muted); font-style: italic; }
+
+      /* Mermaid */
+      .diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; }
+      .mermaid { text-align: center; }
+
+      /* Timeline */
+      .timeline { display: grid; gap: 0.75rem; }
+      .tl-row { display: grid; grid-template-columns: 130px 1fr; gap: 1rem; align-items: start; }
+      .tl-when { font-weight: 600; color: var(--accent); font-size: 0.9rem; padding-top: 0.1rem; }
+      .tl-what { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 1rem; font-size: 0.93rem; }
+      .golden { margin-top: 1.25rem; background: #36d39915; border: 1px solid #36d39944; border-radius: var(--radius); padding: 1rem 1.25rem; }
+      .golden b { color: var(--green); }
+
+      ul.clean { list-style: none; padding: 0; margin: 0; }
+      ul.clean li { padding: 0.45rem 0 0.45rem 1.5rem; position: relative; }
+      ul.clean li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; }
+
+      footer { padding: 2.5rem 0 3.5rem; color: var(--muted); font-size: 0.9rem; }
+
+      @media (max-width: 720px) {
+        .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+        .tl-row { grid-template-columns: 1fr; gap: 0.3rem; }
+        nav a.link { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="wrap">
+        <span class="brand"><b>BrandMatch</b> · Hackathon H1/26</span>
+        <a class="link" href="#idea">Idea</a>
+        <a class="link" href="#how">How it works</a>
+        <a class="link" href="#architecture">Architecture</a>
+        <a class="link" href="#packages">Work packages</a>
+        <a class="link" href="#timeline">Timeline</a>
+        <a class="link" href="#involved">Get involved</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="wrap">
+        <span class="badge">2-day Hackathon · H1 / 2026</span>
+        <h1>Turn any customer URL into an on-brand IDV demo.</h1>
+        <p class="lead">
+          Paste a prospect's website → get a <b>shareable microsite</b> that mimics their onboarding,
+          with a <b>live, brand-themed Jumio WebSDK</b> embedded at the identity-verification step.
+          Built for sales &amp; pre-sales to <b>lower the barrier to attention</b>.
+        </p>
+        <div class="pills">
+          <span class="pill">🎯 Pre-sales attention-grabber</span>
+          <span class="pill">🤖 Auto / semi-auto brand capture</span>
+          <span class="pill">🎨 Real WebSDK theming</span>
+          <span class="pill">🌍 Distributed, mixed-skill team</span>
+        </div>
+      </div>
+    </header>
+
+    <section id="idea">
+      <div class="wrap">
+        <h2><span class="eyebrow">The idea</span>Why this wins attention</h2>
+        <p>
+          In sales/pre-sales the hardest thing is getting a prospect to <em>care</em>. A generic demo says
+          "here's our product." A microsite that looks like <em>their own onboarding</em> says "here's
+          <strong>you</strong>, with friction removed." It closes the imagination gap instantly.
+        </p>
+        <div class="grid cols-3" style="margin-top:1.5rem">
+          <div class="card">
+            <h3>The problem</h3>
+            <p class="muted">Cold demos don't land. Prospects can't picture the SDK inside their own flow, and a real integration takes an engineering team days.</p>
+          </div>
+          <div class="card">
+            <h3>The solution</h3>
+            <p class="muted">A one-click "showcase creator": capture a brand's look &amp; feel → auto-theme the WebSDK → embed it in a brand-skinned onboarding microsite → share a link.</p>
+          </div>
+          <div class="card">
+            <h3>The "wow"</h3>
+            <p class="muted">"Watch us do in 10 seconds what normally takes an integration team a week." It's real — the SDK is genuinely token-themeable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2><span class="eyebrow">How it works</span>One artifact ties it all together</h2>
+        <p>
+          Everything hangs off a single file in the middle — <code>brand-profile.json</code>. The harvesting
+          team <em>produces</em> it; the theming engine <em>consumes</em> it; the microsite and UI read it.
+          <strong>Lock this schema in the first two hours</strong> and every team can build in parallel against
+          mock data — exactly what a distributed, mixed-skill team needs.
+        </p>
+
+        <h3>The contract — <code>brand-profile.json</code></h3>
+        <pre><code><span class="c">// The single source of truth. Harvest fills it, the engine themes from it.</span>
+{
+  <span class="k">"brand"</span>: {
+    <span class="k">"name"</span>: <span class="s">"Acme Bank"</span>,
+    <span class="k">"sourceUrl"</span>: <span class="s">"https://acme.com"</span>,
+    <span class="k">"logo"</span>: { <span class="k">"light"</span>: <span class="s">"&lt;url|base64&gt;"</span>, <span class="k">"dark"</span>: <span class="s">"&lt;url|base64&gt;"</span> },
+    <span class="k">"colors"</span>: { <span class="k">"primary"</span>: <span class="s">"#0a3"</span>, <span class="k">"onPrimary"</span>: <span class="s">"#fff"</span>,
+                 <span class="k">"background"</span>: <span class="s">"#fff"</span>, <span class="k">"text"</span>: <span class="s">"#111"</span>, <span class="k">"accent"</span>: <span class="s">"#0a3"</span> },
+    <span class="k">"typography"</span>: { <span class="k">"family"</span>: <span class="s">"Inter"</span>, <span class="k">"url"</span>: <span class="s">"https://fonts.googleapis.com/..."</span> },
+    <span class="k">"radius"</span>: <span class="s">"12px"</span>
+  },
+  <span class="k">"journey"</span>: {
+    <span class="k">"vertical"</span>: <span class="s">"banking"</span>,
+    <span class="k">"steps"</span>: [<span class="s">"Create account"</span>, <span class="s">"Verify identity"</span>, <span class="s">"Done"</span>],
+    <span class="k">"idvStepIndex"</span>: 1,
+    <span class="k">"ctaLabel"</span>: <span class="s">"Verify your identity"</span>
+  },
+  <span class="k">"sdk"</span>: { <span class="k">"workflow"</span>: <span class="s">"id+selfie"</span>, <span class="k">"locale"</span>: <span class="s">"en"</span> }
+}</code></pre>
+        <p class="muted">
+          The <strong>mapping layer</strong> (brand → SDK) is the secret sauce and reuses what the WebSDK already supports:
+          <code>colors.primary</code> → a generated lightness ramp on <code>--jumio-sdk-color-primary1..7</code>;
+          <code>logo</code> → the <code>&lt;template id="jumio-logotype-*"&gt;</code> slots;
+          <code>typography</code> → a font <code>&lt;link&gt;</code> + <code>--jumio-sdk-font-family</code>.
+        </p>
+      </div>
+    </section>
+
+    <section id="scope">
+      <div class="wrap">
+        <h2><span class="eyebrow">Scope</span>Protect an "always-green" demo</h2>
+        <p>The riskiest part (auto-crawling) must <strong>never</strong> break the demo. Build it as a ladder where every rung is independently demoable.</p>
+        <div class="grid cols-3" style="margin-top:1.5rem">
+          <div class="card tier must">
+            <span class="tag">Must · Day 1</span>
+            <h3>Manual path</h3>
+            <p class="muted">Fill the JSON by hand → press Generate → themed SDK in a brand-skinned microsite → shareable link. <strong>This alone is a complete, winning demo.</strong></p>
+          </div>
+          <div class="card tier should">
+            <span class="tag">Should · Day 2 AM</span>
+            <h3>Semi-auto</h3>
+            <p class="muted">Crawler pre-fills most of the JSON, a human nudges a few fields, then Generate. Best balance of wow and reliability.</p>
+          </div>
+          <div class="card tier could">
+            <span class="tag">Could · Stretch</span>
+            <h3>Full-auto</h3>
+            <p class="muted">URL in → JSON out → microsite, zero manual edits, for 2–3 hand-picked "hero" brands.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="wrap">
+        <h2><span class="eyebrow">Architecture</span>Work packages on the data flow</h2>
+        <p class="muted" style="margin-bottom:1.25rem">
+          WP1 fills the JSON → WP2 <em>is</em> the JSON → WP6 lets a human review/edit it → WP3 turns it into SDK styling →
+          WP4 wraps it in a microsite → WP5 makes it shareable. WP7 runs across everything.
+        </p>
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart LR
+  subgraph WP1["WP1 · Brand Harvesting"]
+    A1["URL input"] --> A2["Crawler / extractor<br/>(Playwright)"]
+    A2 --> A3["Raw assets:<br/>colors · fonts · logo · copy"]
+    A4["Manual asset gathering<br/>(low-tech track)"] --> A3
+  end
+  subgraph WP2["WP2 · Brand Profile CONTRACT"]
+    B1[("brand-profile.json<br/>schema + mocks")]
+  end
+  subgraph WP6["WP6 · Studio UI / Orchestration"]
+    C1["Review &amp; edit form"] --> C2["Generate button"]
+  end
+  subgraph WP3["WP3 · Theming Engine"]
+    D1["Map brand to --jumio-sdk-* ramp"]
+    D2["Inject logo + font"]
+  end
+  subgraph WP4["WP4 · Microsite Shell"]
+    E1["Brand-skinned stepper"]
+    E2["Embed WebSDK at IDV step"]
+  end
+  subgraph WP5["WP5 · Share &amp; Deliver"]
+    F1["Publish"] --> F2["Link / QR"]
+  end
+  A3 --> B1
+  B1 <--> C1
+  C2 --> D1 & D2
+  D1 & D2 --> E2
+  E1 --> E2
+  E2 --> F1
+  WP7["WP7 · Demo &amp; Pitch"] -.hero brands & test data.-> C1
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="packages">
+      <div class="wrap">
+        <h2><span class="eyebrow">Work packages</span>Mapped to skill level &amp; handoffs</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>WP</th><th>Deliverable</th><th>Consumes → Produces</th><th>Level</th><th>Good for</th><th>Fallback</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>WP2</b> Contract</td>
+                <td>JSON schema + 3 mock profiles + mapping rules</td>
+                <td>— → <code>brand-profile.json</code></td>
+                <td><span class="lvl high">High</span></td>
+                <td>1 senior, <b>hour 1–2</b>, then advises</td>
+                <td>Must exist first</td>
+              </tr>
+              <tr>
+                <td><b>WP1</b> Harvesting</td>
+                <td>Auto extractor + manual gatherer</td>
+                <td>URL → assets → JSON</td>
+                <td><span class="lvl low">Low</span> / <span class="lvl high">High</span></td>
+                <td>"Design detectives" collect by hand; coder automates later</td>
+                <td>Manual gathering always works</td>
+              </tr>
+              <tr>
+                <td><b>WP3</b> Theming engine</td>
+                <td>JSON → CSS vars + logo/font injection</td>
+                <td>JSON → styled SDK</td>
+                <td><span class="lvl high">High</span></td>
+                <td>Strongest front-end dev (core)</td>
+                <td>Pre-built theme presets</td>
+              </tr>
+              <tr>
+                <td><b>WP4</b> Microsite shell</td>
+                <td>Branded stepper that embeds the SDK</td>
+                <td>JSON → HTML/CSS</td>
+                <td><span class="lvl mid">Mid</span></td>
+                <td>HTML/CSS-comfortable</td>
+                <td>One generic template, lightly skinned</td>
+              </tr>
+              <tr>
+                <td><b>WP6</b> Studio UI</td>
+                <td>URL field + edit form + Generate</td>
+                <td>JSON ↔ UI</td>
+                <td><span class="lvl mid">Mid</span> / <span class="lvl low">Low</span></td>
+                <td>Form-filling is low-tech</td>
+                <td>Raw JSON textarea + button</td>
+              </tr>
+              <tr>
+                <td><b>WP5</b> Share</td>
+                <td>Publish + link / QR</td>
+                <td>microsite → URL</td>
+                <td><span class="lvl mid">Mid</span></td>
+                <td>DevOps-ish</td>
+                <td>Local serve + screen-share</td>
+              </tr>
+              <tr>
+                <td><b>WP7</b> Demo &amp; pitch</td>
+                <td>Hero brands, script, slides, QA</td>
+                <td>everything → narrative</td>
+                <td><span class="lvl low">Low</span></td>
+                <td><b>Where non-coders shine</b>: domain, taste, presenting</td>
+                <td>This is the safety net</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Why this works for a distributed, mixed-skill team</h3>
+        <ul class="clean">
+          <li><b>Contract-first → parallelism.</b> Once WP2 ships the schema + mock JSONs (~hour 2), WP3/4/6 each work against mocks with zero dependency on the crawler or each other.</li>
+          <li><b>Mock-first → no blocking handoffs.</b> Nobody waits for WP1. The crawler can land on Day 2 and just swap real JSON in for mock JSON.</li>
+          <li><b>The JSON is the handoff token.</b> A region going offline hands off by committing an updated <code>brand-profile.json</code> + a one-line note — no live sync needed.</li>
+          <li><b>Low-tech tracks are real work.</b> Manual brand harvesting (WP1) and demo/hero-brand prep (WP7) are on the critical path for a <em>convincing</em> demo and need a browser, taste and domain sense — not code.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <div class="wrap">
+        <h2><span class="eyebrow">Timeline</span>Follow-the-sun, 2 days</h2>
+        <div class="timeline">
+          <div class="tl-row"><div class="tl-when">Day 1 · Region A</div><div class="tl-what">Lock the schema + 3 mock profiles + the brand→token mapping rules. Stand up WP3/WP4 skeletons against mock JSON.</div></div>
+          <div class="tl-row"><div class="tl-when">↓ handoff</div><div class="tl-what">Commit schema + mocks + a one-line "next steps" note.</div></div>
+          <div class="tl-row"><div class="tl-when">Day 1 · Region B</div><div class="tl-what">Microsite shell renders a themed SDK from mock JSON → <b>end-to-end manual path is GREEN</b>. WP7 picks 2–3 hero brands and hand-builds their JSON.</div></div>
+          <div class="tl-row"><div class="tl-when">Day 2 · Region A</div><div class="tl-what">Crawler auto-fills JSON; WP6 review/edit form comes online.</div></div>
+          <div class="tl-row"><div class="tl-when">Day 2 · Region B</div><div class="tl-what">Polish hero-brand themes, wire up sharing (WP5), rehearse.</div></div>
+          <div class="tl-row"><div class="tl-when">Day 2 · All</div><div class="tl-what">Freeze. Rehearse the 3-minute demo twice.</div></div>
+        </div>
+        <div class="golden">
+          <b>Golden rule:</b> by end of Day 1 you must be able to demo the <em>whole</em> flow with a manually-authored JSON.
+          Everything Day 2 adds is upside, never a dependency.
+        </div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <div class="wrap">
+        <h2><span class="eyebrow">Risks</span>…and cheap mitigations</h2>
+        <div class="grid cols-2">
+          <div class="card"><h3>Crawler is flaky / sites block it</h3><p class="muted">Manual edit is always the fallback. <b>Pre-cache the hero brands' JSON</b> so the live demo never depends on a network crawl.</p></div>
+          <div class="card"><h3>Auto-extracted colors look ugly</h3><p class="muted">The mapping <em>generates</em> a sensible ramp from one primary color; the human nudges one value if needed.</p></div>
+          <div class="card"><h3>CORS / fonts / logo on dark vs light</h3><p class="muted">Server-side fetch for assets; Google-Fonts match with system fallback; light/dark logo variants are already solved in the SDK.</p></div>
+          <div class="card"><h3>Scope creep on "mimic their flow"</h3><p class="muted">Don't clone their site. A clean, brand-<em>skinned</em> 3-step stepper reads as "their flow" and is achievable. Say this out loud as a team.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="involved">
+      <div class="wrap">
+        <h2><span class="eyebrow">Get involved</span>Find your track</h2>
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>🎨 I'm not very technical</h3>
+            <p class="muted">Own <b>WP1 (manual harvesting)</b> or <b>WP7 (demo &amp; pitch)</b>: pick hero brands, collect logos/colors/fonts by eye, hand-fill the JSON, write the story, QA the result. Critical-path work.</p>
+          </div>
+          <div class="card">
+            <h3>🧩 I can do HTML/CSS</h3>
+            <p class="muted">Own <b>WP4 (microsite shell)</b> or the <b>WP6 form</b>. Build the branded onboarding stepper and the review/edit UI against mock JSON.</p>
+          </div>
+          <div class="card">
+            <h3>⚙️ I'm a strong dev</h3>
+            <p class="muted">Own <b>WP2 (schema)</b>, <b>WP3 (theming engine)</b>, or the <b>WP1 crawler</b>. Define the contract first, then automate.</p>
+          </div>
+        </div>
+        <p style="margin-top:1.5rem">
+          👉 Start here: read <code>brand-profile.sample.json</code> in this repo, then claim a WP in the team channel.
+        </p>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <div class="wrap">
+        <h2><span class="eyebrow">Open decisions</span>Let's settle these first</h2>
+        <ul class="clean">
+          <li><b>Team &amp; timezones</b> — who's in, and in which regions? (Drives the real handoff chain.)</li>
+          <li><b>Hero brands</b> — which 2–3 recognizable brands do we guarantee look great?</li>
+          <li><b>Build target</b> — a new little app inside the WebSDK monorepo (<code>apps/showcase-studio</code>), or a standalone app that imports the published <code>@jumio/websdk</code>?</li>
+          <li><b>Crawl strategy</b> — client-side fetch vs a small server-side extractor (avoids CORS, more reliable).</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <p><b>BrandMatch</b> — working name, change freely. Hackathon H1/26.<br />
+        This page is a single self-contained <code>index.html</code>; see <code>README.md</code> to publish it.</p>
+      </div>
+    </footer>
+
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        themeVariables: {
+          primaryColor: "#1c232c",
+          primaryTextColor: "#e7ecf2",
+          primaryBorderColor: "#2a323d",
+          lineColor: "#5b8cff",
+          fontFamily: "IBM Plex Sans, sans-serif"
+        }
+      });
+    </script>
+  </body>
+</html>
