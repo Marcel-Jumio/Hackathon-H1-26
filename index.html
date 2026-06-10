@@ -221,9 +221,8 @@
       .k { color: var(--teal); } .s { color: var(--green); } .c { color: var(--muted-2); font-style: italic; }
 
       /* Diagram */
-      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; min-height: 300px; display: flex; align-items: center; justify-content: center; }
-      .mermaid { text-align: center; width: 100%; }
-      .diagram svg { max-width: 100%; height: auto; }
+      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; }
+      .mermaid { text-align: center; }
 
       /* Timeline */
       .timeline { display: grid; gap: 0.7rem; }
@@ -738,14 +737,8 @@ flowchart LR
           primaryBorderColor: "#13DFCE",
           lineColor: "#7FE753",
           fontFamily: "Inter, sans-serif"
-        },
-        flowchart: {
-          htmlLabels: true,
-          useMaxWidth: true,
-          curve: "linear"
         }
       });
-      mermaid.contentLoaded();
     </script>
   </body>
 </html>
