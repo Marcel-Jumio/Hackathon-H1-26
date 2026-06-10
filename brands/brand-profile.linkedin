@@ -1,0 +1,45 @@
+{
+  "$schema": "./brand-profile.linkedin.json",
+  "themeMode": "light",
+  "brand": {
+    "name": "LinkedIn",
+    "sourceUrl": "https://www.linkedin.com",
+    "logo": "https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg",
+    "fontFamily": "Inter",
+    "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+    "colors": {
+      "primary": "#0A66C2",
+      "onPrimary": "#ffffff",
+      "text": "#000000",
+      "pageBackground": "#f3f2ef",
+      "cardBackground": "#ffffff"
+    },
+    "radius": "8px"
+  },
+  "journey": {
+    "vertical": "professional_network",
+    "steps": [
+      "Create account",
+      "Build profile",
+      "Verify identity",
+      "Done"
+    ],
+    "idvStepIndex": 2,
+    "ctaLabel": "Get verified"
+  },
+  "sdk": {
+    "workflow": "id+selfie",
+    "locale": "en"
+  },
+  "layout": {
+    "containerPadding": {
+      "top": "2em",
+      "right": "1em",
+      "bottom": "2em",
+      "left": "1em"
+    }
+  },
+  "advanced": {
+    "tokenOverrides": {}
+  }
+}
