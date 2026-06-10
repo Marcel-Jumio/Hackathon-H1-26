@@ -39,6 +39,7 @@
   <style>
     :root { --radius: 8px; }
     * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
       font-family: var(--jumio-sdk-font-family, system-ui, sans-serif);
@@ -70,7 +71,7 @@
     }
     h1 { font-size: 1.25em; margin-top: 0; }
     .cta { color: var(--jumio-sdk-color-primary6, #075423); font-weight: 600; }
-    jumio-sdk { display: block; width: 100%; min-height: 640px; margin-top: 1em; }
+    jumio-sdk { display: block; width: 100%; height: 80vh; min-height: 640px; margin-top: 1em; }
     .start-verification {
       font: inherit; font-weight: 600; cursor: pointer; border: none; border-radius: var(--radius);
       padding: 0.7em 1.2em; margin-top: 1em;
