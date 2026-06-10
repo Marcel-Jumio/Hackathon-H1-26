@@ -5,6 +5,9 @@ import { defineConfig } from 'vite';
 // /engine and /microsite are plain ES modules consumed directly by the Studio — no separate
 // build step needed for them.
 export default defineConfig({
+  // Relative base so the built asset URLs resolve under the GitHub Pages
+  // project subpath (/Hackathon-H1-26/) as well as at the root in local dev.
+  base: './',
   build: {
     rollupOptions: {
       input: {
