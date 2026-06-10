@@ -590,41 +590,41 @@
             The complete product: one SDK, infinite branded showcases. Feed a <code>brand-profile.json</code>, get a fully styled microsite with zero SDK changes.
           </p>
           <div class="diagram">
-            <pre class="mermaid">
+            <div class="mermaid">
 flowchart LR
-  BP["brand-profile.json<br/>(color · logo · font · copy)"] -->|input| ENG["WP3 Theming Engine"]
-  ENG -->|emits| OUT["&lt;style&gt; --jumio-sdk-* vars<br/>+ logo + font"]
-  NPM["@jumio/websdk<br/>(from npm)"] -->|imported into| SITE["/microsite"]
+  BP["brand-profile.json"] -->|input| ENG["WP3 Theming Engine"]
+  ENG -->|emits| OUT["CSS vars + logo + font"]
+  NPM["@jumio/websdk"] -->|imported into| SITE["microsite"]
   OUT -->|injected into| SITE
-  SITE -->|renders| RESULT["Branded showcase<br/>(same SDK, re-skinned)"]
-            </pre>
+  SITE -->|renders| RESULT["Branded showcase"]
+            </div>
           </div>
 
           <h3>All work packages</h3>
           <div class="diagram">
-            <pre class="mermaid">
+            <div class="mermaid">
 flowchart LR
-  subgraph WP1["WP1 · Brand Harvesting"]
-    A1["URL input"] --> A2["Crawler / extractor<br/>(Playwright)"]
-    A2 --> A3["Raw assets:<br/>colors · fonts · logo · copy"]
-    A4["Manual asset gathering<br/>(low-tech track)"] --> A3
+  subgraph WP1["WP1: Brand Harvesting"]
+    A1["URL input"] --> A2["Crawler/extractor"]
+    A2 --> A3["Raw assets"]
+    A4["Manual gathering"] --> A3
   end
-  subgraph WP2["WP2 · Brand Profile CONTRACT"]
-    B1[("brand-profile.json<br/>schema + mocks")]
+  subgraph WP2["WP2: Brand Profile"]
+    B1["brand-profile.json"]
   end
-  subgraph WP6["WP6 · Studio UI / Orchestration"]
-    C1["Review &amp; edit form"] --> C2["Generate button"]
+  subgraph WP6["WP6: Studio UI"]
+    C1["Review form"] --> C2["Generate"]
   end
-  subgraph WP3["WP3 · Theming Engine"]
-    D1["Map brand to --jumio-sdk-* ramp"]
-    D2["Inject logo + font"]
+  subgraph WP3["WP3: Theming Engine"]
+    D1["Map brand"]
+    D2["Inject assets"]
   end
-  subgraph WP4["WP4 · Microsite Shell"]
-    E1["Brand-skinned stepper"]
-    E2["Embed WebSDK at IDV step"]
+  subgraph WP4["WP4: Microsite"]
+    E1["Stepper"]
+    E2["Embed SDK"]
   end
-  subgraph WP5["WP5 · Share &amp; Deliver"]
-    F1["Publish"] --> F2["Link / QR"]
+  subgraph WP5["WP5: Share & Deliver"]
+    F1["Publish"] --> F2["Link/QR"]
   end
   A3 --> B1
   B1 <--> C1
@@ -632,8 +632,8 @@ flowchart LR
   D1 & D2 --> E2
   E1 --> E2
   E2 --> F1
-  WP7["WP7 · Demo &amp; Pitch"] -.hero brands & test data.-> C1
-            </pre>
+  WP7["WP7: Demo & Pitch"] -.data.-> C1
+            </div>
           </div>
 
           <h3>Work packages, mapped to skill level</h3>
