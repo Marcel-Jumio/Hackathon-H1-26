@@ -1,0 +1,24 @@
+{
+  "name": "hackathon-h1-26",
+  "version": "1.0.0",
+  "description": "> Working name — change freely.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marcel-Jumio/Hackathon-H1-26.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Marcel-Jumio/Hackathon-H1-26/issues"
+  },
+  "homepage": "https://github.com/Marcel-Jumio/Hackathon-H1-26#readme",
+  "dependencies": {
+    "@jumio/websdk": "^0.4.0"
+  }
+}
