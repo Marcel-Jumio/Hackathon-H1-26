@@ -1,0 +1,35 @@
+{
+  "$schema": "./brand-profile.schema.json",
+  "themeMode": "light",
+  "brand": {
+    "name": "G2",
+    "sourceUrl": "https://www.g2.com/",
+    "logo": "https://company.g2.com/hubfs/brand-guide/g2-logo-rorange.svg",
+    "fontFamily": "Figtree",
+    "fontUrl": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap",
+    "colors": {
+      "primary": "#FF492C",
+      "onPrimary": "#ffffff",
+      "text": "#1a1a1a",
+      "pageBackground": "#ffffff",
+      "cardBackground": "#f5f5f5"
+    },
+    "radius": "8px"
+  },
+  "journey": {
+    "vertical": "software-marketplace",
+    "steps": ["Create Account", "Verify Identity", "Write a Review", "Explore Software"],
+    "idvStepIndex": 1,
+    "ctaLabel": "Verify your identity"
+  },
+  "sdk": {
+    "workflow": "id+selfie",
+    "locale": "en"
+  },
+  "layout": {
+    "containerPadding": { "top": "2em", "right": "1em", "bottom": "2em", "left": "1em" }
+  },
+  "advanced": {
+    "tokenOverrides": {}
+  }
+}
