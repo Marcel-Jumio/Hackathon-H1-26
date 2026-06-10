@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# Vendored @jumio/websdk (regenerate with `npm run vendor:websdk`)
+public/vendor/
+
 # Build output
 dist/
 build/

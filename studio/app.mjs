@@ -3,8 +3,7 @@
 
 import { renderMicrosite, slugify } from '../microsite/render.mjs';
 import { validateProfile } from './validate.mjs';
-
-const DEFAULT_PROFILE_URL = '../brand-profile.sample.json';
+import sampleProfile from '../brand-profile.sample.json';
 
 const els = {
   fileInput: document.getElementById('file-input'),
@@ -23,7 +22,7 @@ const els = {
 let profile = null;
 
 /** Session credentials for <jumio-sdk dc token> — kept out of brand-profile.json. */
-const session = { dc: 'us', token: '' };
+const session = { dc: 'us', token: '', locale: 'en' };
 
 /** Whether the preview should mount <jumio-sdk> directly, or show the skeleton + button. */
 let started = false;
@@ -171,8 +170,7 @@ els.fileInput.addEventListener('change', async () => {
 });
 
 els.loadSampleBtn.addEventListener('click', async () => {
-  const res = await fetch(DEFAULT_PROFILE_URL);
-  await loadProfile(await res.json());
+  await loadProfile(structuredClone(sampleProfile));
 });
 
 els.downloadProfile.addEventListener('click', () => {
@@ -188,6 +186,7 @@ els.downloadMicrosite.addEventListener('click', () => {
 els.sessionForm.addEventListener('input', () => {
   session.dc = els.sessionForm.elements['dc'].value;
   session.token = els.sessionForm.elements['token'].value;
+  session.locale = els.sessionForm.elements['locale'].value;
   render();
 });
 

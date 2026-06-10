@@ -10,215 +10,665 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         /* Jumio brand */
-        --green: #7FE753;
-        --teal: #13DFCE;
-        --dark-teal: #0E3B38;
-        --orange: #F29D18;
-        --ink: #0E0E0E;
-        --card: #213E3F;
+        --green: #7fe753;
+        --teal: #13dfce;
+        --dark-teal: #0e3b38;
+        --orange: #f29d18;
+        --ink: #0e0e0e;
+        --card: #213e3f;
         --card-border: rgba(19, 223, 206, 0.4);
-        --grad-from: #003D3E;
+        --grad-from: #003d3e;
         --grad-to: #258055;
 
-        --text: #FFFFFF;
-        --muted: #BFD6D2;
-        --muted-2: #8FB3AE;
+        --text: #ffffff;
+        --muted: #bfd6d2;
+        --muted-2: #8fb3ae;
         --radius: 14px;
         --maxw: 1080px;
-        --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
         --font-tight: "Inter Tight", var(--font);
       }
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; scroll-padding-top: 5.4rem; }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 5.4rem;
+      }
       body {
         margin: 0;
         font-family: var(--font);
-        background: linear-gradient(135deg, var(--grad-from) 0%, var(--grad-to) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--grad-from) 0%,
+          var(--grad-to) 100%
+        );
         background-attachment: fixed;
         color: var(--text);
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
       }
-      a { color: var(--teal); text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      code, pre { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+      a {
+        color: var(--teal);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code,
+      pre {
+        font-family:
+          "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
 
       /* Nav */
       nav {
-        position: sticky; top: 0; z-index: 50;
-        background: rgba(0, 39, 40, 0.82); backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(0, 39, 40, 0.82);
+        backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(19, 223, 206, 0.18);
       }
       nav .wrap {
-        max-width: var(--maxw); margin: 0 auto; padding: 0.7rem 1.25rem;
-        display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0.7rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        flex-wrap: wrap;
       }
-      nav .brand { font-weight: 700; letter-spacing: -0.01em; margin-right: auto; font-family: var(--font-tight); }
-      nav .brand .dot { color: var(--green); }
-      nav .brand .sub { color: var(--muted-2); font-weight: 500; font-size: 0.82rem; margin-left: 0.5rem; }
+      nav .brand {
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-right: auto;
+        font-family: var(--font-tight);
+      }
+      nav .brand .dot {
+        color: var(--green);
+      }
+      nav .brand .sub {
+        color: var(--muted-2);
+        font-weight: 500;
+        font-size: 0.82rem;
+        margin-left: 0.5rem;
+      }
 
       /* Tabs */
-      .tabs { display: flex; gap: 0.4rem; }
-      .tab-btn {
-        font-family: var(--font); font-size: 0.86rem; font-weight: 600;
-        color: var(--muted); background: transparent; border: 1px solid transparent;
-        padding: 0.45rem 0.95rem; border-radius: 999px; cursor: pointer;
+      .tabs {
+        display: flex;
+        gap: 0.4rem;
       }
-      .tab-btn:hover { color: var(--text); }
-      .tab-btn.active { color: var(--ink); background: var(--green); }
+      .tab-btn {
+        font-family: var(--font);
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 0.45rem 0.95rem;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+      }
+      .tab-btn.active {
+        color: var(--ink);
+        background: var(--green);
+      }
 
-      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
-      section { padding: 3.25rem 0; border-bottom: 1px solid rgba(19, 223, 206, 0.12); }
-      section:last-of-type { border-bottom: 0; }
-      h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.18; font-family: var(--font-tight); }
-      h2 { font-size: 1.65rem; margin: 0 0 0.4rem; font-weight: 700; }
-      h2 .eyebrow { display: block; font-size: 0.78rem; font-weight: 600; color: var(--green); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.55rem; font-family: var(--font); }
-      h3 { font-size: 1.08rem; margin: 1.4rem 0 0.5rem; font-weight: 600; }
-      p { color: var(--muted); }
-      p strong, li strong { color: var(--text); font-weight: 600; }
-      .muted { color: var(--muted-2); }
+      .wrap {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 1.25rem;
+      }
+      section {
+        padding: 3.25rem 0;
+        border-bottom: 1px solid rgba(19, 223, 206, 0.12);
+      }
+      section:last-of-type {
+        border-bottom: 0;
+      }
+      h1,
+      h2,
+      h3 {
+        letter-spacing: -0.02em;
+        line-height: 1.18;
+        font-family: var(--font-tight);
+      }
+      h2 {
+        font-size: 1.65rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h2 .eyebrow {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--green);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.55rem;
+        font-family: var(--font);
+      }
+      h3 {
+        font-size: 1.08rem;
+        margin: 1.4rem 0 0.5rem;
+        font-weight: 600;
+      }
+      p {
+        color: var(--muted);
+      }
+      p strong,
+      li strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .muted {
+        color: var(--muted-2);
+      }
 
       /* Hero */
-      .hero { padding: 5.5rem 0 4rem; position: relative; overflow: hidden; }
-      .hero .wrap { position: relative; z-index: 1; }
+      .hero {
+        padding: 5.5rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero .wrap {
+        position: relative;
+        z-index: 1;
+      }
       /* soft Jumio-style ellipse glow behind hero */
       .hero::before {
-        content: ""; position: absolute; z-index: 0;
-        width: 720px; height: 720px; right: -240px; top: -300px;
-        background: radial-gradient(circle, rgba(127,231,83,0.16) 0%, rgba(19,223,206,0.07) 40%, transparent 70%);
-        border-radius: 50%; pointer-events: none;
+        content: "";
+        position: absolute;
+        z-index: 0;
+        width: 720px;
+        height: 720px;
+        right: -240px;
+        top: -300px;
+        background: radial-gradient(
+          circle,
+          rgba(127, 231, 83, 0.16) 0%,
+          rgba(19, 223, 206, 0.07) 40%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
       }
       .badge {
-        display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.06em;
-        text-transform: uppercase; color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.74rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
         background: var(--green);
-        padding: 0.35rem 0.8rem; border-radius: 999px; margin-bottom: 1.5rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+        margin-bottom: 1.5rem;
       }
-      .hero h1 { font-size: clamp(2.9rem, 7vw, 4.8rem); margin: 0 0 1.25rem; max-width: 16ch; color: var(--text); font-weight: 700; line-height: 1.05; }
-      .hero h1 .hl { color: var(--green); }
-      .hero .lead { font-size: clamp(1.15rem, 2vw, 1.4rem); color: var(--muted); max-width: 62ch; margin: 0 0 1.5rem; }
-      .hero .lead b { color: var(--text); font-weight: 600; }
-      .pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.4rem; }
-      .pill { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; color: var(--muted); background: rgba(33, 62, 63, 0.7); border: 1px solid var(--card-border); padding: 0.4rem 0.85rem; border-radius: 999px; }
-      .pill svg { width: 15px; height: 15px; }
+      .hero h1 {
+        font-size: clamp(2.9rem, 7vw, 4.8rem);
+        margin: 0 0 1.25rem;
+        max-width: 16ch;
+        color: var(--text);
+        font-weight: 700;
+        line-height: 1.05;
+      }
+      .hero h1 .hl {
+        color: var(--green);
+      }
+      .hero .lead {
+        font-size: clamp(1.15rem, 2vw, 1.4rem);
+        color: var(--muted);
+        max-width: 62ch;
+        margin: 0 0 1.5rem;
+      }
+      .hero .lead b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1.4rem;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.84rem;
+        color: var(--muted);
+        background: rgba(33, 62, 63, 0.7);
+        border: 1px solid var(--card-border);
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+      }
+      .pill svg {
+        width: 15px;
+        height: 15px;
+      }
 
       /* Benefits row (product-landing feel) */
-      .benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.75rem; }
-      .benefit { display: flex; gap: 0.85rem; align-items: flex-start; }
-      .benefit .ic {
-        flex: none; width: 46px; height: 46px; border-radius: 12px;
-        display: inline-flex; align-items: center; justify-content: center;
-        background: rgba(127,231,83,0.1); border: 1px solid rgba(127,231,83,0.3);
+      .benefits {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 2.75rem;
       }
-      .benefit .ic svg { width: 24px; height: 24px; }
-      .benefit h4 { margin: 0 0 0.2rem; font-family: var(--font-tight); font-size: 1rem; color: var(--text); font-weight: 600; }
-      .benefit p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+      .benefit {
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+      }
+      .benefit .ic {
+        flex: none;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(127, 231, 83, 0.1);
+        border: 1px solid rgba(127, 231, 83, 0.3);
+      }
+      .benefit .ic svg {
+        width: 24px;
+        height: 24px;
+      }
+      .benefit h4 {
+        margin: 0 0 0.2rem;
+        font-family: var(--font-tight);
+        font-size: 1rem;
+        color: var(--text);
+        font-weight: 600;
+      }
+      .benefit p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
 
       /* Generic icon helpers */
-      .icon-line { stroke: var(--green); stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-      .icon-line.teal { stroke: var(--teal); }
-      .icon-line.orange { stroke: var(--orange); }
-      .card-ic {
-        width: 44px; height: 44px; border-radius: 12px; margin-bottom: 0.9rem;
-        display: inline-flex; align-items: center; justify-content: center;
-        background: rgba(19,223,206,0.08); border: 1px solid var(--card-border);
+      .icon-line {
+        stroke: var(--green);
+        stroke-width: 1.8;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
-      .card-ic svg { width: 23px; height: 23px; }
-      .uc.ae .card-ic { background: rgba(127,231,83,0.1); border-color: rgba(127,231,83,0.3); }
-      .uc.se .card-ic { background: rgba(19,223,206,0.1); border-color: rgba(19,223,206,0.35); }
-      .uc.bdr .card-ic { background: rgba(242,157,24,0.1); border-color: rgba(242,157,24,0.35); }
+      .icon-line.teal {
+        stroke: var(--teal);
+      }
+      .icon-line.orange {
+        stroke: var(--orange);
+      }
+      .card-ic {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        margin-bottom: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(19, 223, 206, 0.08);
+        border: 1px solid var(--card-border);
+      }
+      .card-ic svg {
+        width: 23px;
+        height: 23px;
+      }
+      .uc.ae .card-ic {
+        background: rgba(127, 231, 83, 0.1);
+        border-color: rgba(127, 231, 83, 0.3);
+      }
+      .uc.se .card-ic {
+        background: rgba(19, 223, 206, 0.1);
+        border-color: rgba(19, 223, 206, 0.35);
+      }
+      .uc.bdr .card-ic {
+        background: rgba(242, 157, 24, 0.1);
+        border-color: rgba(242, 157, 24, 0.35);
+      }
 
-      .cta-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.75rem; }
-      .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem; padding: 0.7rem 1.3rem; border-radius: 10px; border: 1px solid transparent; cursor: pointer; }
-      .btn.primary { background: var(--green); color: var(--ink); }
-      .btn.primary:hover { background: #95ef6f; text-decoration: none; }
-      .btn.ghost { background: transparent; color: var(--text); border-color: var(--card-border); }
-      .btn.ghost:hover { background: rgba(33, 62, 63, 0.6); text-decoration: none; }
+      .cta-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1.75rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.7rem 1.3rem;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+      .btn.primary {
+        background: var(--green);
+        color: var(--ink);
+      }
+      .btn.primary:hover {
+        background: #95ef6f;
+        text-decoration: none;
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--text);
+        border-color: var(--card-border);
+      }
+      .btn.ghost:hover {
+        background: rgba(33, 62, 63, 0.6);
+        text-decoration: none;
+      }
 
       /* Judges banner */
       .judges-strip {
-        background: rgba(14, 59, 56, 0.55); border: 1px solid var(--green);
-        border-radius: var(--radius); padding: 1.1rem 1.35rem; margin-top: 2rem;
-        display: flex; gap: 0.9rem; align-items: flex-start;
+        background: rgba(14, 59, 56, 0.55);
+        border: 1px solid var(--green);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.35rem;
+        margin-top: 2rem;
+        display: flex;
+        gap: 0.9rem;
+        align-items: flex-start;
       }
-      .judges-strip .mark { color: var(--green); font-weight: 700; font-size: 1.1rem; }
-      .judges-strip p { margin: 0; color: var(--text); font-size: 0.95rem; }
-      .judges-strip a { font-weight: 600; }
+      .judges-strip .mark {
+        color: var(--green);
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .judges-strip p {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+      .judges-strip a {
+        font-weight: 600;
+      }
 
       /* Cards */
-      .grid { display: grid; gap: 1rem; }
-      .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-      .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-      .card { background: rgba(33, 62, 63, 0.55); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.2rem 1.35rem; }
-      .card h3 { margin-top: 0; color: var(--text); }
-      .card p:last-child { margin-bottom: 0; }
+      .grid {
+        display: grid;
+        gap: 1rem;
+      }
+      .grid.cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .grid.cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .card {
+        background: rgba(33, 62, 63, 0.55);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 1.2rem 1.35rem;
+      }
+      .card h3 {
+        margin-top: 0;
+        color: var(--text);
+      }
+      .card p:last-child {
+        margin-bottom: 0;
+      }
 
       /* Use-case cards (AE / SE / BDR) */
-      .uc { display: flex; flex-direction: column; }
-      .uc .role { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.2rem; }
-      .uc.ae .role { color: var(--green); }
-      .uc.se .role { color: var(--teal); }
-      .uc.bdr .role { color: var(--orange); }
-      .uc h3 { font-size: 1.02rem; }
-      .uc .job { color: var(--muted); font-size: 0.92rem; margin: 0 0 0.7rem; }
-      .uc .play { background: rgba(0, 25, 26, 0.4); border-radius: 10px; padding: 0.7rem 0.85rem; font-size: 0.88rem; color: var(--muted); border: 1px solid rgba(19, 223, 206, 0.14); }
-      .uc .play b { color: var(--text); }
+      .uc {
+        display: flex;
+        flex-direction: column;
+      }
+      .uc .role {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+      }
+      .uc.ae .role {
+        color: var(--green);
+      }
+      .uc.se .role {
+        color: var(--teal);
+      }
+      .uc.bdr .role {
+        color: var(--orange);
+      }
+      .uc h3 {
+        font-size: 1.02rem;
+      }
+      .uc .job {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin: 0 0 0.7rem;
+      }
+      .uc .play {
+        background: rgba(0, 25, 26, 0.4);
+        border-radius: 10px;
+        padding: 0.7rem 0.85rem;
+        font-size: 0.88rem;
+        color: var(--muted);
+        border: 1px solid rgba(19, 223, 206, 0.14);
+      }
+      .uc .play b {
+        color: var(--text);
+      }
 
       /* SL_10 judge section */
-      .qa { margin-top: 1.5rem; }
-      .qa-block {
-        background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border);
-        border-left: 4px solid var(--green); border-radius: var(--radius);
-        padding: 1.25rem 1.4rem; margin-bottom: 1rem;
+      .qa {
+        margin-top: 1.5rem;
       }
-      .qa-block h3 { margin: 0 0 0.9rem; color: var(--green); font-size: 1.15rem; display: flex; align-items: center; gap: 0.6rem; }
-      .qa-block h3 .num { background: var(--green); color: var(--ink); width: 1.7rem; height: 1.7rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem; font-weight: 700; flex: none; }
-      .qa-item { padding: 0.55rem 0; border-top: 1px solid rgba(19, 223, 206, 0.12); }
-      .qa-item:first-of-type { border-top: 0; }
-      .qa-q { font-weight: 600; color: var(--text); font-size: 0.95rem; margin: 0 0 0.25rem; }
-      .qa-a { color: var(--muted); font-size: 0.95rem; margin: 0; }
-      .qa-a b { color: var(--text); font-weight: 600; }
+      .qa-block {
+        background: rgba(33, 62, 63, 0.5);
+        border: 1px solid var(--card-border);
+        border-left: 4px solid var(--green);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.4rem;
+        margin-bottom: 1rem;
+      }
+      .qa-block h3 {
+        margin: 0 0 0.9rem;
+        color: var(--green);
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .qa-block h3 .num {
+        background: var(--green);
+        color: var(--ink);
+        width: 1.7rem;
+        height: 1.7rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        font-weight: 700;
+        flex: none;
+      }
+      .qa-item {
+        padding: 0.55rem 0;
+        border-top: 1px solid rgba(19, 223, 206, 0.12);
+      }
+      .qa-item:first-of-type {
+        border-top: 0;
+      }
+      .qa-q {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.95rem;
+        margin: 0 0 0.25rem;
+      }
+      .qa-a {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0;
+      }
+      .qa-a b {
+        color: var(--text);
+        font-weight: 600;
+      }
 
       .assume {
-        display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
-        text-transform: uppercase; color: var(--ink); background: var(--orange);
-        padding: 0.08rem 0.5rem; border-radius: 5px; margin-left: 0.4rem; vertical-align: middle;
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink);
+        background: var(--orange);
+        padding: 0.08rem 0.5rem;
+        border-radius: 5px;
+        margin-left: 0.4rem;
+        vertical-align: middle;
       }
 
       /* Tiers */
-      .tier { border-left: 3px solid var(--card-border); }
-      .tier .tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: inline-flex; align-items: center; gap: 0.35rem; }
-      .tier.must { border-left-color: var(--green); }
-      .tier.must .tag { color: var(--green); }
-      .tier.should { border-left-color: var(--orange); }
-      .tier.should .tag { color: var(--orange); }
-      .tier.could { border-left-color: var(--teal); }
-      .tier.could .tag { color: var(--teal); }
-      .status-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; display: inline-block; }
-      .status-dot.done { background: var(--green); }
-      .status-dot.wip { background: var(--orange); }
-      .status-dot.stretch { background: var(--teal); }
+      .tier {
+        border-left: 3px solid var(--card-border);
+      }
+      .tier .tag {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .tier.must {
+        border-left-color: var(--green);
+      }
+      .tier.must .tag {
+        color: var(--green);
+      }
+      .tier.should {
+        border-left-color: var(--orange);
+      }
+      .tier.should .tag {
+        color: var(--orange);
+      }
+      .tier.could {
+        border-left-color: var(--teal);
+      }
+      .tier.could .tag {
+        color: var(--teal);
+      }
+      .status-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .status-dot.done {
+        background: var(--green);
+      }
+      .status-dot.wip {
+        background: var(--orange);
+      }
+      .status-dot.stretch {
+        background: var(--teal);
+      }
 
       /* Tables */
-      .table-scroll { overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--radius); }
-      table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 640px; }
-      th, td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid rgba(19, 223, 206, 0.14); vertical-align: top; color: var(--muted); }
-      th { background: rgba(14, 59, 56, 0.6); color: var(--text); font-weight: 600; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; }
-      td b { color: var(--text); }
-      tr:last-child td { border-bottom: 0; }
-      .lvl { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; white-space: nowrap; }
-      .lvl.low { background: rgba(127, 231, 83, 0.18); color: var(--green); }
-      .lvl.mid { background: rgba(242, 157, 24, 0.2); color: var(--orange); }
-      .lvl.high { background: rgba(19, 223, 206, 0.18); color: var(--teal); }
+      .table-scroll {
+        overflow-x: auto;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        min-width: 640px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.7rem 0.9rem;
+        border-bottom: 1px solid rgba(19, 223, 206, 0.14);
+        vertical-align: top;
+        color: var(--muted);
+      }
+      th {
+        background: rgba(14, 59, 56, 0.6);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      td b {
+        color: var(--text);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .lvl {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .lvl.low {
+        background: rgba(127, 231, 83, 0.18);
+        color: var(--green);
+      }
+      .lvl.mid {
+        background: rgba(242, 157, 24, 0.2);
+        color: var(--orange);
+      }
+      .lvl.high {
+        background: rgba(19, 223, 206, 0.18);
+        color: var(--teal);
+      }
 
       /* Code */
-      pre { background: rgba(0, 25, 26, 0.6); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.1rem 1.25rem; overflow-x: auto; font-size: 0.83rem; line-height: 1.55; }
-      pre code { color: #d6e6e2; }
-      .k { color: var(--teal); } .s { color: var(--green); } .c { color: var(--muted-2); font-style: italic; }
+      pre {
+        background: rgba(0, 25, 26, 0.6);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.25rem;
+        overflow-x: auto;
+        font-size: 0.83rem;
+        line-height: 1.55;
+      }
+      pre code {
+        color: #d6e6e2;
+      }
+      .k {
+        color: var(--teal);
+      }
+      .s {
+        color: var(--green);
+      }
+      .c {
+        color: var(--muted-2);
+        font-style: italic;
+      }
 
       /* Diagram */
       .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; min-height: 300px; display: flex; align-items: center; justify-content: center; }
@@ -226,47 +676,128 @@
       .diagram svg { max-width: 100%; height: auto; }
 
       /* Timeline */
-      .timeline { display: grid; gap: 0.7rem; }
-      .tl-row { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; align-items: start; }
-      .tl-when { font-weight: 600; color: var(--green); font-size: 0.88rem; padding-top: 0.1rem; font-family: var(--font-tight); }
-      .tl-what { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: 10px; padding: 0.65rem 1rem; font-size: 0.92rem; color: var(--muted); }
-      .golden { margin-top: 1.25rem; background: rgba(127, 231, 83, 0.1); border: 1px solid var(--green); border-radius: var(--radius); padding: 1rem 1.25rem; color: var(--text); }
-      .golden b { color: var(--green); }
+      .timeline {
+        display: grid;
+        gap: 0.7rem;
+      }
+      .tl-row {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 1rem;
+        align-items: start;
+      }
+      .tl-when {
+        font-weight: 600;
+        color: var(--green);
+        font-size: 0.88rem;
+        padding-top: 0.1rem;
+        font-family: var(--font-tight);
+      }
+      .tl-what {
+        background: rgba(33, 62, 63, 0.5);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        padding: 0.65rem 1rem;
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+      .golden {
+        margin-top: 1.25rem;
+        background: rgba(127, 231, 83, 0.1);
+        border: 1px solid var(--green);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        color: var(--text);
+      }
+      .golden b {
+        color: var(--green);
+      }
 
-      ul.clean { list-style: none; padding: 0; margin: 0; }
-      ul.clean li { padding: 0.42rem 0 0.42rem 1.5rem; position: relative; color: var(--muted); }
-      ul.clean li::before { content: "▸"; color: var(--green); position: absolute; left: 0; }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      ul.clean li {
+        padding: 0.42rem 0 0.42rem 1.5rem;
+        position: relative;
+        color: var(--muted);
+      }
+      ul.clean li::before {
+        content: "▸";
+        color: var(--green);
+        position: absolute;
+        left: 0;
+      }
 
       /* Footer bar (Jumio brand) */
       .brandbar {
-        background: var(--dark-teal); padding: 0.85rem 0;
-        font-size: 0.82rem; border-top: 1px solid rgba(127,231,83,0.25);
+        background: var(--dark-teal);
+        padding: 0.85rem 0;
+        font-size: 0.82rem;
+        border-top: 1px solid rgba(127, 231, 83, 0.25);
       }
-      .brandbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-      .brandbar .left b { color: var(--green); font-family: var(--font-tight); }
-      .brandbar .left span { color: var(--text); }
-      .brandbar .right span { color: var(--muted); }
+      .brandbar .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .brandbar .left b {
+        color: var(--green);
+        font-family: var(--font-tight);
+      }
+      .brandbar .left span {
+        color: var(--text);
+      }
+      .brandbar .right span {
+        color: var(--muted);
+      }
 
-      footer { padding: 2.25rem 0 3rem; color: var(--muted-2); font-size: 0.88rem; }
+      footer {
+        padding: 2.25rem 0 3rem;
+        color: var(--muted-2);
+        font-size: 0.88rem;
+      }
 
       /* Tab panels */
-      .tab-panel { display: none; }
-      .tab-panel.active { display: block; }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
 
       @media (max-width: 720px) {
-        .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
-        .benefits { grid-template-columns: 1fr; }
-        .tl-row { grid-template-columns: 1fr; gap: 0.3rem; }
-        nav .brand .sub { display: none; }
+        .grid.cols-2,
+        .grid.cols-3 {
+          grid-template-columns: 1fr;
+        }
+        .benefits {
+          grid-template-columns: 1fr;
+        }
+        .tl-row {
+          grid-template-columns: 1fr;
+          gap: 0.3rem;
+        }
+        nav .brand .sub {
+          display: none;
+        }
       }
     </style>
   </head>
   <body>
     <nav>
       <div class="wrap">
-        <span class="brand">Jumio SmartDemo<span class="dot">.</span><span class="sub">Hackathon H1/26 · SL_10</span></span>
+        <span class="brand"
+          >Jumio SmartDemo<span class="dot">.</span
+          ><span class="sub">Hackathon H1/26 · SL_10</span></span
+        >
         <div class="tabs">
-          <button class="tab-btn active" data-tab="submission">The Submission</button>
+          <button class="tab-btn active" data-tab="submission">
+            The Submission
+          </button>
           <button class="tab-btn" data-tab="build">How We Built It</button>
         </div>
       </div>
@@ -274,100 +805,218 @@
 
     <!-- ================= TAB 1: SUBMISSION ================= -->
     <div id="tab-submission" class="tab-panel active">
-
       <header class="hero">
         <div class="wrap">
-          <span class="badge">2-day Hackathon · H1 / 2026 · Pain point SL_10</span>
-          <h1><span class="hl">Turn any prospect URL</span> into an on-brand identity demo.</h1>
+          <span class="badge"
+            >2-day Hackathon · H1 / 2026 · Pain point SL_10</span
+          >
+          <h1>
+            <span class="hl">Turn any prospect URL</span> into an on-brand
+            identity demo.
+          </h1>
           <p class="lead">
-            Paste a prospect's website and get a <b>shareable microsite</b> that mirrors their onboarding,
-            with a <b>live, brand-themed Jumio WebSDK</b> embedded at the verification step. Put
-            <b>Jumio's identity intelligence</b> in front of a prospect, in their own brand, in the first
-            30 seconds of a conversation.
+            Paste a prospect's website and get a <b>shareable microsite</b> that
+            mirrors their onboarding, with a
+            <b>live, brand-themed Jumio WebSDK</b> embedded at the verification
+            step. Put <b>Jumio's identity intelligence</b> in front of a
+            prospect, in their own brand, in the first 30 seconds of a
+            conversation.
           </p>
           <div class="cta-row">
             <a class="btn primary" href="#DEMO_VIDEO_URL">
-              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5v14l11-7z" fill="var(--ink)"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path d="M8 5v14l11-7z" fill="var(--ink)" />
+              </svg>
               Watch the demo
             </a>
-            <a class="btn ghost" href="#LIVE_DEMO_URL">
-              <svg viewBox="0 0 24 24" width="18" height="18"><path class="icon-line" d="M7 17L17 7M9 7h8v8"/></svg>
+            <a class="btn ghost" href="/studio/">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path class="icon-line" d="M7 17L17 7M9 7h8v8" />
+              </svg>
               Try it live
             </a>
           </div>
           <div class="pills">
             <span class="pill">
-              <svg viewBox="0 0 24 24"><circle class="icon-line" cx="12" cy="12" r="9"/><circle class="icon-line" cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="var(--green)"/></svg>
+              <svg viewBox="0 0 24 24">
+                <circle class="icon-line" cx="12" cy="12" r="9" />
+                <circle class="icon-line" cx="12" cy="12" r="4" />
+                <circle cx="12" cy="12" r="1.4" fill="var(--green)" />
+              </svg>
               Field attention-grabber
             </span>
             <span class="pill">
-              <svg viewBox="0 0 24 24"><rect class="icon-line teal" x="4" y="6" width="16" height="12" rx="2"/><path class="icon-line teal" d="M8 3v3M16 3v3M9 13h2M9 16h6"/></svg>
+              <svg viewBox="0 0 24 24">
+                <rect
+                  class="icon-line teal"
+                  x="4"
+                  y="6"
+                  width="16"
+                  height="12"
+                  rx="2"
+                />
+                <path class="icon-line teal" d="M8 3v3M16 3v3M9 13h2M9 16h6" />
+              </svg>
               Auto / semi-auto capture
             </span>
             <span class="pill">
-              <svg viewBox="0 0 24 24"><path class="icon-line orange" d="M12 3a9 9 0 100 18 4 4 0 01-1-7.5A4 4 0 0012 3z"/><circle cx="8.5" cy="10" r="1.1" fill="var(--orange)"/><circle cx="15.5" cy="10" r="1.1" fill="var(--orange)"/><circle cx="9" cy="15" r="1.1" fill="var(--orange)"/></svg>
+              <svg viewBox="0 0 24 24">
+                <path
+                  class="icon-line orange"
+                  d="M12 3a9 9 0 100 18 4 4 0 01-1-7.5A4 4 0 0012 3z"
+                />
+                <circle cx="8.5" cy="10" r="1.1" fill="var(--orange)" />
+                <circle cx="15.5" cy="10" r="1.1" fill="var(--orange)" />
+                <circle cx="9" cy="15" r="1.1" fill="var(--orange)" />
+              </svg>
               Real WebSDK theming
             </span>
             <span class="pill">
-              <svg viewBox="0 0 24 24"><circle class="icon-line" cx="12" cy="12" r="9"/><path class="icon-line" d="M3 12h18M12 3c2.5 2.5 3.5 6 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-6-3.5-9s1-6.5 3.5-9z"/></svg>
+              <svg viewBox="0 0 24 24">
+                <circle class="icon-line" cx="12" cy="12" r="9" />
+                <path
+                  class="icon-line"
+                  d="M3 12h18M12 3c2.5 2.5 3.5 6 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-6-3.5-9s1-6.5 3.5-9z"
+                />
+              </svg>
               Distributed team
             </span>
           </div>
 
           <div class="benefits">
             <div class="benefit">
-              <span class="ic"><svg viewBox="0 0 24 24"><path class="icon-line" d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span>
-              <div><h4>Branded in seconds</h4><p>What used to take an integration team days is now self-serve in under a minute.</p></div>
+              <span class="ic"
+                ><svg viewBox="0 0 24 24">
+                  <path class="icon-line" d="M13 2L4 14h7l-1 8 9-12h-7z" /></svg
+              ></span>
+              <div>
+                <h4>Branded in seconds</h4>
+                <p>
+                  What used to take an integration team days is now self-serve
+                  in under a minute.
+                </p>
+              </div>
             </div>
             <div class="benefit">
-              <span class="ic"><svg viewBox="0 0 24 24"><path class="icon-line teal" d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path class="icon-line teal" d="M9 12l2 2 4-4"/></svg></span>
-              <div><h4>Real, not a mockup</h4><p>A genuinely token-themeable Jumio SDK running a live verification flow, not a slide.</p></div>
+              <span class="ic"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    class="icon-line teal"
+                    d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"
+                  />
+                  <path class="icon-line teal" d="M9 12l2 2 4-4" /></svg
+              ></span>
+              <div>
+                <h4>Real, not a mockup</h4>
+                <p>
+                  A genuinely token-themeable Jumio SDK running a live
+                  verification flow, not a slide.
+                </p>
+              </div>
             </div>
             <div class="benefit">
-              <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" class="icon-line orange" opacity="0.35"/><path class="icon-line orange" d="M5 12a7 7 0 1112 5"/><path class="icon-line orange" d="M3 12h4M12 8v4l3 2"/></svg></span>
-              <div><h4>Identity in context</h4><p>Shows continuous, contextual identity intelligence inside the prospect's own journey.</p></div>
+              <span class="ic"
+                ><svg viewBox="0 0 24 24">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    class="icon-line orange"
+                    opacity="0.35"
+                  />
+                  <path class="icon-line orange" d="M5 12a7 7 0 1112 5" />
+                  <path class="icon-line orange" d="M3 12h4M12 8v4l3 2" /></svg
+              ></span>
+              <div>
+                <h4>Identity in context</h4>
+                <p>
+                  Shows continuous, contextual identity intelligence inside the
+                  prospect's own journey.
+                </p>
+              </div>
             </div>
           </div>
 
           <div class="judges-strip">
             <span class="mark">▸</span>
-            <p><b>For the jury:</b> this tab is the full SL_10 response, mapped 1:1 to the five question groups.
-            The second tab, <b>How We Built It</b>, holds the architecture, plan and team detail the SL_10 form didn't ask for.</p>
+            <p>
+              <b>For the jury:</b> this tab is the full SL_10 response, mapped
+              1:1 to the five question groups. The second tab,
+              <b>How We Built It</b>, holds the architecture, plan and team
+              detail the SL_10 form didn't ask for.
+            </p>
           </div>
         </div>
       </header>
 
       <section id="submission">
         <div class="wrap">
-          <h2><span class="eyebrow">SL_10 · Hackathon Output</span>Solution Overview</h2>
-          <p class="muted" style="margin-bottom:0.5rem">
+          <h2>
+            <span class="eyebrow">SL_10 · Hackathon Output</span>Solution
+            Overview
+          </h2>
+          <p class="muted" style="margin-bottom: 0.5rem">
             Five sections, in the jury's own order.
           </p>
 
           <div class="qa">
-
             <!-- 1 -->
             <div class="qa-block">
               <h3><span class="num">1</span> Problem &amp; Impact</h3>
               <div class="qa-item">
                 <p class="qa-q">What problem are you solving?</p>
-                <p class="qa-a">Cold identity demos don't land. Prospects can't picture the Jumio WebSDK inside <b>their own</b> onboarding flow, and a real branded integration takes an engineering team days. That friction kills momentum in the earliest, most fragile part of a deal.</p>
+                <p class="qa-a">
+                  Cold identity demos don't land. Prospects can't picture the
+                  Jumio WebSDK inside <b>their own</b> onboarding flow, and a
+                  real branded integration takes an engineering team days. That
+                  friction kills momentum in the earliest, most fragile part of
+                  a deal.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Who is the target user?</p>
-                <p class="qa-a">Jumio <b>field teams — AEs, solutions engineers and BDRs</b> running first-touch outreach, discovery and demos. Secondary: the prospect on the other side, who sees their own brand reflected back on a live Jumio flow.</p>
+                <p class="qa-a">
+                  Jumio
+                  <b>field teams — AEs, solutions engineers and BDRs</b> running
+                  first-touch outreach, discovery and demos. Secondary: the
+                  prospect on the other side, who sees their own brand reflected
+                  back on a live Jumio flow.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Why is this problem important?</p>
-                <p class="qa-a">Attention is the scarcest asset in the field. A generic demo says "here's our product." A microsite skinned as the prospect's own onboarding says "here's <b>you</b>, with friction removed" — it shifts the conversation from features to <b>fit</b>, and frames Jumio as identity intelligence built into their journey rather than a bolt-on check.</p>
+                <p class="qa-a">
+                  Attention is the scarcest asset in the field. A generic demo
+                  says "here's our product." A microsite skinned as the
+                  prospect's own onboarding says "here's <b>you</b>, with
+                  friction removed" — it shifts the conversation from features
+                  to <b>fit</b>, and frames Jumio as identity intelligence built
+                  into their journey rather than a bolt-on check.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">How do users currently solve this?</p>
-                <p class="qa-a">Generic, unbranded demo flows, or slide mockups of "what it could look like." A truly branded demo today requires a real integration — days of engineering the field can't requisition for a single conversation.</p>
+                <p class="qa-a">
+                  Generic, unbranded demo flows, or slide mockups of "what it
+                  could look like." A truly branded demo today requires a real
+                  integration — days of engineering the field can't requisition
+                  for a single conversation.
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">What measurable impact could this create?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">Branded demo turnaround cut from <b>days of engineering to under a minute, self-serve</b>. Leading indicators to track post-launch: demo-to-opportunity conversion, first-touch engagement, and SE hours saved per demo. <b>Confirm the specific metric the team will commit to.</b></p>
+                <p class="qa-q">
+                  What measurable impact could this create?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  Branded demo turnaround cut from
+                  <b>days of engineering to under a minute, self-serve</b>.
+                  Leading indicators to track post-launch: demo-to-opportunity
+                  conversion, first-touch engagement, and SE hours saved per
+                  demo.
+                  <b>Confirm the specific metric the team will commit to.</b>
+                </p>
               </div>
             </div>
 
@@ -376,23 +1025,54 @@
               <h3><span class="num">2</span> Solution &amp; Innovation</h3>
               <div class="qa-item">
                 <p class="qa-q">Your solution in one sentence?</p>
-                <p class="qa-a">The <b>Jumio SmartDemo Tool</b> captures a prospect's brand from a URL, auto-themes the Jumio WebSDK to match, and embeds it in a shareable, brand-skinned onboarding microsite — in seconds.</p>
+                <p class="qa-a">
+                  The <b>Jumio SmartDemo Tool</b> captures a prospect's brand
+                  from a URL, auto-themes the Jumio WebSDK to match, and embeds
+                  it in a shareable, brand-skinned onboarding microsite — in
+                  seconds.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">What makes it unique or innovative?</p>
-                <p class="qa-a">It drives <b>customization channels 1–4</b> of the WebSDK (342 design tokens, ~45 template slots, theme mode) from a single generated profile. A normal integration only gets channel 5: three server-side branding knobs. The differentiator is "three knobs vs. a full repaint."</p>
+                <p class="qa-a">
+                  It drives <b>customization channels 1–4</b> of the WebSDK (342
+                  design tokens, ~45 template slots, theme mode) from a single
+                  generated profile. A normal integration only gets channel 5:
+                  three server-side branding knobs. The differentiator is "three
+                  knobs vs. a full repaint."
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Why is it better than alternatives?</p>
-                <p class="qa-a">It's <b>real, not a mockup</b> — the embedded SDK is genuinely token-themeable and runs a live verification flow. And it's <b>self-serve</b> for the field: no engineering ticket, no integration sprint.</p>
+                <p class="qa-a">
+                  It's <b>real, not a mockup</b> — the embedded SDK is genuinely
+                  token-themeable and runs a live verification flow. And it's
+                  <b>self-serve</b> for the field: no engineering ticket, no
+                  integration sprint.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Most creative aspect?</p>
-                <p class="qa-a">The <b>ramp generator</b>: one brand hex color expands into a 7-step lightness ramp (<code>color-primary1..7</code>) that drives every interactive state of the SDK. One color in, a coherent themed product out.</p>
+                <p class="qa-a">
+                  The <b>ramp generator</b>: one brand hex color expands into a
+                  7-step lightness ramp (<code>color-primary1..7</code>) that
+                  drives every interactive state of the SDK. One color in, a
+                  coherent themed product out.
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">If you had another month?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">Harden the crawler for full-auto across arbitrary sites, add dark-mode token generation, expand journey verticals beyond banking, and wire one-click publish + QR sharing into a hosted gallery of saved demos. <b>Confirm the team's actual roadmap.</b></p>
+                <p class="qa-q">
+                  If you had another month?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  Harden the crawler for full-auto across arbitrary sites, add
+                  dark-mode token generation, expand journey verticals beyond
+                  banking, and wire one-click publish + QR sharing into a hosted
+                  gallery of saved demos.
+                  <b>Confirm the team's actual roadmap.</b>
+                </p>
               </div>
             </div>
 
@@ -401,23 +1081,61 @@
               <h3><span class="num">3</span> Technical Execution</h3>
               <div class="qa-item">
                 <p class="qa-q">Walk us through the architecture.</p>
-                <p class="qa-a">A single contract — <code>brand-profile.json</code> — connects every component. <b>Harvest</b> produces it; the <b>theming engine</b> maps it to <code>--jumio-sdk-*</code> CSS variables + logo/font templates; the <b>microsite</b> injects that styling and mounts the SDK at the verification step; the <b>studio UI</b> lets a human review and edit the profile. Full data-flow diagram is in the <b>How We Built It</b> tab.</p>
+                <p class="qa-a">
+                  A single contract — <code>brand-profile.json</code> — connects
+                  every component. <b>Harvest</b> produces it; the
+                  <b>theming engine</b> maps it to
+                  <code>--jumio-sdk-*</code> CSS variables + logo/font
+                  templates; the <b>microsite</b> injects that styling and
+                  mounts the SDK at the verification step; the
+                  <b>studio UI</b> lets a human review and edit the profile.
+                  Full data-flow diagram is in the <b>How We Built It</b> tab.
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">Technologies, frameworks, APIs?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">Jumio WebSDK (token + template theming), JSON Schema (Draft 2020-12) for the contract, vanilla HTML/CSS/JS for the microsite shell, and Playwright for the crawler/extractor track. <b>Confirm the final stack actually used.</b></p>
+                <p class="qa-q">
+                  Technologies, frameworks, APIs?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  Jumio WebSDK (token + template theming), JSON Schema (Draft
+                  2020-12) for the contract, vanilla HTML/CSS/JS for the
+                  microsite shell, and Playwright for the crawler/extractor
+                  track. <b>Confirm the final stack actually used.</b>
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">Most technically challenging part?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">Generating a brand-faithful, accessible color ramp from a single primary hex, and injecting theming through the SDK's Shadow DOM cleanly. <b>Confirm with the engine owner.</b></p>
+                <p class="qa-q">
+                  Most technically challenging part?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  Generating a brand-faithful, accessible color ramp from a
+                  single primary hex, and injecting theming through the SDK's
+                  Shadow DOM cleanly. <b>Confirm with the engine owner.</b>
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Reliability / scalability / security?</p>
-                <p class="qa-a">An "always-green" design: the <b>manual path always works</b>, so a flaky crawl never breaks the demo. Hero-brand profiles are pre-cached so the live demo never depends on a network crawl. Theming is pure CSS-variable injection — no SDK fork, no build step.</p>
+                <p class="qa-a">
+                  An "always-green" design: the <b>manual path always works</b>,
+                  so a flaky crawl never breaks the demo. Hero-brand profiles
+                  are pre-cached so the live demo never depends on a network
+                  crawl. Theming is pure CSS-variable injection — no SDK fork,
+                  no build step.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Trade-offs you made?</p>
-                <p class="qa-a"><b>Light mode only</b> for the hackathon (dark-mode token twins deferred). Don't clone the prospect's site — a clean brand-<b>skinned</b> 3-step stepper reads as "their flow" and is achievable in scope. Contract-first over speed-first, to unblock parallel work.</p>
+                <p class="qa-a">
+                  <b>Light mode only</b> for the hackathon (dark-mode token
+                  twins deferred). Don't clone the prospect's site — a clean
+                  brand-<b>skinned</b> 3-step stepper reads as "their flow" and
+                  is achievable in scope. Contract-first over speed-first, to
+                  unblock parallel work.
+                </p>
               </div>
             </div>
 
@@ -426,27 +1144,66 @@
               <h3><span class="num">4</span> Demo &amp; Product Thinking</h3>
               <div class="qa-item">
                 <p class="qa-q">Demonstrate the core workflow.</p>
-                <p class="qa-a">Provide brand inputs (manually, or crawler-prefilled) → press <b>Generate</b> → a themed Jumio WebSDK renders inside a brand-skinned onboarding microsite → share the link. The video walks this end-to-end. <b>[Insert demo video — placeholder link in the header.]</b></p>
+                <p class="qa-a">
+                  Provide brand inputs (manually, or crawler-prefilled) → press
+                  <b>Generate</b> → a themed Jumio WebSDK renders inside a
+                  brand-skinned onboarding microsite → share the link. The video
+                  walks this end-to-end.
+                  <b>[Insert demo video — placeholder link in the header.]</b>
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Key feature that delivers the most value?</p>
-                <p class="qa-a">The <b>theming engine</b>: brand profile → fully themed, live SDK. It's the moment a prospect sees their own brand on a working verification flow.</p>
+                <p class="qa-a">
+                  The <b>theming engine</b>: brand profile → fully themed, live
+                  SDK. It's the moment a prospect sees their own brand on a
+                  working verification flow.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Who uses it, and how? (by role)</p>
-                <p class="qa-a">One tool, three field plays — full breakdown in the <b>use-case cards below</b>. In short: the <b>AE</b> opens a discovery call with the prospect's own branded flow; the <b>SE</b> skips the integration ask and tailors a live demo on the fly; the <b>BDR</b> drops a personalized branded link into cold outreach to earn the reply.</p>
+                <p class="qa-a">
+                  One tool, three field plays — full breakdown in the
+                  <b>use-case cards below</b>. In short: the <b>AE</b> opens a
+                  discovery call with the prospect's own branded flow; the
+                  <b>SE</b> skips the integration ask and tailors a live demo on
+                  the fly; the <b>BDR</b> drops a personalized branded link into
+                  cold outreach to earn the reply.
+                </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">How does a new user get started?</p>
-                <p class="qa-a">Open the studio, paste a URL or fill the short brand form, hit Generate, share the resulting link. No install, no code.</p>
+                <p class="qa-a">
+                  Open the studio, paste a URL or fill the short brand form, hit
+                  Generate, share the resulting link. No install, no code.
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">Assumptions validated during the hackathon?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">That the WebSDK is richly themeable from CSS variables alone (verified against <code>variables.scss</code>), and that a single contract file lets a distributed team build in parallel against mocks. <b>Confirm what was actually proven vs. assumed.</b></p>
+                <p class="qa-q">
+                  Assumptions validated during the hackathon?<span
+                    class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  That the WebSDK is richly themeable from CSS variables alone
+                  (verified against <code>variables.scss</code>), and that a
+                  single contract file lets a distributed team build in parallel
+                  against mocks.
+                  <b>Confirm what was actually proven vs. assumed.</b>
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">How would you measure success at launch?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">Adoption by the field (demos generated per rep), demo-to-opportunity conversion lift, and SE hours saved. <b>Confirm the team's chosen north-star metric.</b></p>
+                <p class="qa-q">
+                  How would you measure success at launch?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  Adoption by the field (demos generated per rep),
+                  demo-to-opportunity conversion lift, and SE hours saved.
+                  <b>Confirm the team's chosen north-star metric.</b>
+                </p>
               </div>
             </div>
 
@@ -455,30 +1212,74 @@
               <h3><span class="num">5</span> Team &amp; Learning</h3>
               <div class="qa-item">
                 <p class="qa-q">How did the team divide responsibilities?</p>
-                <p class="qa-a">By work package, across timezones (follow-the-sun): Austria orchestrated the contract; Singapore built the engine; Colombia the microsite; India the studio UI; UK SE owned harvesting + QA; UK + US Pacific sales owned hero brands + pitch; Idaho owned messaging.</p>
+                <p class="qa-a">
+                  By work package, across timezones (follow-the-sun): Austria
+                  orchestrated the contract; Singapore built the engine;
+                  Colombia the microsite; India the studio UI; UK SE owned
+                  harvesting + QA; UK + US Pacific sales owned hero brands +
+                  pitch; Idaho owned messaging.
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">Obstacles, and how you overcame them?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">A distributed, mixed-skill, multi-timezone team — solved with a contract-first, mock-first model: lock <code>brand-profile.json</code> in hour 2, then every track builds independently against mocks. Handoffs ran through a daily log, not live sync. <b>Add the real obstacles the team hit.</b></p>
+                <p class="qa-q">
+                  Obstacles, and how you overcame them?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  A distributed, mixed-skill, multi-timezone team — solved with
+                  a contract-first, mock-first model: lock
+                  <code>brand-profile.json</code> in hour 2, then every track
+                  builds independently against mocks. Handoffs ran through a
+                  daily log, not live sync.
+                  <b>Add the real obstacles the team hit.</b>
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">What did you learn?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a">How deeply the WebSDK can be re-skinned beyond the documented three branding knobs, and that a single well-designed contract is what makes a distributed team actually parallel. <b>Add the team's own takeaways.</b></p>
+                <p class="qa-q">
+                  What did you learn?<span class="assume">ASSUMPTION</span>
+                </p>
+                <p class="qa-a">
+                  How deeply the WebSDK can be re-skinned beyond the documented
+                  three branding knobs, and that a single well-designed contract
+                  is what makes a distributed team actually parallel.
+                  <b>Add the team's own takeaways.</b>
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">What would you do differently?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a"><b>Team to fill in.</b> (Common honest answers: scope the crawler smaller earlier, lock hero brands on day 1, build the share path before polish.)</p>
+                <p class="qa-q">
+                  What would you do differently?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  <b>Team to fill in.</b> (Common honest answers: scope the
+                  crawler smaller earlier, lock hero brands on day 1, build the
+                  share path before polish.)
+                </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">Each member's proudest contribution?<span class="assume">ASSUMPTION</span></p>
-                <p class="qa-a"><b>One line per person — team to fill in.</b> Keep it specific and personal; judges remember these.</p>
+                <p class="qa-q">
+                  Each member's proudest contribution?<span class="assume"
+                    >ASSUMPTION</span
+                  >
+                </p>
+                <p class="qa-a">
+                  <b>One line per person — team to fill in.</b> Keep it specific
+                  and personal; judges remember these.
+                </p>
               </div>
             </div>
-
           </div>
 
-          <p class="muted" style="margin-top:0.5rem">
-            Any additional note for the jury panel? <b>Optional — add a closing line here.</b> A good one ties back to the strategic shift: from a static product demo to <b>contextual identity intelligence the prospect can see themselves in.</b>
+          <p class="muted" style="margin-top: 0.5rem">
+            Any additional note for the jury panel?
+            <b>Optional — add a closing line here.</b> A good one ties back to
+            the strategic shift: from a static product demo to
+            <b
+              >contextual identity intelligence the prospect can see themselves
+              in.</b
+            >
           </p>
         </div>
       </section>
@@ -486,67 +1287,151 @@
       <!-- USE CASES BY ROLE -->
       <section id="usecases">
         <div class="wrap">
-          <h2><span class="eyebrow">Use cases by role</span>One tool, three field plays</h2>
-          <p>Same SmartDemo Tool, three different jobs-to-be-done. Each role uses a branded, live identity flow to earn attention earlier in the cycle.</p>
-          <div class="grid cols-3" style="margin-top:1.4rem">
-
+          <h2>
+            <span class="eyebrow">Use cases by role</span>One tool, three field
+            plays
+          </h2>
+          <p>
+            Same SmartDemo Tool, three different jobs-to-be-done. Each role uses
+            a branded, live identity flow to earn attention earlier in the
+            cycle.
+          </p>
+          <div class="grid cols-3" style="margin-top: 1.4rem">
             <div class="card uc ae">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><circle class="icon-line" cx="12" cy="8" r="4"/><path class="icon-line" d="M5 21a7 7 0 0114 0"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <circle class="icon-line" cx="12" cy="8" r="4" />
+                  <path class="icon-line" d="M5 21a7 7 0 0114 0" /></svg
+              ></span>
               <span class="role">Account Executive</span>
               <h3>Open the call with their brand</h3>
-              <p class="job">Job: make a discovery or demo call feel built for this prospect, not off-the-shelf.</p>
-              <div class="play">Before the call, generate a microsite skinned in the prospect's brand. Open screen-share on <b>their</b> onboarding flow running a live Jumio verification. The conversation starts at "fit," not "features."</div>
+              <p class="job">
+                Job: make a discovery or demo call feel built for this prospect,
+                not off-the-shelf.
+              </p>
+              <div class="play">
+                Before the call, generate a microsite skinned in the prospect's
+                brand. Open screen-share on <b>their</b> onboarding flow running
+                a live Jumio verification. The conversation starts at "fit," not
+                "features."
+              </div>
             </div>
 
             <div class="card uc se">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><path class="icon-line teal" d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    class="icon-line teal"
+                    d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"
+                  /></svg
+              ></span>
               <span class="role">Solutions Engineer</span>
               <h3>Demo without the integration ask</h3>
-              <p class="job">Job: show a tailored, working flow without booking engineering time.</p>
-              <div class="play">Spin up a branded, live SDK demo in minutes and adjust it on the fly when the prospect asks "what about our colors / logo / steps?" Proves the SDK is genuinely themeable — and frees up SE hours per cycle.</div>
+              <p class="job">
+                Job: show a tailored, working flow without booking engineering
+                time.
+              </p>
+              <div class="play">
+                Spin up a branded, live SDK demo in minutes and adjust it on the
+                fly when the prospect asks "what about our colors / logo /
+                steps?" Proves the SDK is genuinely themeable — and frees up SE
+                hours per cycle.
+              </div>
             </div>
 
             <div class="card uc bdr">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><rect class="icon-line orange" x="3" y="6" width="18" height="12" rx="2"/><path class="icon-line orange" d="M3.5 7l8.5 6 8.5-6"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <rect
+                    class="icon-line orange"
+                    x="3"
+                    y="6"
+                    width="18"
+                    height="12"
+                    rx="2"
+                  />
+                  <path class="icon-line orange" d="M3.5 7l8.5 6 8.5-6" /></svg
+              ></span>
               <span class="role">BDR · Cold outreach</span>
               <h3>Earn the reply with a branded link</h3>
-              <p class="job">Job: stand out in a cold inbox and get a response.</p>
-              <div class="play">Drop a personalized link into a cold email: "Here's what identity verification looks like inside <i>your</i> onboarding." The prospect clicks into their own branded flow instead of reading another pitch — a reason to reply.</div>
+              <p class="job">
+                Job: stand out in a cold inbox and get a response.
+              </p>
+              <div class="play">
+                Drop a personalized link into a cold email: "Here's what
+                identity verification looks like inside <i>your</i> onboarding."
+                The prospect clicks into their own branded flow instead of
+                reading another pitch — a reason to reply.
+              </div>
             </div>
-
           </div>
-          <p class="muted" style="margin-top:1rem"><b>Why it matters:</b> the tool moves the field from describing identity intelligence to <b>showing it in context</b> — the prospect's brand, a live flow, zero engineering — at every stage from first touch to demo.</p>
+          <p class="muted" style="margin-top: 1rem">
+            <b>Why it matters:</b> the tool moves the field from describing
+            identity intelligence to <b>showing it in context</b> — the
+            prospect's brand, a live flow, zero engineering — at every stage
+            from first touch to demo.
+          </p>
         </div>
       </section>
-
-    </div><!-- /tab-submission -->
+    </div>
+    <!-- /tab-submission -->
 
     <!-- ================= TAB 2: HOW WE BUILT IT ================= -->
     <div id="tab-build" class="tab-panel">
-
-      <section id="idea" style="padding-top:3.5rem">
+      <section id="idea" style="padding-top: 3.5rem">
         <div class="wrap">
           <h2><span class="eyebrow">The idea</span>Why this wins attention</h2>
           <p>
-            In the field, the hardest thing is getting a prospect to <em>care</em>. A generic demo says
-            "here's our product." A microsite that looks like <em>their own onboarding</em> says "here's
-            <strong>you</strong>, with friction removed." It closes the imagination gap instantly.
+            In the field, the hardest thing is getting a prospect to
+            <em>care</em>. A generic demo says "here's our product." A microsite
+            that looks like <em>their own onboarding</em> says "here's
+            <strong>you</strong>, with friction removed." It closes the
+            imagination gap instantly.
           </p>
-          <div class="grid cols-3" style="margin-top:1.4rem">
+          <div class="grid cols-3" style="margin-top: 1.4rem">
             <div class="card">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><circle class="icon-line orange" cx="12" cy="12" r="9"/><path class="icon-line orange" d="M12 7v6"/><circle cx="12" cy="16.5" r="1.1" fill="var(--orange)"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <circle class="icon-line orange" cx="12" cy="12" r="9" />
+                  <path class="icon-line orange" d="M12 7v6" />
+                  <circle cx="12" cy="16.5" r="1.1" fill="var(--orange)" /></svg
+              ></span>
               <h3>The problem</h3>
-              <p class="muted">Cold demos don't land. Prospects can't picture the SDK inside their own flow, and a real integration takes an engineering team days.</p>
+              <p class="muted">
+                Cold demos don't land. Prospects can't picture the SDK inside
+                their own flow, and a real integration takes an engineering team
+                days.
+              </p>
             </div>
             <div class="card">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><path class="icon-line" d="M9 18h6M10 21h4"/><path class="icon-line" d="M12 3a6 6 0 00-3.5 10.9c.6.4 1 1.1 1 1.8v.3h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0012 3z"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <path class="icon-line" d="M9 18h6M10 21h4" />
+                  <path
+                    class="icon-line"
+                    d="M12 3a6 6 0 00-3.5 10.9c.6.4 1 1.1 1 1.8v.3h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0012 3z"
+                  /></svg
+              ></span>
               <h3>The solution</h3>
-              <p class="muted">A one-click showcase creator: capture a brand's look &amp; feel → auto-theme the WebSDK → embed it in a brand-skinned onboarding microsite → share a link.</p>
+              <p class="muted">
+                A one-click showcase creator: capture a brand's look &amp; feel
+                → auto-theme the WebSDK → embed it in a brand-skinned onboarding
+                microsite → share a link.
+              </p>
             </div>
             <div class="card">
-              <span class="card-ic"><svg viewBox="0 0 24 24"><path class="icon-line teal" d="M12 3l2.2 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.8-.5z"/></svg></span>
+              <span class="card-ic"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    class="icon-line teal"
+                    d="M12 3l2.2 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.8-.5z"
+                  /></svg
+              ></span>
               <h3>The "wow"</h3>
-              <p class="muted">"Watch us do in 10 seconds what normally takes an integration team a week." It's real — the SDK is genuinely token-themeable.</p>
+              <p class="muted">
+                "Watch us do in 10 seconds what normally takes an integration
+                team a week." It's real — the SDK is genuinely token-themeable.
+              </p>
             </div>
           </div>
         </div>
@@ -554,11 +1439,17 @@
 
       <section id="how">
         <div class="wrap">
-          <h2><span class="eyebrow">How it works</span>One artifact ties it all together</h2>
+          <h2>
+            <span class="eyebrow">How it works</span>One artifact ties it all
+            together
+          </h2>
           <p>
-            Everything hangs off a single file — <code>brand-profile.json</code>. The harvesting team
-            <em>produces</em> it; the theming engine <em>consumes</em> it; the microsite and UI read it.
-            <strong>Lock this schema in the first two hours</strong> and every team builds in parallel against mock data.
+            Everything hangs off a single file —
+            <code>brand-profile.json</code>. The harvesting team
+            <em>produces</em> it; the theming engine <em>consumes</em> it; the
+            microsite and UI read it.
+            <strong>Lock this schema in the first two hours</strong> and every
+            team builds in parallel against mock data.
           </p>
 
           <h3>The contract — <code>brand-profile.json</code></h3>
@@ -576,10 +1467,13 @@
   <span class="k">"sdk"</span>: { <span class="k">"workflow"</span>: <span class="s">"id+selfie"</span>, <span class="k">"locale"</span>: <span class="s">"en"</span> }
 }</code></pre>
           <p class="muted">
-            The <strong>mapping layer</strong> (brand → SDK) reuses what the WebSDK already supports:
-            <code>colors.primary</code> → a generated lightness ramp on <code>--jumio-sdk-color-primary1..7</code>;
-            <code>logo</code> → the <code>&lt;template id="jumio-logotype-*"&gt;</code> slots;
-            <code>fontFamily</code> → a font <code>&lt;link&gt;</code> + <code>--jumio-sdk-font-family</code>.
+            The <strong>mapping layer</strong> (brand → SDK) reuses what the
+            WebSDK already supports: <code>colors.primary</code> → a generated
+            lightness ramp on <code>--jumio-sdk-color-primary1..7</code>;
+            <code>logo</code> → the
+            <code>&lt;template id="jumio-logotype-*"&gt;</code> slots;
+            <code>fontFamily</code> → a font <code>&lt;link&gt;</code> +
+            <code>--jumio-sdk-font-family</code>.
           </p>
         </div>
       </section>
@@ -641,16 +1535,59 @@ flowchart LR
           <div class="table-scroll">
             <table>
               <thead>
-                <tr><th>WP</th><th>Deliverable</th><th>Consumes → Produces</th><th>Level</th></tr>
+                <tr>
+                  <th>WP</th>
+                  <th>Deliverable</th>
+                  <th>Consumes → Produces</th>
+                  <th>Level</th>
+                </tr>
               </thead>
               <tbody>
-                <tr><td><b>WP2</b> Contract</td><td>JSON schema + mock profiles + mapping rules</td><td>— → <code>brand-profile.json</code></td><td><span class="lvl high">High</span></td></tr>
-                <tr><td><b>WP1</b> Harvesting</td><td>Auto extractor + manual gatherer</td><td>URL → assets → JSON</td><td><span class="lvl low">Low</span> / <span class="lvl high">High</span></td></tr>
-                <tr><td><b>WP3</b> Theming engine</td><td>JSON → CSS vars + logo/font injection</td><td>JSON → styled SDK</td><td><span class="lvl high">High</span></td></tr>
-                <tr><td><b>WP4</b> Microsite shell</td><td>Branded stepper that embeds the SDK</td><td>JSON → HTML/CSS</td><td><span class="lvl mid">Mid</span></td></tr>
-                <tr><td><b>WP6</b> Studio UI</td><td>URL field + edit form + Generate</td><td>JSON → UI</td><td><span class="lvl mid">Mid</span></td></tr>
-                <tr><td><b>WP5</b> Share</td><td>Publish + link / QR</td><td>microsite → URL</td><td><span class="lvl mid">Mid</span></td></tr>
-                <tr><td><b>WP7</b> Demo &amp; pitch</td><td>Hero brands, script, slides, QA</td><td>everything → narrative</td><td><span class="lvl low">Low</span></td></tr>
+                <tr>
+                  <td><b>WP2</b> Contract</td>
+                  <td>JSON schema + mock profiles + mapping rules</td>
+                  <td>— → <code>brand-profile.json</code></td>
+                  <td><span class="lvl high">High</span></td>
+                </tr>
+                <tr>
+                  <td><b>WP1</b> Harvesting</td>
+                  <td>Auto extractor + manual gatherer</td>
+                  <td>URL → assets → JSON</td>
+                  <td>
+                    <span class="lvl low">Low</span> /
+                    <span class="lvl high">High</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><b>WP3</b> Theming engine</td>
+                  <td>JSON → CSS vars + logo/font injection</td>
+                  <td>JSON → styled SDK</td>
+                  <td><span class="lvl high">High</span></td>
+                </tr>
+                <tr>
+                  <td><b>WP4</b> Microsite shell</td>
+                  <td>Branded stepper that embeds the SDK</td>
+                  <td>JSON → HTML/CSS</td>
+                  <td><span class="lvl mid">Mid</span></td>
+                </tr>
+                <tr>
+                  <td><b>WP6</b> Studio UI</td>
+                  <td>URL field + edit form + Generate</td>
+                  <td>JSON → UI</td>
+                  <td><span class="lvl mid">Mid</span></td>
+                </tr>
+                <tr>
+                  <td><b>WP5</b> Share</td>
+                  <td>Publish + link / QR</td>
+                  <td>microsite → URL</td>
+                  <td><span class="lvl mid">Mid</span></td>
+                </tr>
+                <tr>
+                  <td><b>WP7</b> Demo &amp; pitch</td>
+                  <td>Hero brands, script, slides, QA</td>
+                  <td>everything → narrative</td>
+                  <td><span class="lvl low">Low</span></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -659,23 +1596,45 @@ flowchart LR
 
       <section id="status">
         <div class="wrap">
-          <h2><span class="eyebrow">What's built</span>An always-green demo ladder</h2>
-          <p>Every rung is independently demoable. Status reflects the <span style="color:var(--green)">Must</span> tier as the guaranteed floor — <b>confirm the actual reached tier with the team.</b></p>
-          <div class="grid cols-3" style="margin-top:1.4rem">
+          <h2>
+            <span class="eyebrow">What's built</span>An always-green demo ladder
+          </h2>
+          <p>
+            Every rung is independently demoable. Status reflects the
+            <span style="color: var(--green)">Must</span> tier as the guaranteed
+            floor — <b>confirm the actual reached tier with the team.</b>
+          </p>
+          <div class="grid cols-3" style="margin-top: 1.4rem">
             <div class="card tier must">
-              <span class="tag"><span class="status-dot done"></span> Must · Built</span>
+              <span class="tag"
+                ><span class="status-dot done"></span> Must · Built</span
+              >
               <h3>Manual path</h3>
-              <p class="muted">Fill the profile by hand → Generate → themed SDK in a brand-skinned microsite → shareable link. <b>A complete demo on its own.</b></p>
+              <p class="muted">
+                Fill the profile by hand → Generate → themed SDK in a
+                brand-skinned microsite → shareable link.
+                <b>A complete demo on its own.</b>
+              </p>
             </div>
             <div class="card tier should">
-              <span class="tag"><span class="status-dot wip"></span> Should · In progress</span>
+              <span class="tag"
+                ><span class="status-dot wip"></span> Should · In progress</span
+              >
               <h3>Semi-auto</h3>
-              <p class="muted">Crawler pre-fills most of the profile, a human nudges a few fields, then Generate. Best balance of wow and reliability.</p>
+              <p class="muted">
+                Crawler pre-fills most of the profile, a human nudges a few
+                fields, then Generate. Best balance of wow and reliability.
+              </p>
             </div>
             <div class="card tier could">
-              <span class="tag"><span class="status-dot stretch"></span> Could · Stretch</span>
+              <span class="tag"
+                ><span class="status-dot stretch"></span> Could · Stretch</span
+              >
               <h3>Full-auto</h3>
-              <p class="muted">URL in → profile out → microsite, zero manual edits, for 2–3 hand-picked hero brands.</p>
+              <p class="muted">
+                URL in → profile out → microsite, zero manual edits, for 2–3
+                hand-picked hero brands.
+              </p>
             </div>
           </div>
         </div>
@@ -685,45 +1644,90 @@ flowchart LR
         <div class="wrap">
           <h2><span class="eyebrow">Timeline</span>Follow-the-sun, 2 days</h2>
           <div class="timeline">
-            <div class="tl-row"><div class="tl-when">Day 1 · Region A</div><div class="tl-what">Lock schema + mock profiles + brand→token mapping rules. Stand up WP3/WP4 skeletons against mock JSON.</div></div>
-            <div class="tl-row"><div class="tl-when">↓ handoff</div><div class="tl-what">Commit schema + mocks + a one-line next-steps note.</div></div>
-            <div class="tl-row"><div class="tl-when">Day 1 · Region B</div><div class="tl-what">Microsite renders a themed SDK from mock JSON → <b>end-to-end manual path is GREEN</b>. WP7 picks 2–3 hero brands.</div></div>
-            <div class="tl-row"><div class="tl-when">Day 2 · Region A</div><div class="tl-what">Crawler auto-fills JSON; WP6 review/edit form comes online.</div></div>
-            <div class="tl-row"><div class="tl-when">Day 2 · Region B</div><div class="tl-what">Polish hero-brand themes, wire up sharing (WP5), rehearse.</div></div>
-            <div class="tl-row"><div class="tl-when">Day 2 · All</div><div class="tl-what">Freeze. Rehearse the demo twice.</div></div>
+            <div class="tl-row">
+              <div class="tl-when">Day 1 · Region A</div>
+              <div class="tl-what">
+                Lock schema + mock profiles + brand→token mapping rules. Stand
+                up WP3/WP4 skeletons against mock JSON.
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-when">↓ handoff</div>
+              <div class="tl-what">
+                Commit schema + mocks + a one-line next-steps note.
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-when">Day 1 · Region B</div>
+              <div class="tl-what">
+                Microsite renders a themed SDK from mock JSON →
+                <b>end-to-end manual path is GREEN</b>. WP7 picks 2–3 hero
+                brands.
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-when">Day 2 · Region A</div>
+              <div class="tl-what">
+                Crawler auto-fills JSON; WP6 review/edit form comes online.
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-when">Day 2 · Region B</div>
+              <div class="tl-what">
+                Polish hero-brand themes, wire up sharing (WP5), rehearse.
+              </div>
+            </div>
+            <div class="tl-row">
+              <div class="tl-when">Day 2 · All</div>
+              <div class="tl-what">Freeze. Rehearse the demo twice.</div>
+            </div>
           </div>
           <div class="golden">
-            <b>Golden rule:</b> by end of Day 1 you can demo the <em>whole</em> flow with a manually-authored JSON.
-            Everything Day 2 adds is upside, never a dependency.
+            <b>Golden rule:</b> by end of Day 1 you can demo the
+            <em>whole</em> flow with a manually-authored JSON. Everything Day 2
+            adds is upside, never a dependency.
           </div>
         </div>
       </section>
-
-    </div><!-- /tab-build -->
+    </div>
+    <!-- /tab-build -->
 
     <div class="brandbar">
       <div class="wrap">
-        <span class="left"><b>jumio.</b> <span>Identity Intelligence</span></span>
-        <span class="right">Jumio SmartDemo Tool · Hackathon H1/26 · SL_10</span>
+        <span class="left"
+          ><b>jumio.</b> <span>Identity Intelligence</span></span
+        >
+        <span class="right"
+          >Jumio SmartDemo Tool · Hackathon H1/26 · SL_10</span
+        >
       </div>
     </div>
 
     <footer>
       <div class="wrap">
-        <p><b style="color:var(--text)">Jumio SmartDemo Tool</b> — Hackathon H1/26 · Pain point SL_10.<br />
-        Self-contained <code>index.html</code> — publish via GitHub Pages. Replace the demo placeholders and confirm all ASSUMPTION tags before submitting.</p>
+        <p>
+          <b style="color: var(--text)">Jumio SmartDemo Tool</b> — Hackathon
+          H1/26 · Pain point SL_10.<br />
+          Self-contained <code>index.html</code> — publish via GitHub Pages.
+          Replace the demo placeholders and confirm all ASSUMPTION tags before
+          submitting.
+        </p>
       </div>
     </footer>
 
     <script>
-      document.querySelectorAll('.tab-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var tab = btn.getAttribute('data-tab');
-          document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
-          document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
-          btn.classList.add('active');
-          document.getElementById('tab-' + tab).classList.add('active');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var tab = btn.getAttribute("data-tab");
+          document.querySelectorAll(".tab-btn").forEach(function (b) {
+            b.classList.remove("active");
+          });
+          document.querySelectorAll(".tab-panel").forEach(function (p) {
+            p.classList.remove("active");
+          });
+          btn.classList.add("active");
+          document.getElementById("tab-" + tab).classList.add("active");
+          window.scrollTo({ top: 0, behavior: "smooth" });
         });
       });
     </script>
