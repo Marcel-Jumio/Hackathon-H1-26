@@ -221,8 +221,8 @@
       .k { color: var(--teal); } .s { color: var(--green); } .c { color: var(--muted-2); font-style: italic; }
 
       /* Diagram */
-      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; width: 100%; min-height: 400px; display: block; }
-      .mermaid { text-align: center; display: block; width: 100%; }
+      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; }
+      .mermaid { text-align: center; }
 
       /* Timeline */
       .timeline { display: grid; gap: 0.7rem; }
@@ -590,41 +590,41 @@
             The complete product: one SDK, infinite branded showcases. Feed a <code>brand-profile.json</code>, get a fully styled microsite with zero SDK changes.
           </p>
           <div class="diagram">
-            <div class="mermaid">
+            <pre class="mermaid">
 flowchart LR
-  BP["brand-profile.json"] -->|input| ENG["WP3 Theming Engine"]
-  ENG -->|emits| OUT["CSS vars + logo + font"]
-  NPM["@jumio/websdk"] -->|imported into| SITE["microsite"]
-  OUT -->|injected into| SITE
+  BP["brand-profile.json<br/>(color · logo · font)"] -->|input| ENG["WP3 Theming Engine"]
+  ENG -->|emits| OUT["CSS variables<br/>+ logo + font"]
+  NPM["@jumio/websdk"] -->|imported| SITE["/microsite"]
+  OUT -->|injected| SITE
   SITE -->|renders| RESULT["Branded showcase"]
-            </div>
+            </pre>
           </div>
 
           <h3>All work packages</h3>
           <div class="diagram">
-            <div class="mermaid">
+            <pre class="mermaid">
 flowchart LR
-  subgraph WP1["WP1: Brand Harvesting"]
-    A1["URL input"] --> A2["Crawler/extractor"]
-    A2 --> A3["Raw assets"]
-    A4["Manual gathering"] --> A3
+  subgraph WP1["WP1 · Brand Harvesting"]
+    A1["URL input"] --> A2["Crawler / extractor<br/>(Playwright)"]
+    A2 --> A3["Raw assets:<br/>colors · fonts · logo · copy"]
+    A4["Manual asset gathering<br/>(low-tech track)"] --> A3
   end
-  subgraph WP2["WP2: Brand Profile"]
-    B1["brand-profile.json"]
+  subgraph WP2["WP2 · Brand Profile CONTRACT"]
+    B1[("brand-profile.json<br/>schema + mocks")]
   end
-  subgraph WP6["WP6: Studio UI"]
-    C1["Review form"] --> C2["Generate"]
+  subgraph WP6["WP6 · Studio UI / Orchestration"]
+    C1["Review &amp; edit form"] --> C2["Generate button"]
   end
-  subgraph WP3["WP3: Theming Engine"]
-    D1["Map brand"]
-    D2["Inject assets"]
+  subgraph WP3["WP3 · Theming Engine"]
+    D1["Map brand to --jumio-sdk-* ramp"]
+    D2["Inject logo + font"]
   end
-  subgraph WP4["WP4: Microsite"]
-    E1["Stepper"]
-    E2["Embed SDK"]
+  subgraph WP4["WP4 · Microsite Shell"]
+    E1["Brand-skinned stepper"]
+    E2["Embed WebSDK at IDV step"]
   end
-  subgraph WP5["WP5: Share & Deliver"]
-    F1["Publish"] --> F2["Link/QR"]
+  subgraph WP5["WP5 · Share &amp; Deliver"]
+    F1["Publish"] --> F2["Link / QR"]
   end
   A3 --> B1
   B1 <--> C1
@@ -632,8 +632,8 @@ flowchart LR
   D1 & D2 --> E2
   E1 --> E2
   E2 --> F1
-  WP7["WP7: Demo & Pitch"] -.data.-> C1
-            </div>
+  WP7["WP7 · Demo &amp; Pitch"] -.hero brands & test data.-> C1
+            </pre>
           </div>
 
           <h3>Work packages, mapped to skill level</h3>
