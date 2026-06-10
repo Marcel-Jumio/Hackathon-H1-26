@@ -1,0 +1,78 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "npx serve"
+  },
+  "name": "@jumio/websdk",
+  "version": "0.4.0",
+  "license": "UNLICENSED",
+  "author": "Jumio Corporation",
+  "website": "https://www.jumio.com",
+  "homepage": "https://docs.web.jumio.ai",
+  "bugs": "https://www.jumio.com/contact/support/",
+  "description": "Jumio WebSDK is a powerful, flexible software development kit that simplifies the integration of Jumio's services into your web applications.",
+  "keywords": [
+    "age-verification",
+    "aml",
+    "aml-screening",
+    "anti-money-laundering",
+    "authentication",
+    "biometric-authentication",
+    "compliance-management",
+    "customer-onboarding",
+    "data-protection",
+    "digital-identity",
+    "doc-proof",
+    "document-verification",
+    "face-matching",
+    "fastfill",
+    "fraud-prevention",
+    "government-database-checks",
+    "id-verification",
+    "identity",
+    "identity-proofing",
+    "identity-verification",
+    "jumio",
+    "jumio-web-sdk",
+    "jumio-websdk",
+    "kyc",
+    "kyc-compliance",
+    "liveness",
+    "liveness-detection",
+    "online-identity-checks",
+    "regulatory-compliance",
+    "risk-signals",
+    "secure-authentication",
+    "video-verification",
+    "websdk"
+  ],
+  "peerDependencies": {},
+  "module": "./index2.js",
+  "types": "./index2.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index2.js",
+      "default": "./index2.js"
+    },
+    "./assets/*.css": {
+      "import": "./assets/*.css",
+      "default": "./assets/*.css"
+    },
+    "./assets/*.webp": {
+      "import": "./assets/*.webp",
+      "default": "./assets/*.webp"
+    },
+    "./ml/assets_da_web.tar.gz": {
+      "import": "./assets/ml/assets_da_web.tar.gz",
+      "default": "./assets/ml/assets_da_web.tar.gz"
+    },
+    "./ml/dac.wasm": {
+      "import": "./assets/ml/dac.wasm",
+      "default": "./assets/ml/dac.wasm"
+    },
+    "./ml/dac_simd.wasm": {
+      "import": "./assets/ml/dac_simd.wasm",
+      "default": "./assets/ml/dac_simd.wasm"
+    }
+  }
+}
