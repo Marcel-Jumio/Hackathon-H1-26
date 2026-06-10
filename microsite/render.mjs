@@ -124,7 +124,7 @@ ${themeSnippet.split('\n').map((l) => '  ' + l).join('\n')}
       font-weight: 600;
     }
     main {
-      max-width: 720px; margin: 0 auto;
+      width: 90%; max-width: none; margin: 0 auto;
       padding: ${escapeHtml(profile.layout?.containerPadding?.top ?? '2em')} ${escapeHtml(profile.layout?.containerPadding?.right ?? '1em')} ${escapeHtml(profile.layout?.containerPadding?.bottom ?? '2em')} ${escapeHtml(profile.layout?.containerPadding?.left ?? '1em')};
       background: var(--jumio-sdk-theme-light-app-container-bg-color, #f5f7fa);
       border-radius: var(--radius);

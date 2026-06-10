@@ -22,7 +22,7 @@ const els = {
 let profile = null;
 
 /** Session credentials for <jumio-sdk dc token> — kept out of brand-profile.json. */
-const session = { dc: 'us', token: '', locale: '' };
+const session = { dc: 'us', token: '', locale: 'en' };
 
 /** Whether the preview should mount <jumio-sdk> directly, or show the skeleton + button. */
 let started = false;

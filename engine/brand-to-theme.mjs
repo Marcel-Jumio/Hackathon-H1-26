@@ -92,7 +92,9 @@ export function buildHtml(profile) {
   parts.push('<jumio-sdk-theme slot="theme" data-color="light"></jumio-sdk-theme>');
   if (profile.brand?.logo) {
     const alt = profile.brand?.name ?? '';
+    const darkLogo = profile.brand?.logoDark ?? profile.brand.logo;
     parts.push(`<template id="jumio-logotype-light"><img src="${profile.brand.logo}" alt="${alt}" /></template>`);
+    parts.push(`<template id="jumio-logotype-dark"><img src="${darkLogo}" alt="${alt}" /></template>`);
   }
   for (const [id, markup] of Object.entries(profile.content?.templates ?? {})) {
     parts.push(`<template id="${id}">${markup}</template>`);
