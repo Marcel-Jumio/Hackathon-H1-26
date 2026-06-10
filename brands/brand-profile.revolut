@@ -1,0 +1,45 @@
+{
+  "$schema": "./brand-profile.revolut.json",
+  "themeMode": "dark",
+  "brand": {
+    "name": "Revolut",
+    "sourceUrl": "https://www.revolut.com",
+    "logo": "https://www.vectorlogo.zone/logos/revolut/revolut-icon.svg",
+    "fontFamily": "Inter",
+    "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+    "colors": {
+      "primary": "#494fdf",
+      "onPrimary": "#ffffff",
+      "text": "#ffffff",
+      "pageBackground": "#000000",
+      "cardBackground": "#161616"
+    },
+    "radius": "10px"
+  },
+  "journey": {
+    "vertical": "banking",
+    "steps": [
+      "Create account",
+      "Choose plan",
+      "Verify identity",
+      "Done"
+    ],
+    "idvStepIndex": 2,
+    "ctaLabel": "Verify your identity"
+  },
+  "sdk": {
+    "workflow": "id+selfie",
+    "locale": "en"
+  },
+  "layout": {
+    "containerPadding": {
+      "top": "2em",
+      "right": "1.5em",
+      "bottom": "2em",
+      "left": "1.5em"
+    }
+  },
+  "advanced": {
+    "tokenOverrides": {}
+  }
+}
