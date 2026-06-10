@@ -587,9 +587,20 @@
         <div class="wrap">
           <h2><span class="eyebrow">Architecture</span>Work packages on the data flow</h2>
           <p class="muted" style="margin-bottom:1.2rem">
-            WP1 fills the JSON → WP2 <em>is</em> the JSON → WP6 lets a human review/edit it → WP3 turns it into SDK styling →
-            WP4 wraps it in a microsite → WP5 makes it shareable. WP7 runs across everything.
+            The complete product: one SDK, infinite branded showcases. Feed a <code>brand-profile.json</code>, get a fully styled microsite with zero SDK changes.
           </p>
+          <div class="diagram">
+            <pre class="mermaid">
+flowchart LR
+  BP["brand-profile.json<br/>(color · logo · font · copy)"] -->|input| ENG["WP3 Theming Engine"]
+  ENG -->|emits| OUT["&lt;style&gt; --jumio-sdk-* vars<br/>+ logo + font"]
+  NPM["@jumio/websdk<br/>(from npm)"] -->|imported into| SITE["/microsite"]
+  OUT -->|injected into| SITE
+  SITE -->|renders| RESULT["Branded showcase<br/>(same SDK, re-skinned)"]
+            </pre>
+          </div>
+
+          <h3>All work packages</h3>
           <div class="diagram">
             <pre class="mermaid">
 flowchart LR
