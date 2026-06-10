@@ -22,7 +22,7 @@ const els = {
 let profile = null;
 
 /** Session credentials for <jumio-sdk dc token> — kept out of brand-profile.json. */
-const session = { dc: 'us', token: '' };
+const session = { dc: 'us', token: '', locale: '' };
 
 /** Whether the preview should mount <jumio-sdk> directly, or show the skeleton + button. */
 let started = false;
@@ -186,6 +186,7 @@ els.downloadMicrosite.addEventListener('click', () => {
 els.sessionForm.addEventListener('input', () => {
   session.dc = els.sessionForm.elements['dc'].value;
   session.token = els.sessionForm.elements['token'].value;
+  session.locale = els.sessionForm.elements['locale'].value;
   render();
 });
 

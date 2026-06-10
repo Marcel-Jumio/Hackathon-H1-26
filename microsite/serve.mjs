@@ -36,6 +36,17 @@ createServer(async (req, res) => {
     if (!filePath.startsWith(root)) throw new Error('Forbidden');
 
     let stats = await stat(filePath).catch(() => null);
+
+    // Fall back to public/ for absolute paths (e.g. /vendor/websdk/...), mirroring Vite's public dir.
+    if (!stats) {
+      const publicPath = path.join(root, 'public', urlPath);
+      const publicStats = await stat(publicPath).catch(() => null);
+      if (publicStats) {
+        filePath = publicPath;
+        stats = publicStats;
+      }
+    }
+
     if (stats?.isDirectory()) filePath = path.join(filePath, 'index.html');
 
     const data = await readFile(filePath);

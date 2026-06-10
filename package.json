@@ -4,6 +4,8 @@
   "description": "> Working name — change freely.",
   "main": "index.js",
   "scripts": {
+    "postinstall": "node scripts/vendor-websdk.mjs",
+    "vendor:websdk": "node scripts/vendor-websdk.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
