@@ -1,0 +1,45 @@
+{
+  "$schema": "./brand-profile.xbox.json",
+  "themeMode": "dark",
+  "brand": {
+    "name": "Xbox",
+    "sourceUrl": "https://www.xbox.com",
+    "logo": "https://www.vectorlogo.zone/logos/xbox/xbox-icon.svg",
+    "fontFamily": "Segoe UI",
+    "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    "colors": {
+      "primary": "#107C10",
+      "onPrimary": "#ffffff",
+      "text": "#ffffff",
+      "pageBackground": "#000000",
+      "cardBackground": "#1f1f1f"
+    },
+    "radius": "8px"
+  },
+  "journey": {
+    "vertical": "gaming",
+    "steps": [
+      "Create account",
+      "Choose your plan",
+      "Verify your age",
+      "Start playing"
+    ],
+    "idvStepIndex": 2,
+    "ctaLabel": "Verify your age"
+  },
+  "sdk": {
+    "workflow": "id+selfie",
+    "locale": "en"
+  },
+  "layout": {
+    "containerPadding": {
+      "top": "2em",
+      "right": "1.5em",
+      "bottom": "2em",
+      "left": "1.5em"
+    }
+  },
+  "advanced": {
+    "tokenOverrides": {}
+  }
+}
