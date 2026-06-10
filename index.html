@@ -671,9 +671,8 @@
       }
 
       /* Diagram */
-      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; min-height: 300px; display: flex; align-items: center; justify-content: center; }
-      .mermaid { text-align: center; width: 100%; }
-      .diagram svg { max-width: 100%; height: auto; }
+      .diagram { background: rgba(33, 62, 63, 0.5); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; overflow-x: auto; }
+      .mermaid { text-align: center; }
 
       /* Timeline */
       .timeline {
@@ -1487,11 +1486,11 @@
           <div class="diagram">
             <pre class="mermaid">
 flowchart LR
-  BP["brand-profile.json<br/>(color · logo · font · copy)"] -->|input| ENG["WP3 Theming Engine"]
-  ENG -->|emits| OUT["&lt;style&gt; --jumio-sdk-* vars<br/>+ logo + font"]
-  NPM["@jumio/websdk<br/>(from npm)"] -->|imported into| SITE["/microsite"]
-  OUT -->|injected into| SITE
-  SITE -->|renders| RESULT["Branded showcase<br/>(same SDK, re-skinned)"]
+  BP["brand-profile.json<br/>(color · logo · font)"] -->|input| ENG["WP3 Theming Engine"]
+  ENG -->|emits| OUT["CSS variables<br/>+ logo + font"]
+  NPM["@jumio/websdk"] -->|imported| SITE["/microsite"]
+  OUT -->|injected| SITE
+  SITE -->|renders| RESULT["Branded showcase"]
             </pre>
           </div>
 
@@ -1742,14 +1741,8 @@ flowchart LR
           primaryBorderColor: "#13DFCE",
           lineColor: "#7FE753",
           fontFamily: "Inter, sans-serif"
-        },
-        flowchart: {
-          htmlLabels: true,
-          useMaxWidth: true,
-          curve: "linear"
         }
       });
-      mermaid.contentLoaded();
     </script>
   </body>
 </html>
