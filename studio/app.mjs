@@ -3,8 +3,7 @@
 
 import { renderMicrosite, slugify } from '../microsite/render.mjs';
 import { validateProfile } from './validate.mjs';
-
-const DEFAULT_PROFILE_URL = '../brand-profile.sample.json';
+import sampleProfile from '../brand-profile.sample.json';
 
 const els = {
   fileInput: document.getElementById('file-input'),
@@ -171,8 +170,7 @@ els.fileInput.addEventListener('change', async () => {
 });
 
 els.loadSampleBtn.addEventListener('click', async () => {
-  const res = await fetch(DEFAULT_PROFILE_URL);
-  await loadProfile(await res.json());
+  await loadProfile(structuredClone(sampleProfile));
 });
 
 els.downloadProfile.addEventListener('click', () => {
