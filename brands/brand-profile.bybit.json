@@ -4,7 +4,7 @@
   "brand": {
     "name": "Bybit",
     "sourceUrl": "https://www.bybit.com/en-GB/",
-    "logo": "https://img.logokit.com/bybit.com",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/1/14/Bybit_Logo.svg",
     "fontFamily": "Inter",
     "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
     "colors": {
