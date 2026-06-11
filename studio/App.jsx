@@ -12,24 +12,32 @@ import sampleProfile from "../brand-profile.sample.json";
 import "./studio.css";
 
 /** Every brand-profile.*.json under /brands, loaded eagerly so "Quick load" stays in sync with the folder. */
-const brandProfileModules = import.meta.glob("../brands/brand-profile.*.json", { eager: true });
+const brandProfileModules = import.meta.glob("../brands/brand-profile.*.json", {
+  eager: true,
+});
 
 const BRAND_PRESETS = Object.entries(brandProfileModules)
   .map(([path, mod]) => {
     const profile = mod.default ?? mod;
     const fileName = path.match(/brand-profile\.(.+)\.json$/)?.[1] ?? path;
-    return { label: profile.brand?.name ?? fileName, profile, url: profile.brand?.sourceUrl ?? "" };
+    return {
+      label: profile.brand?.name ?? fileName,
+      profile,
+      url: profile.brand?.sourceUrl ?? "",
+    };
   })
   .sort((a, b) => a.label.localeCompare(b.label));
 
 const KNOWN_BRANDS = Object.fromEntries(
-  BRAND_PRESETS
-    .map((p) => {
-      let hostname = "";
-      try { hostname = new URL(p.url).hostname.replace(/^www\./, ""); } catch { /* ignore invalid url */ }
-      return [hostname, p.profile];
-    })
-    .filter(([hostname]) => hostname),
+  BRAND_PRESETS.map((p) => {
+    let hostname = "";
+    try {
+      hostname = new URL(p.url).hostname.replace(/^www\./, "");
+    } catch {
+      /* ignore invalid url */
+    }
+    return [hostname, p.profile];
+  }).filter(([hostname]) => hostname),
 );
 
 const DEMO_PERSONAS = [
@@ -723,7 +731,8 @@ export default function App() {
     const creds = getCredentials();
     if (!creds) {
       setCredentialsActive(false);
-      const message = "Credentials expired — reconnect to create a new session.";
+      const message =
+        "Credentials expired — reconnect to create a new session.";
       setSessionError(message);
       toast.error(message);
       return;
@@ -1702,7 +1711,7 @@ export default function App() {
             <p className="modal-body">
               Used to mint <code>&lt;jumio-sdk&gt;</code> session tokens on your
               behalf via <code>/api/session</code>. Stored only in this
-              browser's local storage and cleared automatically after 60
+              browser's local storage and cleared automatically after 15
               minutes.
             </p>
             <div className="field">
