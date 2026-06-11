@@ -1,147 +1,158 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { renderMicrosite, slugify } from '../microsite/render.mjs';
-import { validateProfile } from './validate.mjs';
-import { saveCredentials, getCredentials, clearCredentials, getRemainingMs } from './credentials.mjs';
-import sampleProfile from '../brand-profile.sample.json';
-import bybitProfile    from '../brands/brand-profile.bybit.json';
-import linkedinProfile from '../brands/brand-profile.linkedin.json';
-import okadaProfile    from '../brands/brand-profile.okada.json';
-import revolutProfile  from '../brands/brand-profile.revolut.json';
-import xboxProfile     from '../brands/brand-profile.xbox.json';
-import './studio.css';
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { renderMicrosite } from "../microsite/render.mjs";
+import { validateProfile } from "./validate.mjs";
+import {
+  saveCredentials,
+  getCredentials,
+  clearCredentials,
+  getRemainingMs,
+} from "./credentials.mjs";
+import sampleProfile from "../brand-profile.sample.json";
+import "./studio.css";
 
-const KNOWN_BRANDS = {
-  'bybit.com':    bybitProfile,
-  'linkedin.com': linkedinProfile,
-  'okada.com':    okadaProfile,
-  'revolut.com':  revolutProfile,
-  'xbox.com':     xboxProfile,
-};
+/** Every brand-profile.*.json under /brands, loaded eagerly so "Quick load" stays in sync with the folder. */
+const brandProfileModules = import.meta.glob("../brands/brand-profile.*.json", { eager: true });
 
-const BRAND_PRESETS = [
-  { label: 'Bybit',    profile: bybitProfile,    url: 'https://bybit.com' },
-  { label: 'LinkedIn', profile: linkedinProfile, url: 'https://linkedin.com' },
-  { label: 'Okada',    profile: okadaProfile,    url: 'https://okada.com' },
-  { label: 'Revolut',  profile: revolutProfile,  url: 'https://revolut.com' },
-  { label: 'Xbox',     profile: xboxProfile,     url: 'https://xbox.com' },
-];
+const BRAND_PRESETS = Object.entries(brandProfileModules)
+  .map(([path, mod]) => {
+    const profile = mod.default ?? mod;
+    const fileName = path.match(/brand-profile\.(.+)\.json$/)?.[1] ?? path;
+    return { label: profile.brand?.name ?? fileName, profile, url: profile.brand?.sourceUrl ?? "" };
+  })
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const KNOWN_BRANDS = Object.fromEntries(
+  BRAND_PRESETS
+    .map((p) => {
+      let hostname = "";
+      try { hostname = new URL(p.url).hostname.replace(/^www\./, ""); } catch { /* ignore invalid url */ }
+      return [hostname, p.profile];
+    })
+    .filter(([hostname]) => hostname),
+);
 
 const DEMO_PERSONAS = [
-  { label: 'Ian Fraser Thomas', firstName: 'Ian Fraser', lastName: 'Thomas', dateOfBirth: '1970-07-30' },
+  {
+    label: "Ian Fraser Thomas",
+    firstName: "Ian Fraser",
+    lastName: "Thomas",
+    dateOfBirth: "1970-07-30",
+  },
 ];
 
 const REGIONS = [
-  { value: 'amer-1', label: 'AMER (US)' },
-  { value: 'emea-1', label: 'EMEA (EU)' },
-  { value: 'apac-1', label: 'APAC (SGP)' },
+  { value: "amer-1", label: "AMER (US)" },
+  { value: "emea-1", label: "EMEA (EU)" },
+  { value: "apac-1", label: "APAC (SGP)" },
 ];
 
 /** Auth region -> <jumio-sdk> datacenter. */
-const REGION_TO_DC = { 'amer-1': 'us', 'emea-1': 'eu', 'apac-1': 'sgp' };
+const REGION_TO_DC = { "amer-1": "us", "emea-1": "eu", "apac-1": "sgp" };
 
 /** <jumio-sdk> locale code -> display name, for the Locale dropdown. */
 const LOCALES = {
-  sq: 'Albanian',
-  ar: 'Arabic',
-  az: 'Azerbaijani',
-  bn: 'Bengali',
-  'bn-IN': 'Bengali (India)',
-  bg: 'Bulgarian',
-  'my-MM': 'Burmese (Myanmar)',
-  ca: 'Catalan',
-  ceb: 'Cebuano',
-  'ceb-PH': 'Cebuano (Philippines)',
-  zh: 'Chinese (default)',
-  'zh-CN': 'Simplified Chinese',
-  zh_CN: 'Simplified Chinese',
-  'zh-HK': 'Traditional Chinese',
-  zh_HK: 'Traditional Chinese',
-  hr: 'Croatian',
-  cs: 'Czech',
-  da: 'Danish',
-  nl: 'Dutch',
-  en: 'American English (default)',
-  'en-GB': 'English (United Kingdom)',
-  en_GB: 'English (United Kingdom)',
-  et: 'Estonian',
-  fi: 'Finnish',
-  'fil-PH': 'Filipino (Philippines)',
-  fr: 'French',
-  'fr-CA': 'French (Canada)',
-  'ka-GE': 'Georgian',
-  ka_GE: 'Georgian',
-  de: 'German',
-  el: 'Greek',
-  iw: 'Hebrew',
-  hi: 'Hindi',
-  'hi-IN': 'Hindi (India)',
-  hu: 'Hungarian',
-  is: 'Icelandic',
-  id: 'Indonesian',
-  ga: 'Irish',
-  it: 'Italian',
-  ja: 'Japanese',
-  jv: 'Javanese',
-  'jv-ID': 'Javanese (Indonesia)',
-  kk: 'Kazakh',
-  km: 'Khmer',
-  ko: 'Korean',
-  lv: 'Latvian',
-  lt: 'Lithuanian',
-  ms: 'Malay',
-  no: 'Norwegian',
-  pl: 'Polish',
-  pt: 'Portuguese',
-  'pt-BR': 'Brazilian Portuguese',
-  pt_BR: 'Brazilian Portuguese',
-  ro: 'Romanian',
-  ru: 'Russian',
-  sr: 'Serbian (default)',
-  sr_Latn: 'Serbian (Latin)',
-  'sr-Latn': 'Serbian (Latin)',
-  'sr-Cyrl': 'Serbian (Cyrillic)',
-  sr_Cyrl: 'Serbian (Cyrillic)',
-  sk: 'Slovak',
-  sl: 'Slovenian',
-  es: 'Spanish',
-  es_MX: 'Mexican Spanish',
-  'es-MX': 'Mexican Spanish',
-  sv: 'Swedish',
-  sw: 'Swahili',
-  th: 'Thai',
-  tr: 'Turkish',
-  ur: 'Urdu',
-  uz: 'Uzbek',
-  uk: 'Ukrainian',
-  vi: 'Vietnamese',
+  sq: "Albanian",
+  ar: "Arabic",
+  az: "Azerbaijani",
+  bn: "Bengali",
+  "bn-IN": "Bengali (India)",
+  bg: "Bulgarian",
+  "my-MM": "Burmese (Myanmar)",
+  ca: "Catalan",
+  ceb: "Cebuano",
+  "ceb-PH": "Cebuano (Philippines)",
+  zh: "Chinese (default)",
+  "zh-CN": "Simplified Chinese",
+  zh_CN: "Simplified Chinese",
+  "zh-HK": "Traditional Chinese",
+  zh_HK: "Traditional Chinese",
+  hr: "Croatian",
+  cs: "Czech",
+  da: "Danish",
+  nl: "Dutch",
+  en: "American English (default)",
+  "en-GB": "English (United Kingdom)",
+  en_GB: "English (United Kingdom)",
+  et: "Estonian",
+  fi: "Finnish",
+  "fil-PH": "Filipino (Philippines)",
+  fr: "French",
+  "fr-CA": "French (Canada)",
+  "ka-GE": "Georgian",
+  ka_GE: "Georgian",
+  de: "German",
+  el: "Greek",
+  iw: "Hebrew",
+  hi: "Hindi",
+  "hi-IN": "Hindi (India)",
+  hu: "Hungarian",
+  is: "Icelandic",
+  id: "Indonesian",
+  ga: "Irish",
+  it: "Italian",
+  ja: "Japanese",
+  jv: "Javanese",
+  "jv-ID": "Javanese (Indonesia)",
+  kk: "Kazakh",
+  km: "Khmer",
+  ko: "Korean",
+  lv: "Latvian",
+  lt: "Lithuanian",
+  ms: "Malay",
+  no: "Norwegian",
+  pl: "Polish",
+  pt: "Portuguese",
+  "pt-BR": "Brazilian Portuguese",
+  pt_BR: "Brazilian Portuguese",
+  ro: "Romanian",
+  ru: "Russian",
+  sr: "Serbian (default)",
+  sr_Latn: "Serbian (Latin)",
+  "sr-Latn": "Serbian (Latin)",
+  "sr-Cyrl": "Serbian (Cyrillic)",
+  sr_Cyrl: "Serbian (Cyrillic)",
+  sk: "Slovak",
+  sl: "Slovenian",
+  es: "Spanish",
+  es_MX: "Mexican Spanish",
+  "es-MX": "Mexican Spanish",
+  sv: "Swedish",
+  sw: "Swahili",
+  th: "Thai",
+  tr: "Turkish",
+  ur: "Urdu",
+  uz: "Uzbek",
+  uk: "Ukrainian",
+  vi: "Vietnamese",
 };
 
 /** Studio "Product" -> Jumio workflowKey, used by /api/session. */
 const PRODUCT_WORKFLOW_KEY = {
-  'id-check': '10166',
-  'id-check-selfie': '10164',
-  'liveness': '10016',
-  'selfie': '10610',
+  "id-check": "10166",
+  "id-check-selfie": "10164",
+  liveness: "10016",
+  selfie: "10610",
 };
 
-const BLANK_CUSTOMER = { firstName: '', lastName: '', dateOfBirth: '' };
+const BLANK_CUSTOMER = { firstName: "", lastName: "", dateOfBirth: "" };
 
 const HARVEST_STEPS = [
-  'Fetching page…',
-  'Detecting colors…',
-  'Extracting fonts…',
-  'Reading logo…',
-  'Building profile…',
+  "Fetching page…",
+  "Detecting colors…",
+  "Extracting fonts…",
+  "Reading logo…",
+  "Building profile…",
 ];
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function getPath(obj, path) {
-  return path.split('.').reduce((o, k) => o?.[k], obj);
+  return path.split(".").reduce((o, k) => o?.[k], obj);
 }
 
 function setPath(obj, path, value) {
-  const keys = path.split('.');
+  const keys = path.split(".");
   const result = structuredClone(obj);
   let cur = result;
   for (let i = 0; i < keys.length - 1; i++) {
@@ -157,13 +168,13 @@ function formatRemaining(ms) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function download(filename, contents, mime) {
   const blob = new Blob([contents], { type: mime });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
@@ -173,89 +184,111 @@ function download(filename, contents, mime) {
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'de', label: 'German' },
-  { code: 'es', label: 'Spanish' },
-  { code: 'fr', label: 'French' },
-  { code: 'pt', label: 'Portuguese' },
-  { code: 'it', label: 'Italian' },
-  { code: 'nl', label: 'Dutch' },
-  { code: 'ja', label: 'Japanese' },
-  { code: 'zh', label: 'Chinese' },
+  { code: "en", label: "English" },
+  { code: "de", label: "German" },
+  { code: "es", label: "Spanish" },
+  { code: "fr", label: "French" },
+  { code: "pt", label: "Portuguese" },
+  { code: "it", label: "Italian" },
+  { code: "nl", label: "Dutch" },
+  { code: "ja", label: "Japanese" },
+  { code: "zh", label: "Chinese" },
 ];
 
 const STRING_SCREENS = [
   {
-    value: 'start',
-    label: 'Start screen',
+    value: "start",
+    label: "Start screen",
     keys: [
-      { key: 'instruction.start_verification',                                         label: 'Title' },
-      { key: 'instruction.process_verifies_identity_and_protects_from_identity_theft', label: 'Subtitle' },
-      { key: 'instruction.use_government_issued_document',                              label: 'Bullet 1 — valid document' },
-      { key: 'instruction.find_well_lit_surface',                                      label: 'Bullet 2 — well-lit surface' },
-      { key: 'instruction.be_ready_to_take_selfie',                                    label: 'Bullet 3 — selfie ready' },
-      { key: 'cta.start',                                                              label: 'Start button' },
+      { key: "instruction.start_verification", label: "Title" },
+      {
+        key: "instruction.process_verifies_identity_and_protects_from_identity_theft",
+        label: "Subtitle",
+      },
+      {
+        key: "instruction.use_government_issued_document",
+        label: "Bullet 1 — valid document",
+      },
+      {
+        key: "instruction.find_well_lit_surface",
+        label: "Bullet 2 — well-lit surface",
+      },
+      {
+        key: "instruction.be_ready_to_take_selfie",
+        label: "Bullet 3 — selfie ready",
+      },
+      { key: "cta.start", label: "Start button" },
     ],
   },
   {
-    value: 'doc-select',
-    label: 'Document selection',
+    value: "doc-select",
+    label: "Document selection",
     keys: [
-      { key: 'id.doc_type_selection.id_verification', label: 'Screen title' },
-      { key: 'id.instruction.select_id_type',           label: 'Instruction' },
-      { key: 'id.types.passport',                     label: 'Passport' },
-      { key: 'id.types.drivers_licence',              label: 'Driver\'s license' },
-      { key: 'id.types.id_card',                      label: 'ID card' },
+      { key: "id.doc_type_selection.id_verification", label: "Screen title" },
+      { key: "id.instruction.select_id_type", label: "Instruction" },
+      { key: "id.types.passport", label: "Passport" },
+      { key: "id.types.drivers_licence", label: "Driver's license" },
+      { key: "id.types.id_card", label: "ID card" },
     ],
   },
   {
-    value: 'buttons',
-    label: 'Buttons (global)',
+    value: "buttons",
+    label: "Buttons (global)",
     keys: [
-      { key: 'cta.continue',  label: 'Continue' },
-      { key: 'cta.back',      label: 'Back' },
-      { key: 'cta.retake',    label: 'Retake' },
-      { key: 'cta.try_again', label: 'Try again' },
-      { key: 'cta.upload_file', label: 'Upload file' },
+      { key: "cta.continue", label: "Continue" },
+      { key: "cta.back", label: "Back" },
+      { key: "cta.retake", label: "Retake" },
+      { key: "cta.try_again", label: "Try again" },
+      { key: "cta.upload_file", label: "Upload file" },
     ],
   },
   {
-    value: 'finish',
-    label: 'Finish screen',
+    value: "finish",
+    label: "Finish screen",
     keys: [
-      { key: 'finish.thank_you_message', label: 'Thank you message' },
-      { key: 'status.success',           label: 'Success label' },
+      { key: "finish.thank_you_message", label: "Thank you message" },
+      { key: "status.success", label: "Success label" },
     ],
   },
 ];
 
 const TEMPLATE_SLOTS = [
   {
-    id: 'jumio-start-before',
-    label: 'Before (inject top)',
-    description: 'Content injected before the start block — shown above the title. Perfect for a hero banner, video, or trust row.',
+    id: "jumio-start-before",
+    label: "Before (inject top)",
+    description:
+      "Content injected before the start block — shown above the title. Perfect for a hero banner, video, or trust row.",
     snippets: [
-      { label: 'Welcome banner', html:
-`<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.75em;text-align:center">
+      {
+        label: "Welcome banner",
+        html: `<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.75em;text-align:center">
   <p style="margin:0;font-size:1em;font-weight:600">👋 Welcome! Let's get you verified</p>
   <p style="margin:0.35em 0 0;font-size:0.85em;opacity:0.65">This only takes about 2 minutes. Have your ID ready.</p>
-</div>` },
-      { label: 'Video intro', html:
-`<div style="margin-bottom:0.85em;border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9">
+</div>`,
+      },
+      {
+        label: "Video intro",
+        html: `<div style="margin-bottom:0.85em;border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9">
   <iframe src="https://www.youtube.com/embed/w8Ito7HXzU4?start=0&end=15&autoplay=1&mute=1&loop=1&playlist=w8Ito7HXzU4&controls=0&rel=0&modestbranding=1" style="position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
-</div>` },
-      { label: 'Hero image', html:
-`<div style="margin-bottom:0.85em;border-radius:10px;overflow:hidden">
+</div>`,
+      },
+      {
+        label: "Hero image",
+        html: `<div style="margin-bottom:0.85em;border-radius:10px;overflow:hidden">
   <img src="YOUR_IMAGE_URL" alt="" style="width:100%;display:block;object-fit:cover;max-height:180px">
-</div>` },
-      { label: 'Trust badges', html:
-`<div style="display:flex;gap:0.5em;flex-wrap:wrap;justify-content:center;margin-bottom:0.85em">
+</div>`,
+      },
+      {
+        label: "Trust badges",
+        html: `<div style="display:flex;gap:0.5em;flex-wrap:wrap;justify-content:center;margin-bottom:0.85em">
   <span style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:9999px;padding:0.3em 0.9em;font-size:0.8em">🔒 256-bit encrypted</span>
   <span style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:9999px;padding:0.3em 0.9em;font-size:0.8em">⚡ Under 2 minutes</span>
   <span style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:9999px;padding:0.3em 0.9em;font-size:0.8em">🌍 Trusted globally</span>
-</div>` },
-      { label: 'Step indicator', html:
-`<ol style="display:flex;gap:0;list-style:none;margin:0 0 1em;padding:0;counter-reset:steps">
+</div>`,
+      },
+      {
+        label: "Step indicator",
+        html: `<ol style="display:flex;gap:0;list-style:none;margin:0 0 1em;padding:0;counter-reset:steps">
   <li style="flex:1;text-align:center;font-size:0.75em;opacity:0.5;position:relative">
     <span style="display:block;width:1.8em;height:1.8em;border-radius:50%;background:var(--jumio-sdk-color-primary4,#0a7d33);color:#fff;line-height:1.8em;margin:0 auto 0.3em;font-weight:700">1</span>Scan ID
   </li>
@@ -265,47 +298,58 @@ const TEMPLATE_SLOTS = [
   <li style="flex:1;text-align:center;font-size:0.75em;opacity:0.5">
     <span style="display:block;width:1.8em;height:1.8em;border-radius:50%;background:var(--jumio-sdk-color-primary4,#0a7d33);color:#fff;line-height:1.8em;margin:0 auto 0.3em;font-weight:700">3</span>Done
   </li>
-</ol>` },
+</ol>`,
+      },
     ],
   },
   {
-    id: 'jumio-start-guidance',
-    label: 'Guidance block (title + checklist)',
-    description: 'Replaces the title, explanation, and all three checklist bullets in one block. The three individual slots (title, explanation, checklist) are ignored when this is set.',
+    id: "jumio-start-guidance",
+    label: "Guidance block (title + checklist)",
+    description:
+      "Replaces the title, explanation, and all three checklist bullets in one block. The three individual slots (title, explanation, checklist) are ignored when this is set.",
     snippets: [
-      { label: 'Video intro', html:
-`<div style="border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9;margin-bottom:0.75em">
+      {
+        label: "Video intro",
+        html: `<div style="border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9;margin-bottom:0.75em">
   <iframe src="https://www.youtube.com/embed/w8Ito7HXzU4?start=0&end=15&autoplay=1&mute=1&loop=1&playlist=w8Ito7HXzU4&controls=0&rel=0&modestbranding=1" style="position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
-</div>` },
-      { label: 'Compact card', html:
-`<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.5em">
+</div>`,
+      },
+      {
+        label: "Compact card",
+        html: `<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.5em">
   <p style="margin:0 0 0.6em;font-weight:700;font-size:1em">Quick identity check</p>
   <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4em;font-size:0.85em;opacity:0.8">
     <li>✅ Valid ID (passport, driver's licence, or national ID)</li>
     <li>💡 Well-lit environment</li>
     <li>🤳 Front-facing camera for selfie</li>
   </ul>
-</div>` },
-      { label: 'Card tiles', html:
-`<div style="margin-bottom:0.5em">
+</div>`,
+      },
+      {
+        label: "Card tiles",
+        html: `<div style="margin-bottom:0.5em">
   <p style="margin:0 0 0.65em;font-weight:700;font-size:1em;text-align:center">What you'll need</p>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5em;font-size:0.78em;text-align:center">
     <div style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:8px;padding:0.7em 0.4em">🪪<br/>Valid ID</div>
     <div style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:8px;padding:0.7em 0.4em">☀️<br/>Good light</div>
     <div style="background:var(--jumio-sdk-theme-light-card-bg-color,#f5f7fa);border-radius:8px;padding:0.7em 0.4em">📷<br/>Camera ready</div>
   </div>
-</div>` },
-      { label: 'Emoji checklist', html:
-`<div style="margin-bottom:0.5em">
+</div>`,
+      },
+      {
+        label: "Emoji checklist",
+        html: `<div style="margin-bottom:0.5em">
   <p style="margin:0 0 0.65em;font-weight:700;font-size:1em">Start verification</p>
   <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.55em">
     <li style="display:flex;align-items:center;gap:0.6em;font-size:0.9em">✅ Have your government-issued ID ready</li>
     <li style="display:flex;align-items:center;gap:0.6em;font-size:0.9em">💡 Find a well-lit spot</li>
     <li style="display:flex;align-items:center;gap:0.6em;font-size:0.9em">🤳 Be ready for a quick selfie</li>
   </ul>
-</div>` },
-      { label: 'Step indicator', html:
-`<div style="margin-bottom:0.75em">
+</div>`,
+      },
+      {
+        label: "Step indicator",
+        html: `<div style="margin-bottom:0.75em">
   <p style="margin:0 0 0.75em;font-weight:700;font-size:1em;text-align:center">How it works</p>
   <ol style="display:flex;list-style:none;margin:0;padding:0;gap:0">
     <li style="flex:1;text-align:center;font-size:0.75em">
@@ -318,36 +362,50 @@ const TEMPLATE_SLOTS = [
       <span style="display:block;width:1.8em;height:1.8em;border-radius:50%;background:var(--jumio-sdk-color-primary4,#0a7d33);color:#fff;line-height:1.8em;margin:0 auto 0.3em;font-weight:700">3</span>Done ✓
     </li>
   </ol>
-</div>` },
+</div>`,
+      },
     ],
   },
   {
-    id: 'jumio-start-after',
-    label: 'After (inject bottom)',
-    description: 'Content injected after the start block — shown below the CTA button.',
+    id: "jumio-start-after",
+    label: "After (inject bottom)",
+    description:
+      "Content injected after the start block — shown below the CTA button.",
     snippets: [
-      { label: 'Support link', html:
-`<p style="text-align:center;font-size:0.8em;opacity:0.55;margin-top:1em">
+      {
+        label: "Support link",
+        html: `<p style="text-align:center;font-size:0.8em;opacity:0.55;margin-top:1em">
   Need help? <a href="mailto:support@example.com" style="color:var(--jumio-sdk-color-primary4,#0a7d33)">Contact support</a>
-</p>` },
-      { label: 'Privacy note', html:
-`<p style="text-align:center;font-size:0.75em;opacity:0.45;margin-top:1em;line-height:1.5">
+</p>`,
+      },
+      {
+        label: "Privacy note",
+        html: `<p style="text-align:center;font-size:0.75em;opacity:0.45;margin-top:1em;line-height:1.5">
   Your data is processed by Jumio Corp. under our
   <a href="#" style="color:inherit;text-decoration:underline">privacy policy</a> and deleted after verification.
-</p>` },
-      { label: 'Reassurance row', html:
-`<div style="display:flex;justify-content:center;gap:1.25em;margin-top:1em;font-size:0.75em;opacity:0.5">
+</p>`,
+      },
+      {
+        label: "Reassurance row",
+        html: `<div style="display:flex;justify-content:center;gap:1.25em;margin-top:1em;font-size:0.75em;opacity:0.5">
   <span>🔒 Secure</span><span>🚀 Fast</span><span>🛡️ Private</span>
-</div>` },
+</div>`,
+      },
     ],
   },
   {
-    id: 'jumio-logotype',
-    label: 'Logo',
-    description: 'Replaces the Jumio logo at the top of every screen.',
+    id: "jumio-logotype",
+    label: "Logo",
+    description: "Replaces the Jumio logo at the top of every screen.",
     snippets: [
-      { label: 'Image logo', html: `<img src="YOUR_LOGO_URL" alt="Logo" style="height:36px;object-fit:contain">` },
-      { label: 'Text logo',  html: `<span style="font-size:1.1em;font-weight:800;letter-spacing:-0.03em;color:var(--jumio-sdk-color-primary4,#0a7d33)">YOUR BRAND</span>` },
+      {
+        label: "Image logo",
+        html: `<img src="YOUR_LOGO_URL" alt="Logo" style="height:36px;object-fit:contain">`,
+      },
+      {
+        label: "Text logo",
+        html: `<span style="font-size:1.1em;font-weight:800;letter-spacing:-0.03em;color:var(--jumio-sdk-color-primary4,#0a7d33)">YOUR BRAND</span>`,
+      },
     ],
   },
 ];
@@ -356,68 +414,103 @@ function markPlaceholderHtml(slotId) {
   return `<div style="background:rgba(127,231,83,0.12);border:1.5px dashed rgba(127,231,83,0.55);padding:0.45em 1em;border-radius:5px;font-family:monospace;font-size:0.72em;color:#7fe753;text-align:center;letter-spacing:0.04em">✦ ${slotId}</div>`;
 }
 
+/** Escapes HTML, then converts a small set of markdown-style inline formatting:
+ *  **bold**, _italic_/*italic*, and [text](url) links. */
+function formatInlineMarkdown(str) {
+  let html = escapeHtmlString(str);
+  html = html.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(
+    /(?:_([^_]+)_|\*([^*]+)\*)/g,
+    (_, a, b) => `<em>${a ?? b}</em>`,
+  );
+  return html;
+}
+
 function plainTextToGuidanceHtml(text) {
-  if (!text.trim()) return '';
-  const lines = text.split('\n').filter(line => line.trim());
-  if (lines.length === 0) return '';
+  if (!text.trim()) return "";
+  const lines = text.split("\n").filter((line) => line.trim());
+  if (lines.length === 0) return "";
 
   const title = lines[0];
   const items = lines.slice(1);
 
   let html = `<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.5em">
-  <p style="margin:0 0 0.6em;font-weight:700;font-size:1em">${escapeHtmlString(title)}</p>`;
+  <p style="margin:0 0 0.6em;font-weight:700;font-size:1em">${formatInlineMarkdown(title)}</p>`;
 
   if (items.length > 0) {
-    html += '\n  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4em;font-size:0.85em;opacity:0.8">';
-    items.forEach(item => {
-      html += `\n    <li>${escapeHtmlString(item)}</li>`;
+    html +=
+      '\n  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4em;font-size:0.85em;opacity:0.8">';
+    items.forEach((item) => {
+      html += `\n    <li>${formatInlineMarkdown(item)}</li>`;
     });
-    html += '\n  </ul>';
+    html += "\n  </ul>";
   }
 
-  html += '\n</div>';
+  html += "\n</div>";
   return html;
 }
 
 function escapeHtmlString(str) {
-  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c],
+  );
 }
 
 const TEXT_FIELDS = [
-  ['brand.name',       'Name'],
-  ['brand.logo',       'Logo URL'],
-  ['brand.fontFamily', 'Font family'],
-  ['brand.fontUrl',    'Font URL (Google Fonts, etc.)'],
-  ['brand.radius',     'Corner radius', '12px'],
+  ["brand.name", "Name"],
+  ["brand.logo", "Logo URL"],
+  ["brand.fontFamily", "Font family"],
+  ["brand.fontUrl", "Font URL (Google Fonts, etc.)"],
+  ["brand.radius", "Corner radius", "12px"],
 ];
 
 const COLOR_FIELDS = [
-  ['brand.colors.primary',        'Primary'],
-  ['brand.colors.onPrimary',      'On-primary (label on brand button)'],
-  ['brand.colors.text',           'Text'],
-  ['brand.colors.pageBackground', 'Page background'],
-  ['brand.colors.cardBackground', 'Card background'],
-  ['brand.colors.destructive',    'Destructive'],
+  ["brand.colors.primary", "Primary"],
+  ["brand.colors.onPrimary", "On-primary (label on brand button)"],
+  ["brand.colors.text", "Text"],
+  ["brand.colors.pageBackground", "Page background"],
+  ["brand.colors.cardBackground", "Card background"],
+  ["brand.colors.destructive", "Destructive"],
 ];
 
 // ─── components ─────────────────────────────────────────────────────────────
 
 function ApplyBtn({ onApply }) {
   return (
-    <button className="btn btn-ghost btn-apply" onClick={onApply}>Apply</button>
+    <button className="btn btn-ghost btn-apply" onClick={onApply}>
+      Apply
+    </button>
   );
 }
 
 function ColorField({ label, value, onChange, onApply, hideApply }) {
-  const hex = HEX.test(value ?? '') ? value : '#000000';
+  const hex = HEX.test(value ?? "") ? value : "#000000";
   return (
     <label className="field">
       {label}
       <div className="color-row">
-        <input type="color" value={hex} onChange={e => onChange(e.target.value)} />
-        <input type="text" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+        <input
+          type="color"
+          value={hex}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
         {!hideApply && <ApplyBtn onApply={onApply} />}
       </div>
     </label>
@@ -428,41 +521,69 @@ function ColorField({ label, value, onChange, onApply, hideApply }) {
 
 export default function App() {
   const [profile, setProfile] = useState(() => structuredClone(sampleProfile));
-  const [session, setSession] = useState({ dc: 'us', token: '', locale: 'en' });
-  const [product, setProduct] = useState('id-check-selfie');
-  const [sourceUrl, setSourceUrl] = useState('');
+  const [session, setSession] = useState({ dc: "us", token: "", locale: "en" });
+  const [product, setProduct] = useState("id-check-selfie");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [harvestState, setHarvestState] = useState(null); // null | 'loading' | 'done' | 'error'
-  const [harvestStep, setHarvestStep] = useState('');
-  const [harvestBrand, setHarvestBrand] = useState('');
+  const [harvestStep, setHarvestStep] = useState("");
+  const [harvestBrand, setHarvestBrand] = useState("");
   const [advancedJson, setAdvancedJson] = useState(() =>
-    JSON.stringify(sampleProfile.advanced?.tokenOverrides ?? {}, null, 2)
+    JSON.stringify(sampleProfile.advanced?.tokenOverrides ?? {}, null, 2),
   );
   const [started, setStarted] = useState(false);
-  const [stringsScreen, setStringsScreen] = useState('start');
-  const [stringsLang, setStringsLang] = useState('en');
-  const [templateSlotId, setTemplateSlotId] = useState('jumio-start-guidance');
-  const [templateSnippetLabel, setTemplateSnippetLabel] = useState('');
-  const [customGuidanceText, setCustomGuidanceText] = useState('');
-  const [customVideoUrl, setCustomVideoUrl] = useState('');
+  const [stringsScreen, setStringsScreen] = useState("start");
+  const [stringsLang, setStringsLang] = useState("en");
+  const [templateSlotId, setTemplateSlotId] = useState("jumio-start-guidance");
+  const [templateSnippetLabel, setTemplateSnippetLabel] = useState("");
+  const [customGuidanceText, setCustomGuidanceText] = useState("");
+  const customGuidanceRef = useRef(null);
+
+  const wrapGuidanceSelection = useCallback((before, after = before) => {
+    const el = customGuidanceRef.current;
+    if (!el) return;
+    const { selectionStart, selectionEnd, value } = el;
+    const selected = value.slice(selectionStart, selectionEnd) || "text";
+    const next =
+      value.slice(0, selectionStart) +
+      before +
+      selected +
+      after +
+      value.slice(selectionEnd);
+    setCustomGuidanceText(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.selectionStart = selectionStart + before.length;
+      el.selectionEnd = selectionStart + before.length + selected.length;
+    });
+  }, []);
+  const [customVideoUrl, setCustomVideoUrl] = useState("");
   const [brandOpen, setBrandOpen] = useState(false);
   const [colorsOpen, setColorsOpen] = useState(false);
+  const [templateOverrideOpen, setTemplateOverrideOpen] = useState(false);
+  const [overrideStringsOpen, setOverrideStringsOpen] = useState(false);
   const [finetunePanelOpen, setFinetunePanelOpen] = useState(false);
   const [customerData, setCustomerData] = useState({ ...DEMO_PERSONAS[0] });
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
-  const [showSessionWarning, setShowSessionWarning] = useState(false);
-  const [credentialsActive, setCredentialsActive] = useState(() => !!getCredentials());
-  const [credentialsRemainingMs, setCredentialsRemainingMs] = useState(() => getRemainingMs());
+  const [credentialsActive, setCredentialsActive] = useState(
+    () => !!getCredentials(),
+  );
+  const [credentialsRemainingMs, setCredentialsRemainingMs] = useState(() =>
+    getRemainingMs(),
+  );
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
-  const [credentialsForm, setCredentialsForm] = useState({ apiKey: '', apiSecret: '', region: 'amer-1' });
+  const [credentialsForm, setCredentialsForm] = useState({
+    apiKey: "",
+    apiSecret: "",
+    region: "amer-1",
+  });
   const [credentialsConnecting, setCredentialsConnecting] = useState(false);
-  const [credentialsError, setCredentialsError] = useState('');
+  const [credentialsError, setCredentialsError] = useState("");
   const [sessionLoading, setSessionLoading] = useState(false);
-  const [sessionError, setSessionError] = useState('');
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [sessionError, setSessionError] = useState("");
   const [publishing, setPublishing] = useState(false);
-  const [publishError, setPublishError] = useState('');
-  const [publishedUrl, setPublishedUrl] = useState('');
-  const [tokenLifetime, setTokenLifetime] = useState('30m');
+  const [publishError, setPublishError] = useState("");
+  const [publishedUrl, setPublishedUrl] = useState("");
+  const [tokenLifetime, setTokenLifetime] = useState("30m");
   const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
   const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
 
@@ -474,39 +595,51 @@ export default function App() {
       if (remaining <= 0 && credentialsActive) {
         setCredentialsActive(false);
         setStarted(false);
-        setSession(s => ({ ...s, token: '' }));
-        setSessionError('Credentials expired — reconnect to create a new session.');
+        setSession((s) => ({ ...s, token: "" }));
+        setSessionError(
+          "Credentials expired — reconnect to create a new session.",
+        );
       }
     }, 1000);
     return () => clearInterval(interval);
   }, [credentialsActive]);
 
+  // Hide the published demo link once the user changes any other configuration —
+  // it no longer reflects what's currently configured.
+  useEffect(() => {
+    setPublishedUrl("");
+  }, [profile, product, tokenLifetime, session.locale, customerData]);
+
   const errors = validateProfile(profile);
-  const slug = slugify(profile.brand?.name);
+
+  // Debounce profile edits before re-rendering the live preview, so rapid typing
+  // (e.g. in the Advanced Customization panel) doesn't reload the iframe on every keystroke.
+  const [debouncedProfile, setDebouncedProfile] = useState(profile);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedProfile(profile), 1400);
+    return () => clearTimeout(timer);
+  }, [profile]);
 
   const srcdoc = useMemo(() => {
-    if (!started || errors.length) return '';
+    if (!started || errors.length) return "";
     try {
-      return renderMicrosite(profile, undefined, session, { started });
+      return renderMicrosite(debouncedProfile, undefined, session, { started });
     } catch (e) {
       return `<pre style="color:red">${String(e)}</pre>`;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [started, profile, session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, debouncedProfile, session]);
 
   const setField = useCallback((path, value) => {
-    setStarted(false);
-    setProfile(prev => setPath(prev, path, value === '' ? undefined : value));
+    setProfile((prev) => setPath(prev, path, value === "" ? undefined : value));
   }, []);
 
-
   function setStringOverride(lang, key, value) {
-    setStarted(false);
-    setProfile(prev => {
+    setProfile((prev) => {
       const next = structuredClone(prev);
       next.strings ??= {};
       next.strings[lang] ??= {};
-      if (value === '') {
+      if (value === "") {
         delete next.strings[lang][key];
         if (!Object.keys(next.strings[lang]).length) delete next.strings[lang];
         if (!Object.keys(next.strings).length) delete next.strings;
@@ -520,15 +653,19 @@ export default function App() {
   function applyAdvancedJson(raw) {
     setAdvancedJson(raw);
     try {
-      const overrides = JSON.parse(raw || '{}');
-      setProfile(prev => setPath(prev, 'advanced.tokenOverrides', overrides));
-    } catch { /* ignore mid-edit invalid JSON */ }
+      const overrides = JSON.parse(raw || "{}");
+      setProfile((prev) => setPath(prev, "advanced.tokenOverrides", overrides));
+    } catch {
+      /* ignore mid-edit invalid JSON */
+    }
   }
 
   function loadProfile(json) {
     setProfile(json);
-    setAdvancedJson(JSON.stringify(json.advanced?.tokenOverrides ?? {}, null, 2));
-    setStarted(false);
+    setDebouncedProfile(json);
+    setAdvancedJson(
+      JSON.stringify(json.advanced?.tokenOverrides ?? {}, null, 2),
+    );
   }
 
   /** Validates credentials by fetching a bearer token immediately, then stores them if they work. */
@@ -537,24 +674,38 @@ export default function App() {
     if (!apiKey.trim() || !apiSecret.trim()) return;
 
     setCredentialsConnecting(true);
-    setCredentialsError('');
+    setCredentialsError("");
     try {
-      const res = await fetch('/api/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: apiKey.trim(), apiSecret: apiSecret.trim(), region }),
+      const res = await fetch("/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          apiSecret: apiSecret.trim(),
+          region,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Could not validate credentials (${res.status})`);
+      if (!res.ok)
+        throw new Error(
+          data.error || `Could not validate credentials (${res.status})`,
+        );
 
-      saveCredentials({ apiKey: apiKey.trim(), apiSecret: apiSecret.trim(), region });
+      saveCredentials({
+        apiKey: apiKey.trim(),
+        apiSecret: apiSecret.trim(),
+        region,
+      });
       setCredentialsActive(true);
       setCredentialsRemainingMs(getRemainingMs());
       setShowCredentialsModal(false);
-      setCredentialsForm({ apiKey: '', apiSecret: '', region });
-      setSession(s => ({ ...s, dc: REGION_TO_DC[region] ?? s.dc }));
+      setCredentialsForm({ apiKey: "", apiSecret: "", region });
+      setSession((s) => ({ ...s, dc: REGION_TO_DC[region] ?? s.dc }));
+      toast.success("API credentials connected");
     } catch (err) {
-      setCredentialsError(String(err.message || err));
+      const message = String(err.message || err);
+      setCredentialsError(message);
+      toast.error("Could not connect credentials", { description: message });
     } finally {
       setCredentialsConnecting(false);
     }
@@ -564,6 +715,7 @@ export default function App() {
     clearCredentials();
     setCredentialsActive(false);
     setCredentialsRemainingMs(0);
+    toast("API credentials disconnected");
   }
 
   /** Calls /api/session to mint a fresh <jumio-sdk> session token from stored API credentials. */
@@ -571,32 +723,45 @@ export default function App() {
     const creds = getCredentials();
     if (!creds) {
       setCredentialsActive(false);
-      setSessionError('Credentials expired — reconnect to create a new session.');
+      const message = "Credentials expired — reconnect to create a new session.";
+      setSessionError(message);
+      toast.error(message);
       return;
     }
 
     setSessionLoading(true);
-    setSessionError('');
+    setSessionError("");
     try {
-      const res = await fetch('/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           apiKey: creds.apiKey,
           apiSecret: creds.apiSecret,
           region: creds.region,
-          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
-          customerData: product === 'selfie' ? customerData : undefined,
+          workflowKey:
+            PRODUCT_WORKFLOW_KEY[product] ??
+            PRODUCT_WORKFLOW_KEY["id-check-selfie"],
+          customerData: product === "selfie" ? customerData : undefined,
           tokenLifetime,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Session request failed (${res.status})`);
+      if (!res.ok)
+        throw new Error(data.error || `Session request failed (${res.status})`);
 
-      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc, expiresAt: data.expiresAt }));
+      setSession((s) => ({
+        ...s,
+        token: data.sdkToken,
+        dc: data.sdkDc ?? s.dc,
+        expiresAt: data.expiresAt,
+      }));
       setStarted(true);
+      toast.success("Session created — preview launched");
     } catch (err) {
-      setSessionError(String(err.message || err));
+      const message = String(err.message || err);
+      setSessionError(message);
+      toast.error("Failed to create session", { description: message });
     } finally {
       setSessionLoading(false);
     }
@@ -606,34 +771,42 @@ export default function App() {
     const creds = getCredentials();
     if (!creds) {
       setCredentialsActive(false);
-      setPublishError('Credentials expired — reconnect to publish a demo link.');
+      const message = "Credentials expired — reconnect to publish a demo link.";
+      setPublishError(message);
+      toast.error(message);
       return;
     }
 
     setPublishing(true);
-    setPublishError('');
-    setPublishedUrl('');
+    setPublishError("");
+    setPublishedUrl("");
     try {
-      const res = await fetch('/api/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profile,
-          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
+          workflowKey:
+            PRODUCT_WORKFLOW_KEY[product] ??
+            PRODUCT_WORKFLOW_KEY["id-check-selfie"],
           locale: session.locale,
           apiKey: creds.apiKey,
           apiSecret: creds.apiSecret,
           region: creds.region,
           tokenLifetime,
-          customerData: product === 'selfie' ? customerData : undefined,
+          customerData: product === "selfie" ? customerData : undefined,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Publish failed (${res.status})`);
+      if (!res.ok)
+        throw new Error(data.error || `Publish failed (${res.status})`);
 
       setPublishedUrl(`${window.location.origin}${data.url}`);
+      toast.success("Demo link published");
     } catch (err) {
-      setPublishError(String(err.message || err));
+      const message = String(err.message || err);
+      setPublishError(message);
+      toast.error("Publish failed", { description: message });
     } finally {
       setPublishing(false);
     }
@@ -641,529 +814,784 @@ export default function App() {
 
   async function runHarvest() {
     if (!sourceUrl.trim()) return;
-    setHarvestState('loading');
-    setHarvestBrand('');
+    setHarvestState("loading");
+    setHarvestBrand("");
 
     // step through progress messages
     for (const step of HARVEST_STEPS) {
       setHarvestStep(step);
-      await new Promise(r => setTimeout(r, 340 + Math.random() * 220));
+      await new Promise((r) => setTimeout(r, 340 + Math.random() * 220));
     }
 
     // resolve domain and pick profile
-    let domain = '';
-    try { domain = new URL(sourceUrl.startsWith('http') ? sourceUrl : 'https://' + sourceUrl).hostname.replace('www.', ''); }
-    catch { domain = sourceUrl.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]; }
+    let domain = "";
+    try {
+      domain = new URL(
+        sourceUrl.startsWith("http") ? sourceUrl : "https://" + sourceUrl,
+      ).hostname.replace("www.", "");
+    } catch {
+      domain = sourceUrl.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
+    }
 
-    const known = Object.entries(KNOWN_BRANDS).find(([k]) => domain.includes(k));
+    const known = Object.entries(KNOWN_BRANDS).find(([k]) =>
+      domain.includes(k),
+    );
     if (known) {
       loadProfile(structuredClone(known[1]));
       setHarvestBrand(known[1].brand?.name ?? domain);
+      toast.success(`Brand detected: ${known[1].brand?.name ?? domain}`);
     } else {
       // generic mock — fill name + placeholder color from domain
-      const name = domain.split('.')[0].replace(/^\w/, c => c.toUpperCase());
+      const name = domain.split(".")[0].replace(/^\w/, (c) => c.toUpperCase());
       loadProfile({
         ...structuredClone(sampleProfile),
         brand: { ...structuredClone(sampleProfile.brand), name, sourceUrl },
       });
       setHarvestBrand(name);
+      toast.success(`Brand profile generated for ${name}`);
     }
-    setHarvestState('done');
+    setHarvestState("done");
   }
-
 
   return (
     <div className="studio">
-
       {/* ── sidebar ── */}
       <aside className="sidebar">
-
         <div className="studio-header">
           <span className="studio-title">Jumio SmartDemo Tool</span>
           <span className="studio-badge">Studio</span>
         </div>
 
         <div className="sidebar-scroll">
-
-        {/* ── credentials bar (sticky) ── */}
-        <div className="credentials-bar">
-          <label className="field">
-            API Credentials
-            {credentialsActive ? (
-              <div className="credentials-status">
-                <span className="credentials-badge">
-                  ✓ Connected · {formatRemaining(credentialsRemainingMs)}
-                </span>
+          {/* ── credentials bar (sticky) ── */}
+          <div className="credentials-bar">
+            <label className="field">
+              API Credentials
+              {credentialsActive ? (
+                <div className="credentials-status">
+                  <span className="credentials-badge">
+                    ✓ Connected · {formatRemaining(credentialsRemainingMs)}
+                  </span>
+                  <button
+                    className="btn btn-ghost config-credentials-btn"
+                    onClick={disconnectCredentials}
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
                 <button
                   className="btn btn-ghost config-credentials-btn"
-                  onClick={disconnectCredentials}
+                  onClick={() => {
+                    setCredentialsError("");
+                    setShowCredentialsModal(true);
+                  }}
                 >
-                  Disconnect
+                  🔐 Connect credentials
                 </button>
-              </div>
-            ) : (
-              <button className="btn btn-ghost config-credentials-btn" onClick={() => { setCredentialsError(''); setShowCredentialsModal(true); }}>
-                🔐 Connect credentials
-              </button>
-            )}
-          </label>
-        </div>
-
-        {/* ── config panel ── */}
-        <div className="config-panel">
-          <div className="field-grid">
-            <label className="field">
-              Locale
-              <select value={session.locale}
-                onChange={e => { setSession(s => ({ ...s, locale: e.target.value })); setStarted(false); }}>
-                {Object.entries(LOCALES).map(([code, label]) => (
-                  <option key={code} value={code}>{label}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              Product
-              <select value={product} onChange={e => { setProduct(e.target.value); setStarted(false); }}>
-                <option value="id-check">ID Check</option>
-                <option value="id-check-selfie">ID Check + Selfie</option>
-                <option value="liveness">Liveness standalone</option>
-                <option value="selfie">Selfie.DONE</option>
-              </select>
-            </label>
-            <label className="field">
-              Token lifetime
-              <select value={tokenLifetime} onChange={e => setTokenLifetime(e.target.value)}>
-                <option value="5m">5 minutes</option>
-                <option value="30m">30 minutes (default)</option>
-                <option value="1h">1 hour</option>
-                <option value="1d">1 day</option>
-                <option value="7d">7 days</option>
-                <option value="30d">30 days</option>
-                <option value="60d">60 days</option>
-              </select>
+              )}
             </label>
           </div>
 
-          {credentialsActive ? (
-            <label className="field" style={{ marginTop: '0.65rem' }}>
-              Session
-              <div className="input-apply-row">
-                <button className="btn btn-primary" disabled={sessionLoading} onClick={requestSession}>
-                  {sessionLoading ? 'Creating session…' : 'Create session & launch →'}
-                </button>
-              </div>
-              {sessionError && <p className="field-error">{sessionError}</p>}
-            </label>
-          ) : (
-            <label className="field" style={{ marginTop: '0.65rem' }}>
-              Session token
-              <div className="input-apply-row">
-                <input type="text" value={session.token} placeholder="Paste session token here"
-                  onChange={e => { setSession(s => ({ ...s, token: e.target.value })); setStarted(false); }} />
-                <ApplyBtn onApply={() => setStarted(true)} />
-              </div>
-            </label>
-          )}
-        </div>
-
-        {/* ── customer data (Selfie.DONE only) ── */}
-        {product === 'selfie' && (
-          <div className="customer-panel">
-            <div className="customer-panel__header">
-              <span className="customer-panel__title">Customer data</span>
-              <span className="customer-panel__badge">required</span>
-            </div>
-            <p className="customer-panel__hint">
-              Used when creating the session token on-the-fly for Selfie.DONE.
-            </p>
-            <label className="field">
-              Demo persona
-              <select
-                value={personaLabel}
-                onChange={e => {
-                  const val = e.target.value;
-                  setPersonaLabel(val);
-                  if (val === '__custom__') return;
-                  const p = DEMO_PERSONAS.find(p => p.label === val);
-                  if (p) setCustomerData({ firstName: p.firstName, lastName: p.lastName, dateOfBirth: p.dateOfBirth });
-                }}
-              >
-                {DEMO_PERSONAS.map(p => (
-                  <option key={p.label} value={p.label}>{p.label}</option>
-                ))}
-                <option value="__custom__">— Custom —</option>
-              </select>
-            </label>
-            <div className="customer-fields">
+          {/* ── config panel ── */}
+          <div className="config-panel">
+            <div className="field-grid">
               <label className="field">
-                First name
-                <input
-                  type="text"
-                  value={customerData.firstName}
-                  onChange={e => { setPersonaLabel('__custom__'); setCustomerData(d => ({ ...d, firstName: e.target.value })); }}
-                />
+                Locale
+                <select
+                  value={session.locale}
+                  onChange={(e) => {
+                    setSession((s) => ({ ...s, locale: e.target.value }));
+                    setStarted(false);
+                  }}
+                >
+                  {Object.entries(LOCALES).map(([code, label]) => (
+                    <option key={code} value={code}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="field">
-                Last name
-                <input
-                  type="text"
-                  value={customerData.lastName}
-                  onChange={e => { setPersonaLabel('__custom__'); setCustomerData(d => ({ ...d, lastName: e.target.value })); }}
-                />
+                Product
+                <select
+                  value={product}
+                  onChange={(e) => {
+                    setProduct(e.target.value);
+                    setStarted(false);
+                  }}
+                >
+                  <option value="id-check">ID Check</option>
+                  <option value="id-check-selfie">ID Check + Selfie</option>
+                  <option value="liveness">Liveness standalone</option>
+                  <option value="selfie">Selfie.DONE</option>
+                </select>
               </label>
               <label className="field">
-                Date of birth
-                <input
-                  type="text"
-                  value={customerData.dateOfBirth}
-                  placeholder="YYYY-MM-DD"
-                  onChange={e => { setPersonaLabel('__custom__'); setCustomerData(d => ({ ...d, dateOfBirth: e.target.value })); }}
-                />
+                Token lifetime
+                <select
+                  value={tokenLifetime}
+                  onChange={(e) => setTokenLifetime(e.target.value)}
+                >
+                  <option value="5m">5 minutes</option>
+                  <option value="30m">30 minutes (default)</option>
+                  <option value="1h">1 hour</option>
+                  <option value="1d">1 day</option>
+                  <option value="7d">7 days</option>
+                  <option value="30d">30 days</option>
+                  <option value="60d">60 days</option>
+                </select>
               </label>
             </div>
-            <button
-              className="btn btn-primary customer-submit-btn"
-              disabled={!credentialsActive}
-              title={credentialsActive ? '' : 'Connect API credentials first'}
-              onClick={() => setShowSessionWarning(true)}
-            >
-              Create session &amp; launch →
-            </button>
-          </div>
-        )}
 
-        {/* ── brand url / harvester ── */}
-        <div className="harvest-panel">
-          <div className="harvest-preset-row">
-            <span className="harvest-preset-label">Quick load</span>
-            <select
-              className="harvest-preset-select"
-              value=""
-              onChange={e => {
-                const preset = BRAND_PRESETS[e.target.value];
-                if (!preset) return;
-                setSourceUrl(preset.url);
-                setHarvestState(null);
-                loadProfile(structuredClone(preset.profile));
-                setHarvestBrand(preset.label);
-                setHarvestState('done');
-              }}
-            >
-              <option value="">— pick a brand —</option>
-              {BRAND_PRESETS.map((p, i) => (
-                <option key={p.label} value={i}>{p.label}</option>
-              ))}
-            </select>
-            <button
-              className="btn btn-ghost btn-apply"
-              title="Reset to default profile"
-              onClick={() => {
-                loadProfile(structuredClone(sampleProfile));
-                setSourceUrl('');
-                setHarvestState(null);
-                setHarvestBrand('');
-                setStarted(false);
-              }}
-            >↺ Reset</button>
-          </div>
-
-          <label className="field" style={{ marginTop: '0.65rem' }}>
-            Brand website URL
-            <div className="harvest-row">
-              <input
-                type="text"
-                value={sourceUrl}
-                placeholder="https://brand.com"
-                onChange={e => { setSourceUrl(e.target.value); setHarvestState(null); }}
-                onKeyDown={e => e.key === 'Enter' && runHarvest()}
-              />
-              <button
-                className={`btn btn-primary harvest-btn${harvestState === 'loading' ? ' loading' : ''}`}
-                onClick={runHarvest}
-                disabled={harvestState === 'loading' || !sourceUrl.trim()}
-              >
-                {harvestState === 'loading' ? '⏳' : '✦ Analyze'}
-              </button>
-            </div>
-          </label>
-
-          {harvestState === 'loading' && (
-            <div className="harvest-progress">
-              <span className="harvest-spinner" />
-              {harvestStep}
-            </div>
-          )}
-          {harvestState === 'done' && (
-            <div className="harvest-success">
-              ✓ Brand detected: <strong>{harvestBrand}</strong> — fields pre-filled below
-            </div>
-          )}
-
-        </div>
-
-        {errors.length > 0 && (
-          <ul className="errors">
-            {errors.map((e, i) => <li key={i}>{e}</li>)}
-          </ul>
-        )}
-
-        {/* ── fine-tuning panel ── */}
-        <button className="advanced-section-header" onClick={() => setFinetunePanelOpen(o => !o)}>
-          <div className="advanced-section-header__content">
-            <span className="advanced-section-header__icon">✨</span>
-            <div>
-              <span className="advanced-section-header__title">Advanced customization</span>
-              <span className="advanced-section-header__subtitle">Where the real magic happens</span>
-            </div>
-          </div>
-          <span className="collapsible-chevron">{finetunePanelOpen ? '▲' : '▼'}</span>
-        </button>
-
-        {finetunePanelOpen && (
-          <div className="finetune-panel">
-            <p className="finetune-panel__description">
-              Fine-tune the look &amp; feel: change colors, swap the logo, or customize the text users see. Adjust individual text fields, or replace entire sections with templates.
-            </p>
-
-            <button className="collapsible-header" onClick={() => setBrandOpen(o => !o)}>
-              <span>Brand</span>
-              <span className="collapsible-chevron">{brandOpen ? '▲' : '▼'}</span>
-            </button>
-          {brandOpen && TEXT_FIELDS.map(([path, label, placeholder]) => (
-            <label key={path} className="field">
-              {label}
-              <input type="text" value={getPath(profile, path) ?? ''}
-                placeholder={placeholder ?? ''}
-                onChange={e => setField(path, e.target.value)} />
-            </label>
-          ))}
-
-          <button className="collapsible-header" onClick={() => setColorsOpen(o => !o)}>
-            <span>Colors</span>
-            <span className="collapsible-chevron">{colorsOpen ? '▲' : '▼'}</span>
-          </button>
-          {colorsOpen && COLOR_FIELDS.map(([path, label]) => (
-            <ColorField key={path} label={label}
-              value={getPath(profile, path)}
-              onChange={v => setField(path, v)}
-              hideApply={true} />
-          ))}
-
-          <h2 className="section-header">Template override</h2>
-          {(() => {
-            const slot = TEMPLATE_SLOTS.find(s => s.id === templateSlotId);
-            const slotPath = `templateOverride.slots.${templateSlotId}`;
-            const currentHtml = getPath(profile, slotPath) ?? '';
-            return (
-              <div className="template-override-panel">
-                <div className="template-selector-row">
-                  <label className="field">
-                    Slot
-                    <select value={templateSlotId} onChange={e => {
-                      setTemplateSlotId(e.target.value);
-                      setTemplateSnippetLabel('');
-                    }}>
-                      {TEMPLATE_SLOTS.map(s => (
-                        <option key={s.id} value={s.id}>{s.label}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="field">
-                    Snippet
-                    <select
-                      value={templateSnippetLabel}
-                      onChange={e => {
-                        const label = e.target.value;
-                        setTemplateSnippetLabel(label);
-                        const snippet = slot.snippets?.find(s => s.label === label);
-                        if (snippet) setField(slotPath, snippet.html);
-                      }}
-                    >
-                      <option value="">— pick a snippet —</option>
-                      {slot.snippets?.map(s => (
-                        <option key={s.label} value={s.label}>{s.label}</option>
-                      ))}
-                    </select>
-                  </label>
+            {/* ── customer data (Selfie.DONE only) ── */}
+            {product === "selfie" && (
+              <div className="customer-panel">
+                <div className="customer-panel__header">
+                  <span className="customer-panel__title">Customer data</span>
+                  <span className="customer-panel__badge">required</span>
                 </div>
-                <p className="template-zone-desc">{slot.description}</p>
-
-                {templateSlotId === 'jumio-start-guidance' && (
-                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(127,231,83,0.04)', borderRadius: '6px', border: '1px solid rgba(127,231,83,0.1)' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600', color: '#7fe753' }}>
-                      Write custom text (no HTML needed)
-                    </label>
-                    <textarea
-                      style={{
-                        width: '100%',
-                        minHeight: '80px',
-                        padding: '0.6rem',
-                        fontSize: '0.85em',
-                        fontFamily: 'inherit',
-                        border: '1px solid rgba(127,231,83,0.2)',
-                        borderRadius: '5px',
-                        background: 'rgba(0,0,0,0.2)',
-                        color: 'inherit',
-                        resize: 'vertical'
-                      }}
-                      placeholder="First line is the title&#10;Other lines become checklist items&#10;&#10;Example:&#10;Quick identity check&#10;Valid ID (passport or driver's license)&#10;Well-lit environment&#10;Camera ready for selfie"
-                      spellCheck={false}
-                      value={customGuidanceText}
-                      onChange={e => setCustomGuidanceText(e.target.value)}
-                    />
-                    <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem' }}>
-                      <button
-                        className="btn btn-ghost btn-apply"
-                        onClick={() => {
-                          const html = plainTextToGuidanceHtml(customGuidanceText);
-                          setField(slotPath, html);
-                          setTemplateSnippetLabel('');
-                        }}
-                      >Apply custom text</button>
-                      {customGuidanceText && (
-                        <button
-                          className="btn btn-ghost btn-apply"
-                          onClick={() => setCustomGuidanceText('')}
-                        >Clear</button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {templateSnippetLabel === 'Video intro' && (
-                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(127,231,83,0.04)', borderRadius: '6px', border: '1px solid rgba(127,231,83,0.1)' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600', color: '#7fe753' }}>
-                      YouTube URL (optional)
-                    </label>
+                <p className="customer-panel__hint">
+                  Used when creating the session token on-the-fly for
+                  Selfie.DONE.
+                </p>
+                <label className="field">
+                  Demo persona
+                  <select
+                    value={personaLabel}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPersonaLabel(val);
+                      if (val === "__custom__") return;
+                      const p = DEMO_PERSONAS.find((p) => p.label === val);
+                      if (p)
+                        setCustomerData({
+                          firstName: p.firstName,
+                          lastName: p.lastName,
+                          dateOfBirth: p.dateOfBirth,
+                        });
+                    }}
+                  >
+                    {DEMO_PERSONAS.map((p) => (
+                      <option key={p.label} value={p.label}>
+                        {p.label}
+                      </option>
+                    ))}
+                    <option value="__custom__">— Custom —</option>
+                  </select>
+                </label>
+                <div className="customer-fields">
+                  <label className="field">
+                    First name
                     <input
                       type="text"
-                      placeholder="https://www.youtube.com/embed/VIDEO_ID or with params: ?autoplay=1&mute=1&loop=1&..."
-                      value={customVideoUrl}
-                      onChange={e => setCustomVideoUrl(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.6rem',
-                        fontSize: '0.85em',
-                        fontFamily: 'inherit',
-                        border: '1px solid rgba(127,231,83,0.2)',
-                        borderRadius: '5px',
-                        background: 'rgba(0,0,0,0.2)',
-                        color: 'inherit',
-                        marginBottom: '0.5rem'
+                      value={customerData.firstName}
+                      onChange={(e) => {
+                        setPersonaLabel("__custom__");
+                        setCustomerData((d) => ({
+                          ...d,
+                          firstName: e.target.value,
+                        }));
                       }}
                     />
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
-                      <button
-                        className="btn btn-ghost btn-apply"
-                        onClick={() => {
-                          const videoUrl = customVideoUrl.trim() || 'https://www.youtube.com/embed/w8Ito7HXzU4?start=0&end=15&autoplay=1&mute=1&loop=1&playlist=w8Ito7HXzU4&controls=0&rel=0&modestbranding=1';
-                          const videoHtml = `<div style="border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9;margin-bottom:0.75em">
-  <iframe src="${escapeHtmlString(videoUrl)}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
-</div>`;
-                          setField(slotPath, videoHtml);
-                        }}
-                      >Apply video</button>
-                      {customVideoUrl && (
-                        <button
-                          className="btn btn-ghost btn-apply"
-                          onClick={() => setCustomVideoUrl('')}
-                        >Clear</button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ marginTop: '0.75rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600' }}>Custom HTML (advanced)</label>
-                  <textarea
-                    className="template-override-textarea"
-                    value={currentHtml}
-                    placeholder="Paste custom HTML here, or click Mark to locate this slot in the preview…"
-                    spellCheck={false}
-                    onChange={e => { setTemplateSnippetLabel(''); setField(slotPath, e.target.value); }}
-                  />
-                  <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem' }}>
-                    <button
-                      className="btn btn-ghost btn-apply"
-                      title="Fill with a bright placeholder so you can see where this slot appears in the preview"
-                      onClick={() => {
-                        setField(slotPath, markPlaceholderHtml(templateSlotId));
+                  </label>
+                  <label className="field">
+                    Last name
+                    <input
+                      type="text"
+                      value={customerData.lastName}
+                      onChange={(e) => {
+                        setPersonaLabel("__custom__");
+                        setCustomerData((d) => ({
+                          ...d,
+                          lastName: e.target.value,
+                        }));
                       }}
-                    >Mark</button>
-                    {currentHtml && (
-                      <button
-                        className="btn btn-ghost btn-apply"
-                        onClick={() => { setField(slotPath, ''); }}
-                      >Clear</button>
-                    )}
-                  </div>
+                    />
+                  </label>
+                  <label className="field">
+                    Date of birth
+                    <input
+                      type="text"
+                      value={customerData.dateOfBirth}
+                      placeholder="YYYY-MM-DD"
+                      onChange={(e) => {
+                        setPersonaLabel("__custom__");
+                        setCustomerData((d) => ({
+                          ...d,
+                          dateOfBirth: e.target.value,
+                        }));
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
-            );
-          })()}
+            )}
 
-          <h2 className="section-header">Override strings</h2>
-          <div className="strings-panel">
-            <div className="strings-selectors">
-              <label className="field">
-                Screen
-                <select value={stringsScreen} onChange={e => setStringsScreen(e.target.value)}>
-                  {STRING_SCREENS.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
+            {credentialsActive ? (
+              <label className="field" style={{ marginTop: "0.65rem" }}>
+                Session
+                <div className="input-apply-row">
+                  <button
+                    className="btn btn-primary"
+                    disabled={sessionLoading}
+                    onClick={() => requestSession()}
+                  >
+                    {sessionLoading
+                      ? "Creating session…"
+                      : "Create session & launch →"}
+                  </button>
+                </div>
+                {sessionError && <p className="field-error">{sessionError}</p>}
               </label>
-              <label className="field">
-                Language
-                <select value={stringsLang} onChange={e => setStringsLang(e.target.value)}>
-                  {LANGUAGES.map(l => (
-                    <option key={l.code} value={l.code}>{l.label} ({l.code})</option>
-                  ))}
-                </select>
+            ) : (
+              <label className="field" style={{ marginTop: "0.65rem" }}>
+                Session token
+                <div className="input-apply-row">
+                  <input
+                    type="text"
+                    value={session.token}
+                    placeholder="Paste session token here"
+                    onChange={(e) => {
+                      setSession((s) => ({ ...s, token: e.target.value }));
+                      setStarted(false);
+                    }}
+                  />
+                  <ApplyBtn onApply={() => setStarted(true)} />
+                </div>
               </label>
+            )}
+          </div>
+
+          {/* ── brand url / harvester ── */}
+          <div className="harvest-panel">
+            <div className="harvest-preset-row">
+              <span className="harvest-preset-label">Quick load</span>
+              <select
+                className="harvest-preset-select"
+                value=""
+                onChange={(e) => {
+                  const preset = BRAND_PRESETS[e.target.value];
+                  if (!preset) return;
+                  setSourceUrl(preset.url);
+                  setHarvestState(null);
+                  loadProfile(structuredClone(preset.profile));
+                  setHarvestBrand(preset.label);
+                  setHarvestState("done");
+                  toast.success(`Loaded ${preset.label} brand profile`);
+                }}
+              >
+                <option value="">Select a brand</option>
+                {BRAND_PRESETS.map((p, i) => (
+                  <option key={p.label} value={i}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="btn btn-ghost btn-apply"
+                title="Reset to default profile"
+                onClick={() => {
+                  loadProfile(structuredClone(sampleProfile));
+                  setSourceUrl("");
+                  setHarvestState(null);
+                  setHarvestBrand("");
+                  setStarted(false);
+                }}
+              >
+                ↺ Reset
+              </button>
             </div>
-            {STRING_SCREENS.find(s => s.value === stringsScreen)?.keys.map(({ key, label }) => (
-              <label key={key} className="field">
-                {label}
+
+            <label className="field" style={{ marginTop: "0.65rem" }}>
+              Brand website URL
+              <div className="harvest-row">
                 <input
                   type="text"
-                  value={profile.strings?.[stringsLang]?.[key] ?? ''}
-                  placeholder="Default (unchanged)"
-                  onChange={e => setStringOverride(stringsLang, key, e.target.value)}
+                  value={sourceUrl}
+                  placeholder="https://brand.com"
+                  onChange={(e) => {
+                    setSourceUrl(e.target.value);
+                    setHarvestState(null);
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && runHarvest()}
                 />
-                <span className="strings-key-hint">{key}</span>
-              </label>
-            ))}
-          </div>
-          </div>
-        )}
+                <button
+                  className={`btn btn-primary harvest-btn${harvestState === "loading" ? " loading" : ""}`}
+                  onClick={runHarvest}
+                  disabled={harvestState === "loading" || !sourceUrl.trim()}
+                >
+                  {harvestState === "loading" ? "⏳" : "✦ Analyze"}
+                </button>
+              </div>
+            </label>
 
-        {/* ── prepare for customer send out ── */}
-        <div className="customer-sendout-section">
-          <div className="customer-sendout-section__header">
-            <span className="customer-sendout-section__title">Prepare for customer send out</span>
+            {harvestState === "loading" && (
+              <div className="harvest-progress">
+                <span className="harvest-spinner" />
+                {harvestStep}
+              </div>
+            )}
+            {harvestState === "done" && (
+              <div className="harvest-success">
+                ✓ Brand detected: <strong>{harvestBrand}</strong> — fields
+                pre-filled below
+              </div>
+            )}
           </div>
-          <p className="customer-sendout-section__description">
-            Download the HTML file to send to your customer. They can open it directly in any web browser.
-          </p>
-          <button className="btn btn-primary customer-sendout-btn"
-            onClick={() => setShowShareModal(true)}>
-            ↓ Share with your customer
+
+          {errors.length > 0 && (
+            <ul className="errors">
+              {errors.map((e, i) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          )}
+
+          {/* ── fine-tuning panel ── */}
+          <button
+            className="advanced-section-header"
+            onClick={() => setFinetunePanelOpen((o) => !o)}
+          >
+            <div className="advanced-section-header__content">
+              <span className="advanced-section-header__icon">✨</span>
+              <div>
+                <span className="advanced-section-header__title">
+                  Advanced customization
+                </span>
+                <span className="advanced-section-header__subtitle">
+                  Where the real magic happens
+                </span>
+              </div>
+            </div>
+            <span className="collapsible-chevron">
+              {finetunePanelOpen ? "▲" : "▼"}
+            </span>
           </button>
-          <p className="hint">ID: <code>{slug}</code></p>
-        </div>
 
+          {finetunePanelOpen && (
+            <div className="finetune-panel">
+              <p className="finetune-panel__description">
+                Fine-tune the look &amp; feel: change colors, swap the logo, or
+                customize the text users see. Adjust individual text fields, or
+                replace entire sections with templates.
+              </p>
+
+              <button
+                className="collapsible-header"
+                onClick={() => setBrandOpen((o) => !o)}
+              >
+                <span>Brand</span>
+                <span className="collapsible-chevron">
+                  {brandOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {brandOpen &&
+                TEXT_FIELDS.map(([path, label, placeholder]) => (
+                  <label key={path} className="field">
+                    {label}
+                    <input
+                      type="text"
+                      value={getPath(profile, path) ?? ""}
+                      placeholder={placeholder ?? ""}
+                      onChange={(e) => setField(path, e.target.value)}
+                    />
+                  </label>
+                ))}
+
+              <button
+                className="collapsible-header"
+                onClick={() => setColorsOpen((o) => !o)}
+              >
+                <span>Colors</span>
+                <span className="collapsible-chevron">
+                  {colorsOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {colorsOpen &&
+                COLOR_FIELDS.map(([path, label]) => (
+                  <ColorField
+                    key={path}
+                    label={label}
+                    value={getPath(profile, path)}
+                    onChange={(v) => setField(path, v)}
+                    hideApply={true}
+                  />
+                ))}
+
+              <button
+                className="collapsible-header"
+                onClick={() => setTemplateOverrideOpen((o) => !o)}
+              >
+                <span>Template override</span>
+                <span className="collapsible-chevron">
+                  {templateOverrideOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {templateOverrideOpen &&
+                (() => {
+                  const slot = TEMPLATE_SLOTS.find(
+                    (s) => s.id === templateSlotId,
+                  );
+                  const slotPath = `templateOverride.slots.${templateSlotId}`;
+                  const currentHtml = getPath(profile, slotPath) ?? "";
+                  return (
+                    <div className="template-override-panel">
+                      <div className="template-selector-row">
+                        <label className="field">
+                          Slot
+                          <select
+                            value={templateSlotId}
+                            onChange={(e) => {
+                              setTemplateSlotId(e.target.value);
+                              setTemplateSnippetLabel("");
+                            }}
+                          >
+                            {TEMPLATE_SLOTS.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="field">
+                          Snippet
+                          <select
+                            value={templateSnippetLabel}
+                            onChange={(e) => {
+                              const label = e.target.value;
+                              setTemplateSnippetLabel(label);
+                              if (label === "") {
+                                setField(slotPath, "");
+                                return;
+                              }
+                              const snippet = slot.snippets?.find(
+                                (s) => s.label === label,
+                              );
+                              if (snippet) setField(slotPath, snippet.html);
+                            }}
+                          >
+                            <option value="">Default snippet</option>
+                            {slot.snippets?.map((s) => (
+                              <option key={s.label} value={s.label}>
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                      <p className="template-zone-desc">{slot.description}</p>
+
+                      {templateSlotId === "jumio-start-guidance" && (
+                        <div
+                          style={{
+                            marginTop: "0.75rem",
+                            padding: "0.75rem",
+                            background: "rgba(127,231,83,0.04)",
+                            borderRadius: "6px",
+                            border: "1px solid rgba(127,231,83,0.1)",
+                          }}
+                        >
+                          <label
+                            style={{
+                              display: "block",
+                              marginBottom: "0.5rem",
+                              fontSize: "0.8rem",
+                              fontWeight: "600",
+                              color: "#7fe753",
+                            }}
+                          >
+                            Write custom text (no HTML needed)
+                          </label>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.3rem",
+                              marginBottom: "0.35rem",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-apply"
+                              style={{ fontWeight: "700" }}
+                              title="Bold (**text**)"
+                              onClick={() => wrapGuidanceSelection("**")}
+                            >
+                              B
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-apply"
+                              style={{ fontStyle: "italic" }}
+                              title="Italic (_text_)"
+                              onClick={() => wrapGuidanceSelection("_")}
+                            >
+                              I
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-apply"
+                              title="Link ([text](https://...))"
+                              onClick={() =>
+                                wrapGuidanceSelection("[", "](https://)")
+                              }
+                            >
+                              Link
+                            </button>
+                          </div>
+                          <textarea
+                            ref={customGuidanceRef}
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "0.6rem",
+                              fontSize: "0.85em",
+                              fontFamily: "inherit",
+                              border: "1px solid rgba(127,231,83,0.2)",
+                              borderRadius: "5px",
+                              background: "rgba(0,0,0,0.2)",
+                              color: "inherit",
+                              resize: "vertical",
+                            }}
+                            placeholder="First line is the title&#10;Other lines become checklist items&#10;&#10;Use **bold**, _italic_, or [links](https://...)&#10;&#10;Example:&#10;Quick identity check&#10;Valid ID (passport or driver's license)&#10;Well-lit environment&#10;Camera ready for selfie"
+                            spellCheck={false}
+                            value={customGuidanceText}
+                            onChange={(e) =>
+                              setCustomGuidanceText(e.target.value)
+                            }
+                          />
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.35rem",
+                              marginTop: "0.35rem",
+                            }}
+                          >
+                            <button
+                              className="btn btn-ghost btn-apply"
+                              onClick={() => {
+                                const html =
+                                  plainTextToGuidanceHtml(customGuidanceText);
+                                setField(slotPath, html);
+                                setTemplateSnippetLabel("");
+                                toast.success("Custom text applied");
+                              }}
+                            >
+                              Apply custom text
+                            </button>
+                            {customGuidanceText && (
+                              <button
+                                className="btn btn-ghost btn-apply"
+                                onClick={() => setCustomGuidanceText("")}
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {templateSnippetLabel === "Video intro" && (
+                        <div
+                          style={{
+                            marginTop: "0.75rem",
+                            padding: "0.75rem",
+                            background: "rgba(127,231,83,0.04)",
+                            borderRadius: "6px",
+                            border: "1px solid rgba(127,231,83,0.1)",
+                          }}
+                        >
+                          <label
+                            style={{
+                              display: "block",
+                              marginBottom: "0.5rem",
+                              fontSize: "0.8rem",
+                              fontWeight: "600",
+                              color: "#7fe753",
+                            }}
+                          >
+                            YouTube URL (optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://www.youtube.com/embed/VIDEO_ID or with params: ?autoplay=1&mute=1&loop=1&..."
+                            value={customVideoUrl}
+                            onChange={(e) => setCustomVideoUrl(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "0.6rem",
+                              fontSize: "0.85em",
+                              fontFamily: "inherit",
+                              border: "1px solid rgba(127,231,83,0.2)",
+                              borderRadius: "5px",
+                              background: "rgba(0,0,0,0.2)",
+                              color: "inherit",
+                              marginBottom: "0.5rem",
+                            }}
+                          />
+                          <div style={{ display: "flex", gap: "0.35rem" }}>
+                            <button
+                              className="btn btn-ghost btn-apply"
+                              onClick={() => {
+                                const videoUrl =
+                                  customVideoUrl.trim() ||
+                                  "https://www.youtube.com/embed/w8Ito7HXzU4?start=0&end=15&autoplay=1&mute=1&loop=1&playlist=w8Ito7HXzU4&controls=0&rel=0&modestbranding=1";
+                                const videoHtml = `<div style="border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9;margin-bottom:0.75em">
+  <iframe src="${escapeHtmlString(videoUrl)}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
+</div>`;
+                                setField(slotPath, videoHtml);
+                                toast.success("Video applied");
+                              }}
+                            >
+                              Apply video
+                            </button>
+                            {customVideoUrl && (
+                              <button
+                                className="btn btn-ghost btn-apply"
+                                onClick={() => setCustomVideoUrl("")}
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ marginTop: "0.75rem" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "0.5rem",
+                            fontSize: "0.8rem",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Custom HTML (advanced)
+                        </label>
+                        <textarea
+                          className="template-override-textarea"
+                          value={currentHtml}
+                          placeholder="Paste custom HTML here, or click Mark to locate this slot in the preview…"
+                          spellCheck={false}
+                          onChange={(e) => {
+                            setTemplateSnippetLabel("");
+                            setField(slotPath, e.target.value);
+                          }}
+                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.35rem",
+                            marginTop: "0.35rem",
+                          }}
+                        >
+                          <button
+                            className="btn btn-ghost btn-apply"
+                            title="Fill with a bright placeholder so you can see where this slot appears in the preview"
+                            onClick={() => {
+                              setField(
+                                slotPath,
+                                markPlaceholderHtml(templateSlotId),
+                              );
+                            }}
+                          >
+                            Mark
+                          </button>
+                          {currentHtml && (
+                            <button
+                              className="btn btn-ghost btn-apply"
+                              onClick={() => {
+                                setField(slotPath, "");
+                              }}
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              <button
+                className="collapsible-header"
+                onClick={() => setOverrideStringsOpen((o) => !o)}
+              >
+                <span>Override strings</span>
+                <span className="collapsible-chevron">
+                  {overrideStringsOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {overrideStringsOpen && (
+                <div className="strings-panel">
+                  <div className="strings-selectors">
+                    <label className="field">
+                      Screen
+                      <select
+                        value={stringsScreen}
+                        onChange={(e) => setStringsScreen(e.target.value)}
+                      >
+                        {STRING_SCREENS.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="field">
+                      Language
+                      <select
+                        value={stringsLang}
+                        onChange={(e) => setStringsLang(e.target.value)}
+                      >
+                        {LANGUAGES.map((l) => (
+                          <option key={l.code} value={l.code}>
+                            {l.label} ({l.code})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  {STRING_SCREENS.find(
+                    (s) => s.value === stringsScreen,
+                  )?.keys.map(({ key, label }) => (
+                    <label key={key} className="field">
+                      {label}
+                      <input
+                        type="text"
+                        value={profile.strings?.[stringsLang]?.[key] ?? ""}
+                        placeholder="Default (unchanged)"
+                        onChange={(e) =>
+                          setStringOverride(stringsLang, key, e.target.value)
+                        }
+                      />
+                      <span className="strings-key-hint">{key}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── apply section (pinned to bottom) ── */}
         <div className="apply-section">
           <div className="apply-section__header">
-            <span className="apply-section__title">Ready to see your changes?</span>
+            <span className="apply-section__title">
+              Ready to see your changes?
+            </span>
           </div>
           <p className="apply-section__description">
-            Click below to apply your configuration and any customizations to the preview.
+            Click below to apply your configuration and any customizations to
+            the preview.
           </p>
-          <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
+          <button
+            className="btn btn-primary apply-section__btn"
+            onClick={() => {
+              setStarted(true);
+              toast.success("Preview updated");
+            }}
+          >
             Apply →
           </button>
 
@@ -1173,42 +1601,65 @@ export default function App() {
               disabled={publishing}
               onClick={publishSite}
             >
-              {publishing ? 'Publishing…' : '🚀 Publish demo link'}
+              {publishing ? "Publishing…" : "🚀 Publish demo link"}
             </button>
             {publishError && <p className="field-error">{publishError}</p>}
             {publishedUrl && (
               <div className="publish-result">
-                <input type="text" readOnly value={publishedUrl} onFocus={e => e.target.select()} />
+                <input
+                  type="text"
+                  readOnly
+                  value={publishedUrl}
+                  onFocus={(e) => e.target.select()}
+                />
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  onClick={() => navigator.clipboard?.writeText(publishedUrl)}
+                  onClick={() => {
+                    navigator.clipboard?.writeText(publishedUrl);
+                    toast.success("Link copied to clipboard");
+                  }}
                 >
                   Copy
                 </button>
-                <p className="hint">Single-use — valid until the token expires ({tokenLifetime})</p>
+                <p className="hint">
+                  Single-use — valid until the token expires ({tokenLifetime})
+                </p>
               </div>
             )}
           </div>
         </div>
-
       </aside>
 
       {/* ── preview ── */}
       <main className="preview-pane">
         <div className="preview-journey-nav">
-          <button className="preview-journey-nav__item preview-journey-nav__item--pre" onClick={() => setShowPreIdvTeaser(true)}>
+          <button
+            className="preview-journey-nav__item preview-journey-nav__item--pre"
+            onClick={() => setShowPreIdvTeaser(true)}
+          >
             <div className="preview-journey-nav__label">Risk Signals</div>
-            <div className="preview-journey-nav__sublabel">Device, IP, custom input</div>
+            <div className="preview-journey-nav__sublabel">
+              Device, IP, custom input
+            </div>
             <div className="preview-journey-nav__link">Learn more →</div>
           </button>
           <div className="preview-journey-nav__item preview-journey-nav__item--main">
-            <div className="preview-journey-nav__label">Verification Journey</div>
+            <div className="preview-journey-nav__label">
+              Verification Journey
+            </div>
             <div className="preview-journey-nav__status">YOU ARE HERE</div>
           </div>
-          <button className="preview-journey-nav__item preview-journey-nav__item--post" onClick={() => setShowPostIdvTeaser(true)}>
-            <div className="preview-journey-nav__label">Results & Intelligence</div>
-            <div className="preview-journey-nav__sublabel">Interpretation, rules, evaluation</div>
+          <button
+            className="preview-journey-nav__item preview-journey-nav__item--post"
+            onClick={() => setShowPostIdvTeaser(true)}
+          >
+            <div className="preview-journey-nav__label">
+              Results & Intelligence
+            </div>
+            <div className="preview-journey-nav__sublabel">
+              Interpretation, rules, evaluation
+            </div>
             <div className="preview-journey-nav__link">Learn more →</div>
           </button>
         </div>
@@ -1223,9 +1674,13 @@ export default function App() {
             <div className="preview-placeholder">
               <div className="preview-placeholder__card">
                 <div className="preview-placeholder__dots">
-                  <span /><span /><span />
+                  <span />
+                  <span />
+                  <span />
                 </div>
-                <p className="preview-placeholder__title">Keep calm, and sell Jumio</p>
+                <p className="preview-placeholder__title">
+                  Keep calm, and sell Jumio
+                </p>
                 <p className="preview-placeholder__hint">
                   Press <kbd>Apply</kbd> next to any field to render the preview
                 </p>
@@ -1237,25 +1692,32 @@ export default function App() {
 
       {/* ── connect credentials modal ── */}
       {showCredentialsModal && (
-        <div className="modal-backdrop" onClick={() => setShowCredentialsModal(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowCredentialsModal(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon">🔐</div>
             <h2 className="modal-title">Connect API credentials</h2>
             <p className="modal-body">
-              Used to mint <code>&lt;jumio-sdk&gt;</code> session tokens on your behalf via <code>/api/session</code>.
-              Stored only in this browser's local storage and cleared automatically after 60 minutes.
+              Used to mint <code>&lt;jumio-sdk&gt;</code> session tokens on your
+              behalf via <code>/api/session</code>. Stored only in this
+              browser's local storage and cleared automatically after 60
+              minutes.
             </p>
             <div className="field">
               Region
               <div className="region-radio-group">
-                {REGIONS.map(r => (
+                {REGIONS.map((r) => (
                   <label key={r.value} className="region-radio">
                     <input
                       type="radio"
                       name="credentials-region"
                       value={r.value}
                       checked={credentialsForm.region === r.value}
-                      onChange={() => setCredentialsForm(f => ({ ...f, region: r.value }))}
+                      onChange={() =>
+                        setCredentialsForm((f) => ({ ...f, region: r.value }))
+                      }
                     />
                     {r.label}
                   </label>
@@ -1264,54 +1726,47 @@ export default function App() {
             </div>
             <label className="field">
               API Key
-              <input type="text" value={credentialsForm.apiKey}
-                onChange={e => setCredentialsForm(f => ({ ...f, apiKey: e.target.value }))} />
+              <input
+                type="text"
+                value={credentialsForm.apiKey}
+                onChange={(e) =>
+                  setCredentialsForm((f) => ({ ...f, apiKey: e.target.value }))
+                }
+              />
             </label>
             <label className="field">
               API Secret
-              <input type="password" value={credentialsForm.apiSecret}
-                onChange={e => setCredentialsForm(f => ({ ...f, apiSecret: e.target.value }))} />
+              <input
+                type="password"
+                value={credentialsForm.apiSecret}
+                onChange={(e) =>
+                  setCredentialsForm((f) => ({
+                    ...f,
+                    apiSecret: e.target.value,
+                  }))
+                }
+              />
             </label>
-            {credentialsError && <p className="field-error">{credentialsError}</p>}
+            {credentialsError && (
+              <p className="field-error">{credentialsError}</p>
+            )}
             <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setShowCredentialsModal(false)}>
+              <button
+                className="btn btn-ghost"
+                onClick={() => setShowCredentialsModal(false)}
+              >
                 Cancel
               </button>
               <button
                 className="btn btn-primary"
-                disabled={!credentialsForm.apiKey.trim() || !credentialsForm.apiSecret.trim() || credentialsConnecting}
+                disabled={
+                  !credentialsForm.apiKey.trim() ||
+                  !credentialsForm.apiSecret.trim() ||
+                  credentialsConnecting
+                }
                 onClick={connectCredentials}
               >
-                {credentialsConnecting ? 'Validating…' : 'Connect'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── session warning modal ── */}
-      {showSessionWarning && (
-        <div className="modal-backdrop" onClick={() => setShowSessionWarning(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon">⏱</div>
-            <h2 className="modal-title">While you're here — talk to your client!</h2>
-            <p className="modal-body">
-              Use this moment. Explain what's about to happen, set the scene,
-              build the excitement. <strong>A great demo is a conversation, not a click.</strong>
-            </p>
-            <p className="modal-body modal-body--secondary">
-              Once created, the session is live for <strong>15 minutes</strong>.
-              Hand the device to your client and let them run through the journey themselves.
-            </p>
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setShowSessionWarning(false)}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={() => {
-                setShowSessionWarning(false);
-                requestSession();
-              }}>
-                Got it — create session →
+                {credentialsConnecting ? "Validating…" : "Connect"}
               </button>
             </div>
           </div>
@@ -1320,16 +1775,18 @@ export default function App() {
 
       {/* ── Pre-IDV teaser modal ── */}
       {showPreIdvTeaser && (
-        <div className="modal-backdrop" onClick={() => setShowPreIdvTeaser(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowPreIdvTeaser(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon">🔍</div>
             <h2 className="modal-title">Risk Signals</h2>
             <p className="modal-body">
-              Configure what happens <strong>before</strong> the identity verification flow starts.
+              Configure what happens <strong>before</strong> the identity
+              verification flow starts.
             </p>
-            <p className="modal-body">
-              Future capabilities:
-            </p>
+            <p className="modal-body">Future capabilities:</p>
             <ul className="teaser-list">
               <li>Risk signals & KYC rules</li>
               <li>Prepared data inputs</li>
@@ -1338,10 +1795,14 @@ export default function App() {
               <li>Brand-styled forms</li>
             </ul>
             <p className="modal-body modal-body--secondary">
-              This feature is on the roadmap and will allow you to orchestrate the complete customer journey.
+              This feature is on the roadmap and will allow you to orchestrate
+              the complete customer journey.
             </p>
             <div className="modal-actions">
-              <button className="btn btn-primary" onClick={() => setShowPreIdvTeaser(false)}>
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowPreIdvTeaser(false)}
+              >
                 Got it
               </button>
             </div>
@@ -1351,16 +1812,18 @@ export default function App() {
 
       {/* ── Post-IDV teaser modal ── */}
       {showPostIdvTeaser && (
-        <div className="modal-backdrop" onClick={() => setShowPostIdvTeaser(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowPostIdvTeaser(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon">💡</div>
             <h2 className="modal-title">Results & Intelligence</h2>
             <p className="modal-body">
-              Configure what is shown <strong>after</strong> identity verification completes.
+              Configure what is shown <strong>after</strong> identity
+              verification completes.
             </p>
-            <p className="modal-body">
-              Future capabilities:
-            </p>
+            <p className="modal-body">Future capabilities:</p>
             <ul className="teaser-list">
               <li>Verification results display</li>
               <li>Risk signals & CTR</li>
@@ -1369,68 +1832,20 @@ export default function App() {
               <li>Next steps & actions</li>
             </ul>
             <p className="modal-body modal-body--secondary">
-              Build confidence in your risk assessment by showing customers what data you've gathered and how you interpret it.
+              Build confidence in your risk assessment by showing customers what
+              data you've gathered and how you interpret it.
             </p>
             <div className="modal-actions">
-              <button className="btn btn-primary" onClick={() => setShowPostIdvTeaser(false)}>
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowPostIdvTeaser(false)}
+              >
                 Got it
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* ── share modal ── */}
-      {showShareModal && (
-        <div className="modal-backdrop" onClick={() => setShowShareModal(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon">📤</div>
-            <h2 className="modal-title">Share with your customer</h2>
-            <p className="modal-body">
-              Choose how you'd like to send the demo to your customer.
-            </p>
-
-            <div className="share-options">
-              <button className="share-option share-option--primary" onClick={() => {
-                alert('Email integration coming soon — colleague will wire this up');
-                setShowShareModal(false);
-              }}>
-                <span className="share-option__icon">✉️</span>
-                <span className="share-option__label">Email</span>
-                <span className="share-option__status">Being implemented</span>
-              </button>
-
-              <button className="share-option share-option--secondary" onClick={() => {
-                download(`${slug}.index.html`, renderMicrosite(profile, undefined, session), 'text/html');
-                setShowShareModal(false);
-              }}>
-                <span className="share-option__icon">⬇️</span>
-                <span className="share-option__label">Download file</span>
-                <span className="share-option__status">Direct download</span>
-              </button>
-
-              <button className="share-option share-option--mocked" disabled>
-                <span className="share-option__icon">📱</span>
-                <span className="share-option__label">WhatsApp</span>
-                <span className="share-option__status">Conceptual</span>
-              </button>
-
-              <button className="share-option share-option--mocked" disabled>
-                <span className="share-option__icon">🔗</span>
-                <span className="share-option__label">QR code</span>
-                <span className="share-option__status">Conceptual</span>
-              </button>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setShowShareModal(false)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

@@ -301,6 +301,7 @@ body {
   border: 1px solid rgba(127,231,83,0.2);
   border-radius: var(--radius);
   padding: 0.9rem 1rem 1rem;
+  margin-top: 0.65rem;
   margin-bottom: 0.75rem;
 }
 
@@ -451,76 +452,6 @@ body {
 
 .modal-actions .btn {
   flex: 1;
-}
-
-/* ── share options ────────────────────────────────────────────────────────── */
-.share-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin: 1.2rem 0 1.5rem;
-}
-
-.share-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 1rem 0.8rem;
-  background: transparent;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-  text-align: center;
-}
-
-.share-option__icon {
-  font-size: 1.8rem;
-}
-
-.share-option__label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.share-option__status {
-  font-size: 0.68rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.share-option--primary {
-  background: rgba(127,231,83,0.1);
-  border-color: rgba(127,231,83,0.4);
-}
-
-.share-option--primary:hover {
-  background: rgba(127,231,83,0.15);
-  border-color: var(--accent);
-}
-
-.share-option--secondary {
-  background: rgba(255,255,255,0.03);
-  border-color: var(--border);
-}
-
-.share-option--secondary:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: var(--border-hover);
-}
-
-.share-option--mocked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.share-option--mocked:hover {
-  background: transparent;
-  border-color: var(--border);
 }
 
 /* ── credentials bar (sticky) ────────────────────────────────────────────── */
@@ -808,42 +739,6 @@ body {
 
 .harvest-success strong {
   color: #fff;
-}
-
-/* ── customer sendout section ─────────────────────────────────────────────── */
-.customer-sendout-section {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.customer-sendout-section__header {
-  margin-bottom: 0.6rem;
-}
-
-.customer-sendout-section__title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-}
-
-.customer-sendout-section__description {
-  font-size: 0.8rem;
-  color: var(--muted);
-  line-height: 1.5;
-  margin-bottom: 0.9rem;
-}
-
-.customer-sendout-btn {
-  width: 100%;
-  padding: 0.7em 1.2em;
-  font-size: 0.88rem;
-  font-weight: 700;
-  justify-content: center;
 }
 
 /* ── advanced section header ──────────────────────────────────────────────── */
