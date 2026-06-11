@@ -1512,10 +1512,12 @@
           <div class="diagram">
             <div class="mermaid">
 flowchart LR
-  BP["brand-profile.json<br/>(color · logo · font)"] -->|input| ENG["WP3 Theming Engine"]
-  ENG -->|emits| OUT["CSS variables<br/>+ logo + font"]
-  NPM["@jumio/websdk"] -->|imported| SITE["/microsite"]
-  OUT -->|injected| SITE
+  BP["brand-profile.json<br/>(color · logo · font)"] -->|edited in| STUDIO["WP6 Studio"]
+  STUDIO -->|publish: profile +<br/>single-use SDK token| BLOB[("Vercel Blob")]
+  BLOB -->|feeds /studio/&lt;slug&gt;| SITE["/microsite"]
+  BLOB -->|profile| ENG["WP3 Theming Engine"]
+  ENG -->|CSS variables<br/>+ logo + font| SITE
+  NPM["@jumio/websdk"] -->|imported| SITE
   SITE -->|renders| RESULT["Branded showcase"]
             </div>
           </div>
@@ -1544,7 +1546,7 @@ flowchart LR
     E2["Embed WebSDK at IDV step"]
   end
   subgraph WP5["WP5 · Share &amp; Deliver"]
-    F1["Publish"] --> F2["Link / QR"]
+    F1["Publish via /api<br/>(Vercel Blob)"] --> F2["Link / QR"]
   end
   A3 --> B1
   B1 &lt;--> C1
