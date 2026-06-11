@@ -572,8 +572,10 @@ export default function App() {
   }
 
   async function publishSite() {
-    if (!session.token) {
-      setPublishError('Create a session & launch first — Publish reuses that session token.');
+    const creds = getCredentials();
+    if (!creds) {
+      setCredentialsActive(false);
+      setPublishError('Credentials expired — reconnect to publish a demo link.');
       return;
     }
 
@@ -586,10 +588,13 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           profile,
+          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
           locale: session.locale,
-          sdkToken: session.token,
-          sdkDc: session.dc,
-          expiresAt: session.expiresAt,
+          apiKey: creds.apiKey,
+          apiSecret: creds.apiSecret,
+          region: creds.region,
+          tokenLifetime,
+          customerData: product === 'selfie' ? customerData : undefined,
         }),
       });
       const data = await res.json();
