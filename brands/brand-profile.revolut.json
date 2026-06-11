@@ -1,6 +1,6 @@
 {
   "$schema": "./brand-profile.revolut.json",
-  "themeMode": "dark",
+  "themeMode": "light",
   "brand": {
     "name": "Revolut",
     "sourceUrl": "https://www.revolut.com",

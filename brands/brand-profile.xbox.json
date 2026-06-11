@@ -1,6 +1,6 @@
 {
   "$schema": "./brand-profile.xbox.json",
-  "themeMode": "dark",
+  "themeMode": "light",
   "brand": {
     "name": "Xbox",
     "sourceUrl": "https://www.xbox.com",

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { renderMicrosite, slugify } from '../microsite/render.mjs';
+import { renderMicrosite } from '../microsite/render.mjs';
 import { validateProfile } from './validate.mjs';
 import { saveCredentials, getCredentials, clearCredentials, getRemainingMs } from './credentials.mjs';
 import sampleProfile from '../brand-profile.sample.json';
@@ -446,6 +446,8 @@ export default function App() {
   const [customVideoUrl, setCustomVideoUrl] = useState('');
   const [brandOpen, setBrandOpen] = useState(false);
   const [colorsOpen, setColorsOpen] = useState(false);
+  const [templateOverrideOpen, setTemplateOverrideOpen] = useState(false);
+  const [overrideStringsOpen, setOverrideStringsOpen] = useState(false);
   const [finetunePanelOpen, setFinetunePanelOpen] = useState(false);
   const [customerData, setCustomerData] = useState({ ...DEMO_PERSONAS[0] });
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
@@ -458,7 +460,6 @@ export default function App() {
   const [credentialsError, setCredentialsError] = useState('');
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
-  const [showShareModal, setShowShareModal] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
   const [publishedUrl, setPublishedUrl] = useState('');
@@ -482,7 +483,6 @@ export default function App() {
   }, [credentialsActive]);
 
   const errors = validateProfile(profile);
-  const slug = slugify(profile.brand?.name);
 
   const srcdoc = useMemo(() => {
     if (!started || errors.length) return '';
@@ -949,8 +949,11 @@ export default function App() {
               hideApply={true} />
           ))}
 
-          <h2 className="section-header">Template override</h2>
-          {(() => {
+          <button className="collapsible-header" onClick={() => setTemplateOverrideOpen(o => !o)}>
+            <span>Template override</span>
+            <span className="collapsible-chevron">{templateOverrideOpen ? '▲' : '▼'}</span>
+          </button>
+          {templateOverrideOpen && (() => {
             const slot = TEMPLATE_SLOTS.find(s => s.id === templateSlotId);
             const slotPath = `templateOverride.slots.${templateSlotId}`;
             const currentHtml = getPath(profile, slotPath) ?? '';
@@ -1102,7 +1105,11 @@ export default function App() {
             );
           })()}
 
-          <h2 className="section-header">Override strings</h2>
+          <button className="collapsible-header" onClick={() => setOverrideStringsOpen(o => !o)}>
+            <span>Override strings</span>
+            <span className="collapsible-chevron">{overrideStringsOpen ? '▲' : '▼'}</span>
+          </button>
+          {overrideStringsOpen && (
           <div className="strings-panel">
             <div className="strings-selectors">
               <label className="field">
@@ -1135,23 +1142,9 @@ export default function App() {
               </label>
             ))}
           </div>
+          )}
           </div>
         )}
-
-        {/* ── prepare for customer send out ── */}
-        <div className="customer-sendout-section">
-          <div className="customer-sendout-section__header">
-            <span className="customer-sendout-section__title">Prepare for customer send out</span>
-          </div>
-          <p className="customer-sendout-section__description">
-            Download the HTML file to send to your customer. They can open it directly in any web browser.
-          </p>
-          <button className="btn btn-primary customer-sendout-btn"
-            onClick={() => setShowShareModal(true)}>
-            ↓ Share with your customer
-          </button>
-          <p className="hint">ID: <code>{slug}</code></p>
-        </div>
 
         </div>
 
@@ -1374,57 +1367,6 @@ export default function App() {
             <div className="modal-actions">
               <button className="btn btn-primary" onClick={() => setShowPostIdvTeaser(false)}>
                 Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── share modal ── */}
-      {showShareModal && (
-        <div className="modal-backdrop" onClick={() => setShowShareModal(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon">📤</div>
-            <h2 className="modal-title">Share with your customer</h2>
-            <p className="modal-body">
-              Choose how you'd like to send the demo to your customer.
-            </p>
-
-            <div className="share-options">
-              <button className="share-option share-option--primary" onClick={() => {
-                alert('Email integration coming soon — colleague will wire this up');
-                setShowShareModal(false);
-              }}>
-                <span className="share-option__icon">✉️</span>
-                <span className="share-option__label">Email</span>
-                <span className="share-option__status">Being implemented</span>
-              </button>
-
-              <button className="share-option share-option--secondary" onClick={() => {
-                download(`${slug}.index.html`, renderMicrosite(profile, undefined, session), 'text/html');
-                setShowShareModal(false);
-              }}>
-                <span className="share-option__icon">⬇️</span>
-                <span className="share-option__label">Download file</span>
-                <span className="share-option__status">Direct download</span>
-              </button>
-
-              <button className="share-option share-option--mocked" disabled>
-                <span className="share-option__icon">📱</span>
-                <span className="share-option__label">WhatsApp</span>
-                <span className="share-option__status">Conceptual</span>
-              </button>
-
-              <button className="share-option share-option--mocked" disabled>
-                <span className="share-option__icon">🔗</span>
-                <span className="share-option__label">QR code</span>
-                <span className="share-option__status">Conceptual</span>
-              </button>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setShowShareModal(false)}>
-                Close
               </button>
             </div>
           </div>
