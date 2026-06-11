@@ -327,6 +327,7 @@ export default function App() {
   const [customerData, setCustomerData] = useState({ ...DEMO_PERSONAS[0] });
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
+  const [credentialsActive, setCredentialsActive] = useState(false);
 
   const errors = validateProfile(profile);
   const slug = slugify(profile.brand?.name);
@@ -427,7 +428,12 @@ export default function App() {
           <div className="field-grid">
             <label className="field">
               Datacenter
-              <select value={session.dc} onChange={e => { setSession(s => ({ ...s, dc: e.target.value })); setStarted(true); }}>
+              <select
+                value={session.dc}
+                onChange={e => { setSession(s => ({ ...s, dc: e.target.value })); setStarted(true); }}
+                disabled={credentialsActive}
+                title={credentialsActive ? 'Datacenter is locked to the connected credentials' : ''}
+              >
                 <option value="us">US</option>
                 <option value="eu">EU</option>
                 <option value="sgp">SGP</option>
@@ -446,9 +452,21 @@ export default function App() {
 
           <label className="field" style={{ marginTop: '0.65rem' }}>
             API Credentials
-            <button className="btn btn-ghost config-credentials-btn" disabled>
-              🔐 Connect credentials — coming soon
-            </button>
+            {credentialsActive ? (
+              <div className="credentials-status">
+                <span className="credentials-badge">✓ Connected</span>
+                <button
+                  className="btn btn-ghost config-credentials-btn"
+                  onClick={() => setCredentialsActive(false)}
+                >
+                  Disconnect
+                </button>
+              </div>
+            ) : (
+              <button className="btn btn-ghost config-credentials-btn" disabled>
+                🔐 Connect credentials — coming soon
+              </button>
+            )}
           </label>
 
           <label className="field" style={{ marginTop: '0.65rem' }}>
