@@ -60,7 +60,8 @@ export default async function handler(req, res) {
 
     const html = renderMicrosite(data.profile, undefined, undefined, {
       published: true,
-      workflowKey: data.workflowKey,
+      sdkToken: data.sdkToken,
+      sdkDc: data.sdkDc,
       locale: data.locale,
     });
 

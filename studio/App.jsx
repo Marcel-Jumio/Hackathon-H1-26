@@ -431,6 +431,7 @@ export default function App() {
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
   const [publishedUrl, setPublishedUrl] = useState('');
+  const [tokenLifetime, setTokenLifetime] = useState('30m');
   const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
   const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
 
@@ -570,6 +571,13 @@ export default function App() {
   }
 
   async function publishSite() {
+    const creds = getCredentials();
+    if (!creds) {
+      setCredentialsActive(false);
+      setPublishError('Credentials expired — reconnect to publish a demo link.');
+      return;
+    }
+
     setPublishing(true);
     setPublishError('');
     setPublishedUrl('');
@@ -581,6 +589,11 @@ export default function App() {
           profile,
           workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
           locale: session.locale,
+          apiKey: creds.apiKey,
+          apiSecret: creds.apiSecret,
+          region: creds.region,
+          tokenLifetime,
+          customerData: product === 'selfie' ? customerData : undefined,
         }),
       });
       const data = await res.json();
@@ -1024,6 +1037,18 @@ export default function App() {
           </button>
 
           <div className="publish-row">
+            <label className="field publish-lifetime-field">
+              <span>Token lifetime</span>
+              <select value={tokenLifetime} onChange={e => setTokenLifetime(e.target.value)}>
+                <option value="5m">5 minutes</option>
+                <option value="30m">30 minutes (default)</option>
+                <option value="1h">1 hour</option>
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+                <option value="60d">60 days</option>
+              </select>
+            </label>
             <button
               className="btn btn-ghost publish-btn"
               disabled={publishing}
@@ -1042,7 +1067,7 @@ export default function App() {
                 >
                   Copy
                 </button>
-                <p className="hint">Valid for 24 hours</p>
+                <p className="hint">Single-use — valid until the token expires ({tokenLifetime})</p>
               </div>
             )}
           </div>

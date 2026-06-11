@@ -67,25 +67,6 @@ const skeletonStyle = `
       100% { background-position: -200% 0; }
     }`;
 
-/** Region options for the published-page credential form (mirrors studio/App.jsx REGIONS). */
-const PUBLISH_REGIONS = [
-  { value: 'amer-1', label: 'AMER (US)' },
-  { value: 'emea-1', label: 'EMEA (EU)' },
-  { value: 'apac-1', label: 'APAC (SGP)' },
-];
-
-const publishCredFormStyle = `
-    .publish-cred-form { max-width: 360px; margin: 0 auto; text-align: left; }
-    .publish-cred-form h3 { margin: 0 0 0.3em; font-size: 1.1em; text-align: center; }
-    .publish-cred-form p.publish-cred-hint { margin: 0 0 1.2em; font-size: 0.85em; opacity: 0.7; text-align: center; }
-    .publish-cred-form label { display: block; font-size: 0.8em; opacity: 0.75; margin: 0.8em 0 0.3em; }
-    .publish-cred-form input, .publish-cred-form select {
-      width: 100%; font: inherit; padding: 0.55em 0.7em; border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.15); background: #fff; color: inherit;
-    }
-    .publish-cred-form .t-cta { width: 100%; text-align: center; margin-top: 1.2em; }
-    .publish-cred-error { color: #d92d20; font-size: 0.8em; margin-top: 0.6em; min-height: 1.2em; }`;
-
 /**
  * brand-profile -> full microsite HTML page (string).
  * The IDV step shows a themed skeleton with a "Start verification" button; clicking it mounts
@@ -213,7 +194,6 @@ ${themeSnippet.split('\n').map((l) => '  ' + l).join('\n')}${translationScript}$
     .t-video-placeholder { background: #111; color: #fff; border-radius: var(--radius); padding: 3em 1em; font-size: 1.1em; text-align: center; opacity: 0.7; }
     .t-caption { font-size: 0.82em; opacity: 0.6; margin: 0; }
 ${skeletonStyle}
-${publishCredFormStyle}
   </style>
 </head>
 <body>
@@ -250,78 +230,13 @@ ${(() => {
 }
 
 /**
- * Published-page SDK block: "Start verification" -> inline credential form -> /api/session
- * -> mount <jumio-sdk> with the returned token. Lets a shared demo link work for any visitor
- * without baking Jumio API credentials into the published page.
+ * Published-page SDK block: mounts <jumio-sdk> directly with the session token minted at
+ * publish time. The token is single-use and tied to one workflow execution.
  */
 function publishedSdkBlock(profile, opts) {
   const locale = escapeHtml(opts.locale || profile.sdk?.locale || 'en');
-  const workflowKey = escapeHtml(opts.workflowKey ?? '');
+  const dc = escapeHtml(opts.sdkDc ?? 'us');
+  const token = escapeHtml(opts.sdkToken ?? 'REPLACE_WITH_SESSION_TOKEN');
 
-  const regionOptions = PUBLISH_REGIONS
-    .map(({ value, label }) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
-    .join('');
-
-  const credFormHtml = `<form id="publish-cred-form" class="publish-cred-form">
-        <h3>Connect to start verification</h3>
-        <p class="publish-cred-hint">Enter Jumio API credentials to start this demo.</p>
-        <label for="publish-api-key">API Key</label>
-        <input type="text" id="publish-api-key" name="apiKey" autocomplete="off" required />
-        <label for="publish-api-secret">API Secret</label>
-        <input type="password" id="publish-api-secret" name="apiSecret" autocomplete="off" required />
-        <label for="publish-region">Region</label>
-        <select id="publish-region" name="region">${regionOptions}</select>
-        <button type="submit" class="t-cta">Start verification</button>
-        <p class="publish-cred-error" id="publish-cred-error"></p>
-      </form>`;
-
-  const script = `
-    <script>
-      (function() {
-        var WORKFLOW_KEY = ${JSON.stringify(workflowKey)};
-        var LOCALE = ${JSON.stringify(locale)};
-        var mount = document.getElementById('jumio-sdk-mount');
-
-        function escAttr(s) {
-          return String(s).replace(/[&<>"']/g, function(c) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-          });
-        }
-
-        var form = document.getElementById('publish-cred-form');
-        var errorEl = document.getElementById('publish-cred-error');
-        var submitBtn = form.querySelector('button[type="submit"]');
-
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          errorEl.textContent = '';
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Connecting…';
-
-          fetch('/api/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              apiKey: form.apiKey.value.trim(),
-              apiSecret: form.apiSecret.value.trim(),
-              region: form.region.value,
-              workflowKey: WORKFLOW_KEY,
-            }),
-          })
-            .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
-            .then(function(res) {
-              if (!res.ok) throw new Error(res.data.error || 'Could not start verification');
-              mount.outerHTML = '<jumio-sdk dc="' + escAttr(res.data.sdkDc) + '" token="' + escAttr(res.data.sdkToken) + '" locale="' + escAttr(LOCALE) + '"></jumio-sdk>';
-            })
-            .catch(function(err) {
-              errorEl.textContent = err.message;
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Start verification';
-            });
-        });
-      })();
-    </script>`;
-
-  return `    <div id="jumio-sdk-mount">${credFormHtml}</div>
-    ${script}`;
+  return `    <jumio-sdk dc="${dc}" token="${token}" locale="${locale}"></jumio-sdk>`;
 }
