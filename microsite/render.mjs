@@ -121,12 +121,13 @@ ${themeSnippet.split('\n').map((l) => '  ' + l).join('\n')}${translationScript}$
   <style>
     :root { --radius: ${escapeHtml(brand.radius ?? '12px')}; }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
     body {
       font-family: var(--jumio-sdk-font-family, system-ui, sans-serif);
       color: var(--jumio-sdk-theme-light-text-color, #111418);
       background: var(--jumio-sdk-theme-light-page-bg-color, #f5f7fa);
       display: flex; flex-direction: column;
+      overflow: hidden;
     }
     /* ── journey bar — Studio chrome, intentionally NOT brand-themed ── */
     .journey-bar {
@@ -164,10 +165,10 @@ ${themeSnippet.split('\n').map((l) => '  ' + l).join('\n')}${translationScript}$
     }
     /* ── sdk area ── */
     .sdk-area {
-      flex: 1; display: flex; flex-direction: column;
+      flex: 1; min-height: 0; display: flex; flex-direction: column;
       padding: ${escapeHtml(profile.layout?.containerPadding?.top ?? '1.5em')} ${escapeHtml(profile.layout?.containerPadding?.right ?? '1em')} ${escapeHtml(profile.layout?.containerPadding?.bottom ?? '1.5em')} ${escapeHtml(profile.layout?.containerPadding?.left ?? '1em')};
     }
-    jumio-sdk { display: block; width: 100%; flex: 1; min-height: 600px; }
+    jumio-sdk { display: block; width: 100%; height: 100%; overflow: hidden; }
     .start-verification, .t-cta {
       font: inherit; font-weight: 600; cursor: pointer; border: none; border-radius: var(--radius);
       padding: 0.7em 1.2em; display: inline-block; margin-top: 1em;
