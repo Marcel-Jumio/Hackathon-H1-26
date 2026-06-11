@@ -428,6 +428,9 @@ export default function App() {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState('');
+  const [publishedUrl, setPublishedUrl] = useState('');
   const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
   const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
 
@@ -563,6 +566,31 @@ export default function App() {
       setSessionError(String(err.message || err));
     } finally {
       setSessionLoading(false);
+    }
+  }
+
+  async function publishSite() {
+    setPublishing(true);
+    setPublishError('');
+    setPublishedUrl('');
+    try {
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile,
+          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
+          locale: session.locale,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Publish failed (${res.status})`);
+
+      setPublishedUrl(`${window.location.origin}${data.url}`);
+    } catch (err) {
+      setPublishError(String(err.message || err));
+    } finally {
+      setPublishing(false);
     }
   }
 
@@ -994,6 +1022,30 @@ export default function App() {
           <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
             Apply →
           </button>
+
+          <div className="publish-row">
+            <button
+              className="btn btn-ghost publish-btn"
+              disabled={publishing}
+              onClick={publishSite}
+            >
+              {publishing ? 'Publishing…' : '🚀 Publish demo link'}
+            </button>
+            {publishError && <p className="field-error">{publishError}</p>}
+            {publishedUrl && (
+              <div className="publish-result">
+                <input type="text" readOnly value={publishedUrl} onFocus={e => e.target.select()} />
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => navigator.clipboard?.writeText(publishedUrl)}
+                >
+                  Copy
+                </button>
+                <p className="hint">Valid for 24 hours</p>
+              </div>
+            )}
+          </div>
         </div>
 
       </aside>
