@@ -45,7 +45,7 @@ const DEMO_PERSONAS = [
     label: "Ian Fraser Thomas",
     firstName: "Ian Fraser",
     lastName: "Thomas",
-    dateOfBirth: "1970-07-30",
+    dateOfBirth: "1979-07-30",
   },
 ];
 
@@ -203,30 +203,48 @@ const LANGUAGES = [
   { code: "zh", label: "Chinese" },
 ];
 
+/** Start screen string-override fields, keyed 1-6 — availability & order vary by product. */
+const START_SCREEN_FIELDS = {
+  1: { key: "instruction.start_verification", label: "Title" },
+  2: {
+    key: "instruction.process_verifies_identity_and_protects_from_identity_theft",
+    label: "Subtitle",
+  },
+  3: {
+    key: "instruction.use_government_issued_document",
+    label: "Bullet 1 — valid document",
+  },
+  4: {
+    key: "instruction.find_well_lit_surface",
+    label: "Bullet 2 — well-lit surface",
+  },
+  5: {
+    key: "instruction.be_ready_to_take_selfie",
+    label: "Bullet 3 — selfie ready",
+  },
+  6: { key: "cta.start", label: "Start button" },
+};
+
+/** Which Start screen fields render, and in what order, per Studio "Product". */
+const PRODUCT_START_SCREEN_FIELDS = {
+  "id-check": [1, 2, 3, 4, 6],
+  "id-check-selfie": [1, 2, 3, 4, 5, 6],
+  liveness: [1, 2, 5, 6],
+  selfie: [1, 2, 5, 3, 4, 6],
+};
+
+function getStartScreenKeys(product) {
+  const order =
+    PRODUCT_START_SCREEN_FIELDS[product] ??
+    PRODUCT_START_SCREEN_FIELDS["id-check-selfie"];
+  return order.map((n) => START_SCREEN_FIELDS[n]);
+}
+
 const STRING_SCREENS = [
   {
     value: "start",
     label: "Start screen",
-    keys: [
-      { key: "instruction.start_verification", label: "Title" },
-      {
-        key: "instruction.process_verifies_identity_and_protects_from_identity_theft",
-        label: "Subtitle",
-      },
-      {
-        key: "instruction.use_government_issued_document",
-        label: "Bullet 1 — valid document",
-      },
-      {
-        key: "instruction.find_well_lit_surface",
-        label: "Bullet 2 — well-lit surface",
-      },
-      {
-        key: "instruction.be_ready_to_take_selfie",
-        label: "Bullet 3 — selfie ready",
-      },
-      { key: "cta.start", label: "Start button" },
-    ],
+    keys: [], // computed per-product via getStartScreenKeys()
   },
   {
     value: "doc-select",
@@ -532,6 +550,7 @@ export default function App() {
   const [session, setSession] = useState({ dc: "us", token: "", locale: "en" });
   const [product, setProduct] = useState("id-check-selfie");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [selectedPresetIndex, setSelectedPresetIndex] = useState("");
   const [harvestState, setHarvestState] = useState(null); // null | 'loading' | 'done' | 'error'
   const [harvestStep, setHarvestStep] = useState("");
   const [harvestBrand, setHarvestBrand] = useState("");
@@ -541,6 +560,13 @@ export default function App() {
   const [started, setStarted] = useState(false);
   const [stringsScreen, setStringsScreen] = useState("start");
   const [stringsLang, setStringsLang] = useState("en");
+  const stringScreens = useMemo(
+    () =>
+      STRING_SCREENS.map((s) =>
+        s.value === "start" ? { ...s, keys: getStartScreenKeys(product) } : s,
+      ),
+    [product],
+  );
   const [templateSlotId, setTemplateSlotId] = useState("jumio-start-guidance");
   const [templateSnippetLabel, setTemplateSnippetLabel] = useState("");
   const [customGuidanceText, setCustomGuidanceText] = useState("");
@@ -674,6 +700,31 @@ export default function App() {
     setAdvancedJson(
       JSON.stringify(json.advanced?.tokenOverrides ?? {}, null, 2),
     );
+  }
+
+  /** Resets the session and all style/customization setup back to defaults. */
+  function fullReset() {
+    loadProfile(structuredClone(sampleProfile));
+    setSession({ dc: "us", token: "", locale: "en" });
+    setStarted(false);
+    setProduct("id-check-selfie");
+    setSourceUrl("");
+    setSelectedPresetIndex("");
+    setHarvestState(null);
+    setHarvestBrand("");
+    setCustomerData({ ...DEMO_PERSONAS[0] });
+    setPersonaLabel(DEMO_PERSONAS[0].label);
+    setTokenLifetime("30m");
+    setTemplateSlotId("jumio-start-guidance");
+    setTemplateSnippetLabel("");
+    setCustomGuidanceText("");
+    setCustomVideoUrl("");
+    setStringsScreen("start");
+    setStringsLang("en");
+    setSessionError("");
+    setPublishError("");
+    setPublishedUrl("");
+    toast.success("Session and style setup reset");
   }
 
   /** Validates credentials by fetching a bearer token immediately, then stores them if they work. */
@@ -882,7 +933,7 @@ export default function App() {
                     ✓ Connected · {formatRemaining(credentialsRemainingMs)}
                   </span>
                   <button
-                    className="btn btn-ghost config-credentials-btn"
+                    className="btn btn-ghost config-credentials-btn config-credentials-btn--disconnect"
                     onClick={disconnectCredentials}
                   >
                     Disconnect
@@ -1078,10 +1129,11 @@ export default function App() {
               <span className="harvest-preset-label">Quick load</span>
               <select
                 className="harvest-preset-select"
-                value=""
+                value={selectedPresetIndex}
                 onChange={(e) => {
                   const preset = BRAND_PRESETS[e.target.value];
                   if (!preset) return;
+                  setSelectedPresetIndex(e.target.value);
                   setSourceUrl(preset.url);
                   setHarvestState(null);
                   loadProfile(structuredClone(preset.profile));
@@ -1103,9 +1155,10 @@ export default function App() {
                 onClick={() => {
                   loadProfile(structuredClone(sampleProfile));
                   setSourceUrl("");
+                  setSelectedPresetIndex("");
                   setHarvestState(null);
                   setHarvestBrand("");
-                  setStarted(false);
+                  toast.success("Reset to default profile");
                 }}
               >
                 ↺ Reset
@@ -1526,7 +1579,7 @@ export default function App() {
                 className="collapsible-header"
                 onClick={() => setOverrideStringsOpen((o) => !o)}
               >
-                <span>Override strings</span>
+                <span>Strings override</span>
                 <span className="collapsible-chevron">
                   {overrideStringsOpen ? "▲" : "▼"}
                 </span>
@@ -1540,7 +1593,7 @@ export default function App() {
                         value={stringsScreen}
                         onChange={(e) => setStringsScreen(e.target.value)}
                       >
-                        {STRING_SCREENS.map((s) => (
+                        {stringScreens.map((s) => (
                           <option key={s.value} value={s.value}>
                             {s.label}
                           </option>
@@ -1561,7 +1614,7 @@ export default function App() {
                       </select>
                     </label>
                   </div>
-                  {STRING_SCREENS.find(
+                  {stringScreens.find(
                     (s) => s.value === stringsScreen,
                   )?.keys.map(({ key, label }) => (
                     <label key={key} className="field">
@@ -1591,17 +1644,14 @@ export default function App() {
             </span>
           </div>
           <p className="apply-section__description">
-            Click below to apply your configuration and any customizations to
-            the preview.
+            Customizations preview live above. Use Full reset to start over
+            with a fresh session and default styling.
           </p>
           <button
-            className="btn btn-primary apply-section__btn"
-            onClick={() => {
-              setStarted(true);
-              toast.success("Preview updated");
-            }}
+            className="btn btn-ghost apply-section__btn"
+            onClick={fullReset}
           >
-            Apply →
+            ↺ Full reset
           </button>
 
           <div className="publish-row">

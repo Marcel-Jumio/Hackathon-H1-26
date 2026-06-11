@@ -518,6 +518,18 @@ body {
   justify-content: center;
 }
 
+.btn-ghost.apply-section__btn {
+  border-width: 2px;
+  border-color: rgba(234,179,8,0.35);
+  color: #eab308;
+  background: rgba(234,179,8,0.1);
+}
+
+.btn-ghost.apply-section__btn:hover {
+  border-color: #eab308;
+  background: rgba(234,179,8,0.18);
+}
+
 .publish-row {
   margin-top: 0.6rem;
 }
@@ -525,6 +537,18 @@ body {
 .publish-btn {
   width: 100%;
   justify-content: center;
+}
+
+.btn-ghost.publish-btn {
+  border-width: 2px;
+  border-color: rgba(127,231,83,0.35);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-ghost.publish-btn:hover {
+  border-color: var(--accent);
+  background: rgba(127,231,83,0.2);
 }
 
 .publish-result {
@@ -564,6 +588,19 @@ body {
 .config-credentials-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-ghost.config-credentials-btn--disconnect {
+  border-width: 2px;
+  border-color: var(--danger-border);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.btn-ghost.config-credentials-btn--disconnect:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239,68,68,0.18);
 }
 
 .field-error {
