@@ -1759,7 +1759,7 @@ flowchart LR
     <script type="module">
       import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
       mermaid.initialize({
-        startOnLoad: true,
+        startOnLoad: false,
         theme: "dark",
         themeVariables: {
           primaryColor: "#213E3F",
@@ -1769,6 +1769,7 @@ flowchart LR
           fontFamily: "Inter, sans-serif"
         }
       });
+      mermaid.contentLoaded();
     </script>
   </body>
 </html>
