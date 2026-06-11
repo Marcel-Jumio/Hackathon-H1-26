@@ -272,25 +272,13 @@ const COLOR_FIELDS = [
 
 // ─── components ─────────────────────────────────────────────────────────────
 
-function LaunchButton({ errors, onLaunch }) {
-  return (
-    <button
-      className="btn btn-primary harvest-launch-btn"
-      onClick={onLaunch}
-      disabled={!!errors.length}
-    >
-      Show styled Web journey →
-    </button>
-  );
-}
-
 function ApplyBtn({ onApply }) {
   return (
     <button className="btn btn-ghost btn-apply" onClick={onApply}>Apply</button>
   );
 }
 
-function ColorField({ label, value, onChange, onApply }) {
+function ColorField({ label, value, onChange, onApply, hideApply }) {
   const hex = HEX.test(value ?? '') ? value : '#000000';
   return (
     <label className="field">
@@ -298,7 +286,7 @@ function ColorField({ label, value, onChange, onApply }) {
       <div className="color-row">
         <input type="color" value={hex} onChange={e => onChange(e.target.value)} />
         <input type="text" value={value ?? ''} onChange={e => onChange(e.target.value)} />
-        <ApplyBtn onApply={onApply} />
+        {!hideApply && <ApplyBtn onApply={onApply} />}
       </div>
     </label>
   );
@@ -329,6 +317,9 @@ export default function App() {
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
   const [credentialsActive, setCredentialsActive] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
+  const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
 
   const errors = validateProfile(profile);
   const slug = slugify(profile.brand?.name);
@@ -426,7 +417,7 @@ export default function App() {
 
         {/* ── config panel ── */}
         <div className="config-panel">
-          <div className="field-grid">
+          <div className="field-grid field-grid-3">
             <label className="field">
               Datacenter
               <select
@@ -439,6 +430,11 @@ export default function App() {
                 <option value="eu">EU</option>
                 <option value="sgp">SGP</option>
               </select>
+            </label>
+            <label className="field">
+              Locale
+              <input type="text" value={session.locale}
+                onChange={e => { setSession(s => ({ ...s, locale: e.target.value })); setStarted(false); }} />
             </label>
             <label className="field">
               Product
@@ -608,9 +604,20 @@ export default function App() {
             </div>
           )}
 
-          <LaunchButton errors={errors} onLaunch={() => setStarted(true)} />
         </div>
 
+        {/* ── apply section ── */}
+        <div className="apply-section">
+          <div className="apply-section__header">
+            <span className="apply-section__title">Ready to see your changes?</span>
+          </div>
+          <p className="apply-section__description">
+            Click below to apply your configuration and any customizations to the preview.
+          </p>
+          <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
+            Apply →
+          </button>
+        </div>
 
         {errors.length > 0 && (
           <ul className="errors">
@@ -619,8 +626,14 @@ export default function App() {
         )}
 
         {/* ── fine-tuning panel ── */}
-        <button className="collapsible-header" onClick={() => setFinetunePanelOpen(o => !o)} style={{ marginTop: '1.5rem' }}>
-          <span>Advanced customization</span>
+        <button className="advanced-section-header" onClick={() => setFinetunePanelOpen(o => !o)}>
+          <div className="advanced-section-header__content">
+            <span className="advanced-section-header__icon">✨</span>
+            <div>
+              <span className="advanced-section-header__title">Advanced customization</span>
+              <span className="advanced-section-header__subtitle">Where the real magic happens</span>
+            </div>
+          </div>
           <span className="collapsible-chevron">{finetunePanelOpen ? '▲' : '▼'}</span>
         </button>
 
@@ -637,11 +650,9 @@ export default function App() {
           {brandOpen && TEXT_FIELDS.map(([path, label, placeholder]) => (
             <label key={path} className="field">
               {label}
-              <div className="input-apply-row">
-                <input type="text" value={getPath(profile, path) ?? ''} placeholder={placeholder ?? ''}
-                  onChange={e => setField(path, e.target.value)} />
-                <ApplyBtn onApply={() => setStarted(true)} />
-              </div>
+              <input type="text" value={getPath(profile, path) ?? ''}
+                placeholder={placeholder ?? ''}
+                onChange={e => setField(path, e.target.value)} />
             </label>
           ))}
 
@@ -653,7 +664,7 @@ export default function App() {
             <ColorField key={path} label={label}
               value={getPath(profile, path)}
               onChange={v => setField(path, v)}
-              onApply={() => setStarted(true)} />
+              hideApply={true} />
           ))}
 
           <h2 className="section-header">Template override</h2>
@@ -694,7 +705,7 @@ export default function App() {
                   </label>
                 </div>
                 <p className="template-zone-desc">{slot.description}</p>
-                <div className="input-apply-row" style={{ alignItems: 'flex-start', marginTop: '0.5rem' }}>
+                <div style={{ marginTop: '0.5rem' }}>
                   <textarea
                     className="template-override-textarea"
                     value={currentHtml}
@@ -702,20 +713,18 @@ export default function App() {
                     spellCheck={false}
                     onChange={e => { setTemplateSnippetLabel(''); setField(slotPath, e.target.value); }}
                   />
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <ApplyBtn onApply={() => setStarted(true)} />
+                  <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem' }}>
                     <button
                       className="btn btn-ghost btn-apply"
                       title="Fill with a bright placeholder so you can see where this slot appears in the preview"
                       onClick={() => {
                         setField(slotPath, markPlaceholderHtml(templateSlotId));
-                        setStarted(true);
                       }}
                     >Mark</button>
                     {currentHtml && (
                       <button
                         className="btn btn-ghost btn-apply"
-                        onClick={() => { setField(slotPath, ''); setStarted(true); }}
+                        onClick={() => { setField(slotPath, ''); }}
                       >Clear</button>
                     )}
                   </div>
@@ -747,15 +756,12 @@ export default function App() {
             {STRING_SCREENS.find(s => s.value === stringsScreen)?.keys.map(({ key, label }) => (
               <label key={key} className="field">
                 {label}
-                <div className="input-apply-row">
-                  <input
-                    type="text"
-                    value={profile.strings?.[stringsLang]?.[key] ?? ''}
-                    placeholder="Default (unchanged)"
-                    onChange={e => setStringOverride(stringsLang, key, e.target.value)}
-                  />
-                  <ApplyBtn onApply={() => setStarted(true)} />
-                </div>
+                <input
+                  type="text"
+                  value={profile.strings?.[stringsLang]?.[key] ?? ''}
+                  placeholder="Default (unchanged)"
+                  onChange={e => setStringOverride(stringsLang, key, e.target.value)}
+                />
                 <span className="strings-key-hint">{key}</span>
               </label>
             ))}
@@ -763,38 +769,46 @@ export default function App() {
           </div>
         )}
 
-        <h2 className="section-header">Advanced — token overrides (JSON)</h2>
-        <textarea value={advancedJson} onChange={e => applyAdvancedJson(e.target.value)} spellCheck={false} />
-        <ApplyBtn onApply={() => setStarted(true)} />
-
-        <label className="field" style={{ marginTop: '1.75rem' }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)' }}>Locale</span>
-          <div className="input-apply-row">
-            <input type="text" value={session.locale}
-              onChange={e => { setSession(s => ({ ...s, locale: e.target.value })); setStarted(false); }} />
-            <ApplyBtn onApply={() => setStarted(true)} />
+        {/* ── prepare for customer send out ── */}
+        <div className="customer-sendout-section">
+          <div className="customer-sendout-section__header">
+            <span className="customer-sendout-section__title">Prepare for customer send out</span>
           </div>
-        </label>
-        <p className="hint">
-          DC, token and locale fill <code>&lt;jumio-sdk&gt;</code> in the preview — not stored in <code>brand-profile.json</code>.
-        </p>
-
-        <div className="actions" style={{ marginTop: '0.6rem' }}>
-          <button className="btn btn-ghost"
-            onClick={() => download(`${slug}.brand-profile.json`, JSON.stringify(profile, null, 2), 'application/json')}>
-            ↓ brand-profile.json
+          <p className="customer-sendout-section__description">
+            Download the HTML file to send to your customer. They can open it directly in any web browser.
+          </p>
+          <button className="btn btn-primary customer-sendout-btn"
+            onClick={() => setShowShareModal(true)}>
+            ↓ Share with your customer
           </button>
-          <button className="btn btn-ghost"
-            onClick={() => download(`${slug}.index.html`, renderMicrosite(profile, undefined, session), 'text/html')}>
-            ↓ microsite HTML
-          </button>
+          <p className="hint">ID: <code>{slug}</code></p>
         </div>
-        <p className="hint" style={{ marginTop: '0.6rem' }}>Slug: <code>{slug}</code></p>
 
       </aside>
 
       {/* ── preview ── */}
       <main className="preview-pane">
+        <div className="preview-platform-header">
+          <span className="preview-platform-header__label">Jumio Platform</span>
+          <span className="preview-platform-header__arrow">↓</span>
+          <span className="preview-platform-header__core">Our CORE</span>
+        </div>
+        <div className="preview-journey-nav">
+          <button className="preview-journey-nav__item preview-journey-nav__item--pre" onClick={() => setShowPreIdvTeaser(true)}>
+            <div className="preview-journey-nav__label">Risk Signals</div>
+            <div className="preview-journey-nav__sublabel">Device, IP, custom input</div>
+            <div className="preview-journey-nav__link">Learn more →</div>
+          </button>
+          <div className="preview-journey-nav__item preview-journey-nav__item--main">
+            <div className="preview-journey-nav__label">Verification Journey</div>
+            <div className="preview-journey-nav__status">YOU ARE HERE</div>
+          </div>
+          <button className="preview-journey-nav__item preview-journey-nav__item--post" onClick={() => setShowPostIdvTeaser(true)}>
+            <div className="preview-journey-nav__label">Results & Intelligence</div>
+            <div className="preview-journey-nav__sublabel">Interpretation, rules, evaluation</div>
+            <div className="preview-journey-nav__link">Learn more →</div>
+          </button>
+        </div>
         <div className="preview-wrapper">
           <iframe
             className="preview-frame"
@@ -808,7 +822,7 @@ export default function App() {
                 <div className="preview-placeholder__dots">
                   <span /><span /><span />
                 </div>
-                <p className="preview-placeholder__title">Keep calm, the magic is happening</p>
+                <p className="preview-placeholder__title">Keep calm, and sell Jumio</p>
                 <p className="preview-placeholder__hint">
                   Press <kbd>Apply</kbd> next to any field to render the preview
                 </p>
@@ -841,6 +855,119 @@ export default function App() {
                 /* TODO: trigger session token creation */
               }}>
                 Got it — create session →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pre-IDV teaser modal ── */}
+      {showPreIdvTeaser && (
+        <div className="modal-backdrop" onClick={() => setShowPreIdvTeaser(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">🔍</div>
+            <h2 className="modal-title">Risk Signals</h2>
+            <p className="modal-body">
+              Configure what happens <strong>before</strong> the identity verification flow starts.
+            </p>
+            <p className="modal-body">
+              Future capabilities:
+            </p>
+            <ul className="teaser-list">
+              <li>Risk signals & KYC rules</li>
+              <li>Prepared data inputs</li>
+              <li>Customer risk profiles</li>
+              <li>Pre-check configurations</li>
+              <li>Brand-styled forms</li>
+            </ul>
+            <p className="modal-body modal-body--secondary">
+              This feature is on the roadmap and will allow you to orchestrate the complete customer journey.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setShowPreIdvTeaser(false)}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Post-IDV teaser modal ── */}
+      {showPostIdvTeaser && (
+        <div className="modal-backdrop" onClick={() => setShowPostIdvTeaser(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">💡</div>
+            <h2 className="modal-title">Results & Intelligence</h2>
+            <p className="modal-body">
+              Configure what is shown <strong>after</strong> identity verification completes.
+            </p>
+            <p className="modal-body">
+              Future capabilities:
+            </p>
+            <ul className="teaser-list">
+              <li>Verification results display</li>
+              <li>Risk signals & CTR</li>
+              <li>Face match detection</li>
+              <li>Fraud indicators</li>
+              <li>Next steps & actions</li>
+            </ul>
+            <p className="modal-body modal-body--secondary">
+              Build confidence in your risk assessment by showing customers what data you've gathered and how you interpret it.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setShowPostIdvTeaser(false)}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── share modal ── */}
+      {showShareModal && (
+        <div className="modal-backdrop" onClick={() => setShowShareModal(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">📤</div>
+            <h2 className="modal-title">Share with your customer</h2>
+            <p className="modal-body">
+              Choose how you'd like to send the demo to your customer.
+            </p>
+
+            <div className="share-options">
+              <button className="share-option share-option--primary" onClick={() => {
+                alert('Email integration coming soon — colleague will wire this up');
+                setShowShareModal(false);
+              }}>
+                <span className="share-option__icon">✉️</span>
+                <span className="share-option__label">Email</span>
+                <span className="share-option__status">Being implemented</span>
+              </button>
+
+              <button className="share-option share-option--secondary" onClick={() => {
+                download(`${slug}.index.html`, renderMicrosite(profile, undefined, session), 'text/html');
+                setShowShareModal(false);
+              }}>
+                <span className="share-option__icon">⬇️</span>
+                <span className="share-option__label">Download file</span>
+                <span className="share-option__status">Direct download</span>
+              </button>
+
+              <button className="share-option share-option--mocked" disabled>
+                <span className="share-option__icon">📱</span>
+                <span className="share-option__label">WhatsApp</span>
+                <span className="share-option__status">Conceptual</span>
+              </button>
+
+              <button className="share-option share-option--mocked" disabled>
+                <span className="share-option__icon">🔗</span>
+                <span className="share-option__label">QR code</span>
+                <span className="share-option__status">Conceptual</span>
+              </button>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setShowShareModal(false)}>
+                Close
               </button>
             </div>
           </div>
