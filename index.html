@@ -1547,7 +1547,7 @@ flowchart LR
     F1["Publish"] --> F2["Link / QR"]
   end
   A3 --> B1
-  B1 <--> C1
+  B1 &lt;--> C1
   C2 --> D1 & D2
   D1 & D2 --> E2
   E1 --> E2
@@ -1769,9 +1769,22 @@ flowchart LR
           fontFamily: "Inter, sans-serif"
         }
       });
-      document.addEventListener('DOMContentLoaded', function() {
-        mermaid.run();
+      // The diagrams sit inside the hidden "How we built it" tab. Mermaid
+      // measures text in the DOM to lay out flowcharts, so rendering while the
+      // panel is display:none produces empty SVGs. Render only once the panel
+      // is actually visible.
+      function renderDiagramsIfVisible() {
+        var panel = document.getElementById("tab-build");
+        if (panel && panel.classList.contains("active")) {
+          mermaid.run();
+        }
+      }
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          renderDiagramsIfVisible();
+        });
       });
+      renderDiagramsIfVisible();
     </script>
   </body>
 </html>
