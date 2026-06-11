@@ -71,6 +71,11 @@ export function buildTokens(profile) {
     if (pad[side]) tokens[`--jumio-sdk-container-padding-${side}`] = pad[side];
   }
 
+  // center the SDK's content card vertically within its (often taller) host container
+  // — overridable via advanced.tokenOverrides. Per customization-reference.md, valid
+  // values are center/start/end.
+  tokens['--jumio-sdk-container-justify-content'] = 'center';
+
   // advanced escape hatch — passthrough verbatim (overrides anything above)
   Object.assign(tokens, profile.advanced?.tokenOverrides ?? {});
 

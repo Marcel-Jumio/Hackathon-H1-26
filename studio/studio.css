@@ -35,14 +35,24 @@ body {
 .studio {
   display: grid;
   grid-template-columns: 440px 1fr;
+  grid-template-rows: minmax(0, 1fr);
   height: 100vh;
 }
 
 .sidebar {
   background: var(--bg);
   border-right: 1px solid var(--border);
-  padding: 1.25rem 1.25rem 3rem;
+  padding: 1.25rem 1.25rem 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebar-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  padding-bottom: 1rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
@@ -435,6 +445,7 @@ body {
   display: flex;
   gap: 0.65rem;
   justify-content: center;
+  margin-top: 1rem;
 }
 
 .modal-actions .btn {
@@ -511,13 +522,31 @@ body {
   border-color: var(--border);
 }
 
+/* ── credentials bar (sticky) ────────────────────────────────────────────── */
+.credentials-bar {
+  position: sticky;
+  top: -1.25rem;
+  z-index: 5;
+  background: var(--bg);
+  margin: -1.25rem -1.25rem 0;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.credentials-bar .field {
+  background: rgba(127,231,83,0.05);
+  border: 1px solid rgba(127,231,83,0.15);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin-top: 0;
+}
+
 /* ── config panel ────────────────────────────────────────────────────────── */
 .config-panel {
   background: rgba(127,231,83,0.05);
   border: 1px solid rgba(127,231,83,0.15);
   border-radius: var(--radius);
   padding: 0.75rem;
-  margin-bottom: 1rem;
+  margin: 0.75rem 0 1rem;
 }
 
 /* ── apply section ───────────────────────────────────────────────────────── */
@@ -526,7 +555,9 @@ body {
   border: 2px solid rgba(127,231,83,0.3);
   border-radius: var(--radius);
   padding: 1rem 1.1rem;
-  margin-bottom: 1rem;
+  margin: 0.75rem 0 1.25rem;
+  flex-shrink: 0;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.35);
 }
 
 .apply-section__header {
@@ -567,9 +598,55 @@ body {
   width: 100%;
   margin-top: 0.3rem;
   justify-content: center;
+  border-style: dashed;
+}
+
+.config-credentials-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  border-style: dashed;
+}
+
+.field-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--danger, #ef4444);
+}
+
+.region-radio-group {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.3rem;
+}
+
+.region-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  padding: 0.55em 0.75em;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.region-radio:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-input-hover);
+}
+
+.region-radio:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text-strong, var(--text));
+}
+
+.region-radio input[type="radio"] {
+  accent-color: var(--accent);
+  margin: 0;
 }
 
 .credentials-status {
@@ -987,6 +1064,7 @@ body {
 /* ── inputs ───────────────────────────────────────────────────────────────── */
 input[type="text"],
 input[type="number"],
+input[type="password"],
 select,
 textarea {
   width: 100%;
@@ -1006,6 +1084,7 @@ textarea {
 
 input[type="text"]:hover,
 input[type="number"]:hover,
+input[type="password"]:hover,
 select:hover,
 textarea:hover {
   border-color: var(--border-hover);
@@ -1014,6 +1093,7 @@ textarea:hover {
 
 input[type="text"]:focus,
 input[type="number"]:focus,
+input[type="password"]:focus,
 select:focus,
 textarea:focus {
   border-color: var(--border-focus);

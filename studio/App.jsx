@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { renderMicrosite, slugify } from '../microsite/render.mjs';
 import { validateProfile } from './validate.mjs';
+import { saveCredentials, getCredentials, clearCredentials, getRemainingMs } from './credentials.mjs';
 import sampleProfile from '../brand-profile.sample.json';
 import bybitProfile    from '../brands/brand-profile.bybit.json';
 import linkedinProfile from '../brands/brand-profile.linkedin.json';
@@ -29,6 +30,100 @@ const DEMO_PERSONAS = [
   { label: 'Ian Fraser Thomas', firstName: 'Ian Fraser', lastName: 'Thomas', dateOfBirth: '1970-07-30' },
 ];
 
+const REGIONS = [
+  { value: 'amer-1', label: 'AMER (US)' },
+  { value: 'emea-1', label: 'EMEA (EU)' },
+  { value: 'apac-1', label: 'APAC (SGP)' },
+];
+
+/** Auth region -> <jumio-sdk> datacenter. */
+const REGION_TO_DC = { 'amer-1': 'us', 'emea-1': 'eu', 'apac-1': 'sgp' };
+
+/** <jumio-sdk> locale code -> display name, for the Locale dropdown. */
+const LOCALES = {
+  sq: 'Albanian',
+  ar: 'Arabic',
+  az: 'Azerbaijani',
+  bn: 'Bengali',
+  'bn-IN': 'Bengali (India)',
+  bg: 'Bulgarian',
+  'my-MM': 'Burmese (Myanmar)',
+  ca: 'Catalan',
+  ceb: 'Cebuano',
+  'ceb-PH': 'Cebuano (Philippines)',
+  zh: 'Chinese (default)',
+  'zh-CN': 'Simplified Chinese',
+  zh_CN: 'Simplified Chinese',
+  'zh-HK': 'Traditional Chinese',
+  zh_HK: 'Traditional Chinese',
+  hr: 'Croatian',
+  cs: 'Czech',
+  da: 'Danish',
+  nl: 'Dutch',
+  en: 'American English (default)',
+  'en-GB': 'English (United Kingdom)',
+  en_GB: 'English (United Kingdom)',
+  et: 'Estonian',
+  fi: 'Finnish',
+  'fil-PH': 'Filipino (Philippines)',
+  fr: 'French',
+  'fr-CA': 'French (Canada)',
+  'ka-GE': 'Georgian',
+  ka_GE: 'Georgian',
+  de: 'German',
+  el: 'Greek',
+  iw: 'Hebrew',
+  hi: 'Hindi',
+  'hi-IN': 'Hindi (India)',
+  hu: 'Hungarian',
+  is: 'Icelandic',
+  id: 'Indonesian',
+  ga: 'Irish',
+  it: 'Italian',
+  ja: 'Japanese',
+  jv: 'Javanese',
+  'jv-ID': 'Javanese (Indonesia)',
+  kk: 'Kazakh',
+  km: 'Khmer',
+  ko: 'Korean',
+  lv: 'Latvian',
+  lt: 'Lithuanian',
+  ms: 'Malay',
+  no: 'Norwegian',
+  pl: 'Polish',
+  pt: 'Portuguese',
+  'pt-BR': 'Brazilian Portuguese',
+  pt_BR: 'Brazilian Portuguese',
+  ro: 'Romanian',
+  ru: 'Russian',
+  sr: 'Serbian (default)',
+  sr_Latn: 'Serbian (Latin)',
+  'sr-Latn': 'Serbian (Latin)',
+  'sr-Cyrl': 'Serbian (Cyrillic)',
+  sr_Cyrl: 'Serbian (Cyrillic)',
+  sk: 'Slovak',
+  sl: 'Slovenian',
+  es: 'Spanish',
+  es_MX: 'Mexican Spanish',
+  'es-MX': 'Mexican Spanish',
+  sv: 'Swedish',
+  sw: 'Swahili',
+  th: 'Thai',
+  tr: 'Turkish',
+  ur: 'Urdu',
+  uz: 'Uzbek',
+  uk: 'Ukrainian',
+  vi: 'Vietnamese',
+};
+
+/** Studio "Product" -> Jumio workflowKey, used by /api/session. */
+const PRODUCT_WORKFLOW_KEY = {
+  'id-check': '10166',
+  'id-check-selfie': '10164',
+  'liveness': '10016',
+  'selfie': '10610',
+};
+
 const BLANK_CUSTOMER = { firstName: '', lastName: '', dateOfBirth: '' };
 
 const HARVEST_STEPS = [
@@ -55,6 +150,14 @@ function setPath(obj, path, value) {
   }
   cur[keys[keys.length - 1]] = value;
   return result;
+}
+
+/** "3542000" -> "59:02" */
+function formatRemaining(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 function download(filename, contents, mime) {
@@ -316,10 +419,32 @@ export default function App() {
   const [customerData, setCustomerData] = useState({ ...DEMO_PERSONAS[0] });
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
-  const [credentialsActive, setCredentialsActive] = useState(false);
+  const [credentialsActive, setCredentialsActive] = useState(() => !!getCredentials());
+  const [credentialsRemainingMs, setCredentialsRemainingMs] = useState(() => getRemainingMs());
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [credentialsForm, setCredentialsForm] = useState({ apiKey: '', apiSecret: '', region: 'amer-1' });
+  const [credentialsConnecting, setCredentialsConnecting] = useState(false);
+  const [credentialsError, setCredentialsError] = useState('');
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
   const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
+
+  // Tick the credentials countdown and auto-disconnect once they expire.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining = getRemainingMs();
+      setCredentialsRemainingMs(remaining);
+      if (remaining <= 0 && credentialsActive) {
+        setCredentialsActive(false);
+        setStarted(false);
+        setSession(s => ({ ...s, token: '' }));
+        setSessionError('Credentials expired — reconnect to create a new session.');
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [credentialsActive]);
 
   const errors = validateProfile(profile);
   const slug = slugify(profile.brand?.name);
@@ -371,6 +496,76 @@ export default function App() {
     setStarted(false);
   }
 
+  /** Validates credentials by fetching a bearer token immediately, then stores them if they work. */
+  async function connectCredentials() {
+    const { apiKey, apiSecret, region } = credentialsForm;
+    if (!apiKey.trim() || !apiSecret.trim()) return;
+
+    setCredentialsConnecting(true);
+    setCredentialsError('');
+    try {
+      const res = await fetch('/api/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: apiKey.trim(), apiSecret: apiSecret.trim(), region }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Could not validate credentials (${res.status})`);
+
+      saveCredentials({ apiKey: apiKey.trim(), apiSecret: apiSecret.trim(), region });
+      setCredentialsActive(true);
+      setCredentialsRemainingMs(getRemainingMs());
+      setShowCredentialsModal(false);
+      setCredentialsForm({ apiKey: '', apiSecret: '', region });
+      setSession(s => ({ ...s, dc: REGION_TO_DC[region] ?? s.dc }));
+    } catch (err) {
+      setCredentialsError(String(err.message || err));
+    } finally {
+      setCredentialsConnecting(false);
+    }
+  }
+
+  function disconnectCredentials() {
+    clearCredentials();
+    setCredentialsActive(false);
+    setCredentialsRemainingMs(0);
+  }
+
+  /** Calls /api/session to mint a fresh <jumio-sdk> session token from stored API credentials. */
+  async function requestSession() {
+    const creds = getCredentials();
+    if (!creds) {
+      setCredentialsActive(false);
+      setSessionError('Credentials expired — reconnect to create a new session.');
+      return;
+    }
+
+    setSessionLoading(true);
+    setSessionError('');
+    try {
+      const res = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: creds.apiKey,
+          apiSecret: creds.apiSecret,
+          region: creds.region,
+          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
+          customerData: product === 'selfie' ? customerData : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Session request failed (${res.status})`);
+
+      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc }));
+      setStarted(true);
+    } catch (err) {
+      setSessionError(String(err.message || err));
+    } finally {
+      setSessionLoading(false);
+    }
+  }
+
   async function runHarvest() {
     if (!sourceUrl.trim()) return;
     setHarvestState('loading');
@@ -415,30 +610,47 @@ export default function App() {
           <span className="studio-badge">Studio</span>
         </div>
 
+        <div className="sidebar-scroll">
+
+        {/* ── credentials bar (sticky) ── */}
+        <div className="credentials-bar">
+          <label className="field">
+            API Credentials
+            {credentialsActive ? (
+              <div className="credentials-status">
+                <span className="credentials-badge">
+                  ✓ Connected · {formatRemaining(credentialsRemainingMs)}
+                </span>
+                <button
+                  className="btn btn-ghost config-credentials-btn"
+                  onClick={disconnectCredentials}
+                >
+                  Disconnect
+                </button>
+              </div>
+            ) : (
+              <button className="btn btn-ghost config-credentials-btn" onClick={() => { setCredentialsError(''); setShowCredentialsModal(true); }}>
+                🔐 Connect credentials
+              </button>
+            )}
+          </label>
+        </div>
+
         {/* ── config panel ── */}
         <div className="config-panel">
-          <div className="field-grid field-grid-3">
+          <div className="field-grid">
             <label className="field">
-              Datacenter
-              <select
-                value={session.dc}
-                onChange={e => { setSession(s => ({ ...s, dc: e.target.value })); setStarted(true); }}
-                disabled={credentialsActive}
-                title={credentialsActive ? 'Datacenter is locked to the connected credentials' : ''}
-              >
-                <option value="us">US</option>
-                <option value="eu">EU</option>
-                <option value="sgp">SGP</option>
+              Locale
+              <select value={session.locale}
+                onChange={e => { setSession(s => ({ ...s, locale: e.target.value })); setStarted(false); }}>
+                {Object.entries(LOCALES).map(([code, label]) => (
+                  <option key={code} value={code}>{label}</option>
+                ))}
               </select>
             </label>
             <label className="field">
-              Locale
-              <input type="text" value={session.locale}
-                onChange={e => { setSession(s => ({ ...s, locale: e.target.value })); setStarted(false); }} />
-            </label>
-            <label className="field">
               Product
-              <select value={product} onChange={e => { setProduct(e.target.value); setStarted(true); }}>
+              <select value={product} onChange={e => { setProduct(e.target.value); setStarted(false); }}>
                 <option value="id-check">ID Check</option>
                 <option value="id-check-selfie">ID Check + Selfie</option>
                 <option value="liveness">Liveness standalone</option>
@@ -447,33 +659,26 @@ export default function App() {
             </label>
           </div>
 
-          <label className="field" style={{ marginTop: '0.65rem' }}>
-            API Credentials
-            {credentialsActive ? (
-              <div className="credentials-status">
-                <span className="credentials-badge">✓ Connected</span>
-                <button
-                  className="btn btn-ghost config-credentials-btn"
-                  onClick={() => setCredentialsActive(false)}
-                >
-                  Disconnect
+          {credentialsActive ? (
+            <label className="field" style={{ marginTop: '0.65rem' }}>
+              Session
+              <div className="input-apply-row">
+                <button className="btn btn-primary" disabled={sessionLoading} onClick={requestSession}>
+                  {sessionLoading ? 'Creating session…' : 'Create session & launch →'}
                 </button>
               </div>
-            ) : (
-              <button className="btn btn-ghost config-credentials-btn" disabled>
-                🔐 Connect credentials — coming soon
-              </button>
-            )}
-          </label>
-
-          <label className="field" style={{ marginTop: '0.65rem' }}>
-            Session token
-            <div className="input-apply-row">
-              <input type="text" value={session.token} placeholder="Paste session token here"
-                onChange={e => { setSession(s => ({ ...s, token: e.target.value })); setStarted(false); }} />
-              <ApplyBtn onApply={() => setStarted(true)} />
-            </div>
-          </label>
+              {sessionError && <p className="field-error">{sessionError}</p>}
+            </label>
+          ) : (
+            <label className="field" style={{ marginTop: '0.65rem' }}>
+              Session token
+              <div className="input-apply-row">
+                <input type="text" value={session.token} placeholder="Paste session token here"
+                  onChange={e => { setSession(s => ({ ...s, token: e.target.value })); setStarted(false); }} />
+                <ApplyBtn onApply={() => setStarted(true)} />
+              </div>
+            </label>
+          )}
         </div>
 
         {/* ── customer data (Selfie.DONE only) ── */}
@@ -531,7 +736,12 @@ export default function App() {
                 />
               </label>
             </div>
-            <button className="btn btn-primary customer-submit-btn" onClick={() => setShowSessionWarning(true)}>
+            <button
+              className="btn btn-primary customer-submit-btn"
+              disabled={!credentialsActive}
+              title={credentialsActive ? '' : 'Connect API credentials first'}
+              onClick={() => setShowSessionWarning(true)}
+            >
               Create session &amp; launch →
             </button>
           </div>
@@ -604,19 +814,6 @@ export default function App() {
             </div>
           )}
 
-        </div>
-
-        {/* ── apply section ── */}
-        <div className="apply-section">
-          <div className="apply-section__header">
-            <span className="apply-section__title">Ready to see your changes?</span>
-          </div>
-          <p className="apply-section__description">
-            Click below to apply your configuration and any customizations to the preview.
-          </p>
-          <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
-            Apply →
-          </button>
         </div>
 
         {errors.length > 0 && (
@@ -784,6 +981,21 @@ export default function App() {
           <p className="hint">ID: <code>{slug}</code></p>
         </div>
 
+        </div>
+
+        {/* ── apply section (pinned to bottom) ── */}
+        <div className="apply-section">
+          <div className="apply-section__header">
+            <span className="apply-section__title">Ready to see your changes?</span>
+          </div>
+          <p className="apply-section__description">
+            Click below to apply your configuration and any customizations to the preview.
+          </p>
+          <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
+            Apply →
+          </button>
+        </div>
+
       </aside>
 
       {/* ── preview ── */}
@@ -832,6 +1044,60 @@ export default function App() {
         </div>
       </main>
 
+      {/* ── connect credentials modal ── */}
+      {showCredentialsModal && (
+        <div className="modal-backdrop" onClick={() => setShowCredentialsModal(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">🔐</div>
+            <h2 className="modal-title">Connect API credentials</h2>
+            <p className="modal-body">
+              Used to mint <code>&lt;jumio-sdk&gt;</code> session tokens on your behalf via <code>/api/session</code>.
+              Stored only in this browser's local storage and cleared automatically after 60 minutes.
+            </p>
+            <div className="field">
+              Region
+              <div className="region-radio-group">
+                {REGIONS.map(r => (
+                  <label key={r.value} className="region-radio">
+                    <input
+                      type="radio"
+                      name="credentials-region"
+                      value={r.value}
+                      checked={credentialsForm.region === r.value}
+                      onChange={() => setCredentialsForm(f => ({ ...f, region: r.value }))}
+                    />
+                    {r.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <label className="field">
+              API Key
+              <input type="text" value={credentialsForm.apiKey}
+                onChange={e => setCredentialsForm(f => ({ ...f, apiKey: e.target.value }))} />
+            </label>
+            <label className="field">
+              API Secret
+              <input type="password" value={credentialsForm.apiSecret}
+                onChange={e => setCredentialsForm(f => ({ ...f, apiSecret: e.target.value }))} />
+            </label>
+            {credentialsError && <p className="field-error">{credentialsError}</p>}
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setShowCredentialsModal(false)}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={!credentialsForm.apiKey.trim() || !credentialsForm.apiSecret.trim() || credentialsConnecting}
+                onClick={connectCredentials}
+              >
+                {credentialsConnecting ? 'Validating…' : 'Connect'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── session warning modal ── */}
       {showSessionWarning && (
         <div className="modal-backdrop" onClick={() => setShowSessionWarning(false)}>
@@ -852,7 +1118,7 @@ export default function App() {
               </button>
               <button className="btn btn-primary" onClick={() => {
                 setShowSessionWarning(false);
-                /* TODO: trigger session token creation */
+                requestSession();
               }}>
                 Got it — create session →
               </button>

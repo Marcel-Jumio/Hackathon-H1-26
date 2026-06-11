@@ -2,23 +2,23 @@
   "$schema": "./brand-profile.schema.json",
   "themeMode": "light",
   "brand": {
-    "name": "Acme Bank",
-    "sourceUrl": "https://acme.example.com",
-    "logo": "https://acme.example.com/assets/logo.svg",
+    "name": "Jumio",
+    "sourceUrl": "https://www.jumio.com/",
+    "logo": "https://www.jumio.com/wp-content/themes/understrap-child/images-dark-jumio/Jumio23-RGB%201.svg",
     "fontFamily": "Inter",
     "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
     "colors": {
-      "primary": "#0a7d33",
+      "primary": "#00D06A",
       "onPrimary": "#ffffff",
-      "text": "#111418",
+      "text": "#121214",
       "pageBackground": "#ffffff",
-      "cardBackground": "#f5f7fa"
+      "cardBackground": "#f7f8fa"
     },
-    "radius": "12px"
+    "radius": "16px"
   },
   "journey": {
-    "vertical": "banking",
-    "steps": ["Create account", "Verify identity", "Done"],
+    "vertical": "identity",
+    "steps": ["Create Account", "Scan ID Document", "Take a Selfie", "Verification Complete"],
     "idvStepIndex": 1,
     "ctaLabel": "Verify your identity"
   },
