@@ -556,12 +556,13 @@ export default function App() {
           region: creds.region,
           workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
           customerData: product === 'selfie' ? customerData : undefined,
+          tokenLifetime,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Session request failed (${res.status})`);
 
-      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc }));
+      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc, expiresAt: data.expiresAt }));
       setStarted(true);
     } catch (err) {
       setSessionError(String(err.message || err));
@@ -571,10 +572,8 @@ export default function App() {
   }
 
   async function publishSite() {
-    const creds = getCredentials();
-    if (!creds) {
-      setCredentialsActive(false);
-      setPublishError('Credentials expired — reconnect to publish a demo link.');
+    if (!session.token) {
+      setPublishError('Create a session & launch first — Publish reuses that session token.');
       return;
     }
 
@@ -587,13 +586,10 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           profile,
-          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
           locale: session.locale,
-          apiKey: creds.apiKey,
-          apiSecret: creds.apiSecret,
-          region: creds.region,
-          tokenLifetime,
-          customerData: product === 'selfie' ? customerData : undefined,
+          sdkToken: session.token,
+          sdkDc: session.dc,
+          expiresAt: session.expiresAt,
         }),
       });
       const data = await res.json();
@@ -696,6 +692,18 @@ export default function App() {
                 <option value="id-check-selfie">ID Check + Selfie</option>
                 <option value="liveness">Liveness standalone</option>
                 <option value="selfie">Selfie.DONE</option>
+              </select>
+            </label>
+            <label className="field">
+              Token lifetime
+              <select value={tokenLifetime} onChange={e => setTokenLifetime(e.target.value)}>
+                <option value="5m">5 minutes</option>
+                <option value="30m">30 minutes (default)</option>
+                <option value="1h">1 hour</option>
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+                <option value="60d">60 days</option>
               </select>
             </label>
           </div>
@@ -1037,18 +1045,6 @@ export default function App() {
           </button>
 
           <div className="publish-row">
-            <label className="field publish-lifetime-field">
-              <span>Token lifetime</span>
-              <select value={tokenLifetime} onChange={e => setTokenLifetime(e.target.value)}>
-                <option value="5m">5 minutes</option>
-                <option value="30m">30 minutes (default)</option>
-                <option value="1h">1 hour</option>
-                <option value="1d">1 day</option>
-                <option value="7d">7 days</option>
-                <option value="30d">30 days</option>
-                <option value="60d">60 days</option>
-              </select>
-            </label>
             <button
               className="btn btn-ghost publish-btn"
               disabled={publishing}

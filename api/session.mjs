@@ -6,7 +6,15 @@
 // account/workflow execution and returns the <jumio-sdk> session token.
 // Credentials are used per-request only — never persisted server-side.
 
-import { getAccessToken, createAccount, uploadPreparedData, resolveDc } from './_jumio.mjs';
+import {
+  getAccessToken,
+  createAccount,
+  uploadPreparedData,
+  resolveDc,
+  parseTokenLifetimeMs,
+  TOKEN_LIFETIME_MIN_MS,
+  TOKEN_LIFETIME_MAX_MS,
+} from './_jumio.mjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,16 +22,25 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { apiKey, apiSecret, region, workflowKey, customerData } = req.body ?? {};
+  const { apiKey, apiSecret, region, workflowKey, customerData, tokenLifetime } = req.body ?? {};
 
   if (!apiKey || !apiSecret || !region || !workflowKey) {
     res.status(400).json({ error: 'apiKey, apiSecret, region and workflowKey are required' });
     return;
   }
 
+  let lifetimeMs = null;
+  if (tokenLifetime) {
+    lifetimeMs = parseTokenLifetimeMs(tokenLifetime);
+    if (lifetimeMs == null || lifetimeMs < TOKEN_LIFETIME_MIN_MS || lifetimeMs > TOKEN_LIFETIME_MAX_MS) {
+      res.status(400).json({ error: 'tokenLifetime must be between 5m and 60d' });
+      return;
+    }
+  }
+
   try {
     const accessToken = await getAccessToken(apiKey, apiSecret, region);
-    const account = await createAccount(accessToken, region, workflowKey, customerData);
+    const account = await createAccount(accessToken, region, workflowKey, customerData, tokenLifetime);
 
     if (customerData) {
       const dataCredential = account.workflowExecution?.credentials?.find((c) => c.category === 'DATA');
@@ -36,6 +53,7 @@ export default async function handler(req, res) {
       sdkToken: account.sdk?.token,
       sdkDc: resolveDc(region),
       accountId: account.account?.id,
+      expiresAt: lifetimeMs != null ? Date.now() + lifetimeMs : undefined,
     });
   } catch (err) {
     console.error('[api/session] Error:', err.message);
