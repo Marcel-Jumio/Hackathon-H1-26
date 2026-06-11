@@ -20,21 +20,7 @@ function escapeHtml(s) {
 }
 
 function journeyBarHtml() {
-  return `\
-  <nav class="journey-bar">
-    <div class="journey-segment journey-segment--placeholder">
-      <span class="journey-segment__label">Placeholder</span>
-      <span class="journey-segment__hint">Page before journey</span>
-    </div>
-    <div class="journey-segment journey-segment--active">
-      <span class="journey-segment__label">Verification Journey</span>
-      <span class="journey-segment__hint">Jumio WebSDK</span>
-    </div>
-    <div class="journey-segment journey-segment--placeholder">
-      <span class="journey-segment__label">Placeholder</span>
-      <span class="journey-segment__hint">Page after journey</span>
-    </div>
-  </nav>`;
+  return ''; // Journey bar removed - kept for backwards compatibility
 }
 
 /** Pulsing placeholder blocks shown at the IDV step before <jumio-sdk> is mounted. */
@@ -52,9 +38,9 @@ const skeletonStyle = `
     .skeleton-line, .skeleton-block {
       border-radius: 6px;
       background: linear-gradient(90deg,
-        var(--jumio-sdk-color-primary1, #e5e7eb) 25%,
-        var(--jumio-sdk-color-primary2, #f3f4f6) 50%,
-        var(--jumio-sdk-color-primary1, #e5e7eb) 75%);
+        var(--jumio-sdk-color-primary1, #f0f2f5) 25%,
+        var(--jumio-sdk-color-primary2, #f5f7fa) 50%,
+        var(--jumio-sdk-color-primary1, #f0f2f5) 75%);
       background-size: 200% 100%;
       animation: jumio-sdk-skeleton-pulse 1.4s ease-in-out infinite;
     }
@@ -196,8 +182,6 @@ ${skeletonStyle}
   </style>
 </head>
 <body>
-${journeyBarHtml()}
-
   <div class="sdk-area">
 ${(() => {
       const jumioSdkHtml = `<jumio-sdk dc="${escapeHtml(session.dc ?? 'us')}" token="${escapeHtml(session.token ?? 'REPLACE_WITH_SESSION_TOKEN')}" locale="${escapeHtml(session.locale || profile.sdk?.locale || 'en')}"></jumio-sdk>`;

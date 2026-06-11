@@ -2,9 +2,9 @@
   "$schema": "./brand-profile.schema.json",
   "themeMode": "light",
   "brand": {
-    "name": "Acme Bank",
-    "sourceUrl": "https://acme.example.com",
-    "logo": "https://acme.example.com/assets/logo.svg",
+    "name": "Jumio",
+    "sourceUrl": "https://www.jumio.com/",
+    "logo": "https://documentation.jumio.ai/img/Jumio-Logo-color/Jumio23-RGB.svg",
     "fontFamily": "Inter",
     "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
     "colors": {
