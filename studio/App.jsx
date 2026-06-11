@@ -324,6 +324,7 @@ export default function App() {
   const [templateSnippetLabel, setTemplateSnippetLabel] = useState('');
   const [brandOpen, setBrandOpen] = useState(false);
   const [colorsOpen, setColorsOpen] = useState(false);
+  const [finetunePanelOpen, setFinetunePanelOpen] = useState(false);
   const [customerData, setCustomerData] = useState({ ...DEMO_PERSONAS[0] });
   const [personaLabel, setPersonaLabel] = useState(DEMO_PERSONAS[0].label);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
@@ -618,16 +619,21 @@ export default function App() {
         )}
 
         {/* ── fine-tuning panel ── */}
-        <div className="finetune-panel">
-          <div className="finetune-panel__header">
-            <span className="finetune-panel__title">Fine-tuning</span>
-            <span className="finetune-panel__hint">Optional — review &amp; adjust extracted values</span>
-          </div>
+        <button className="collapsible-header" onClick={() => setFinetunePanelOpen(o => !o)} style={{ marginTop: '1.5rem' }}>
+          <span>Advanced customization</span>
+          <span className="collapsible-chevron">{finetunePanelOpen ? '▲' : '▼'}</span>
+        </button>
 
-          <button className="collapsible-header" onClick={() => setBrandOpen(o => !o)}>
-            <span>Brand</span>
-            <span className="collapsible-chevron">{brandOpen ? '▲' : '▼'}</span>
-          </button>
+        {finetunePanelOpen && (
+          <div className="finetune-panel">
+            <p className="finetune-panel__description">
+              Fine-tune the look &amp; feel: change colors, swap the logo, or customize the text users see. Adjust individual text fields, or replace entire sections with templates.
+            </p>
+
+            <button className="collapsible-header" onClick={() => setBrandOpen(o => !o)}>
+              <span>Brand</span>
+              <span className="collapsible-chevron">{brandOpen ? '▲' : '▼'}</span>
+            </button>
           {brandOpen && TEXT_FIELDS.map(([path, label, placeholder]) => (
             <label key={path} className="field">
               {label}
@@ -754,7 +760,8 @@ export default function App() {
               </label>
             ))}
           </div>
-        </div>
+          </div>
+        )}
 
         <h2 className="section-header">Advanced — token overrides (JSON)</h2>
         <textarea value={advancedJson} onChange={e => applyAdvancedJson(e.target.value)} spellCheck={false} />
