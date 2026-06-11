@@ -280,7 +280,6 @@ function publishedSdkBlock(profile, opts) {
       (function() {
         var WORKFLOW_KEY = ${JSON.stringify(workflowKey)};
         var LOCALE = ${JSON.stringify(locale)};
-        var btn = document.getElementById('start-verification');
         var mount = document.getElementById('jumio-sdk-mount');
 
         function escAttr(s) {
@@ -289,48 +288,40 @@ function publishedSdkBlock(profile, opts) {
           });
         }
 
-        if (btn) {
-          btn.addEventListener('click', function() {
-            mount.innerHTML = \`${credFormHtml.replace(/`/g, '\\`')}\`;
-            btn.remove();
+        var form = document.getElementById('publish-cred-form');
+        var errorEl = document.getElementById('publish-cred-error');
+        var submitBtn = form.querySelector('button[type="submit"]');
 
-            var form = document.getElementById('publish-cred-form');
-            var errorEl = document.getElementById('publish-cred-error');
-            var submitBtn = form.querySelector('button[type="submit"]');
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          errorEl.textContent = '';
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Connecting…';
 
-            form.addEventListener('submit', function(e) {
-              e.preventDefault();
-              errorEl.textContent = '';
-              submitBtn.disabled = true;
-              submitBtn.textContent = 'Connecting…';
-
-              fetch('/api/session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  apiKey: form.apiKey.value.trim(),
-                  apiSecret: form.apiSecret.value.trim(),
-                  region: form.region.value,
-                  workflowKey: WORKFLOW_KEY,
-                }),
-              })
-                .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
-                .then(function(res) {
-                  if (!res.ok) throw new Error(res.data.error || 'Could not start verification');
-                  mount.outerHTML = '<jumio-sdk dc="' + escAttr(res.data.sdkDc) + '" token="' + escAttr(res.data.sdkToken) + '" locale="' + escAttr(LOCALE) + '"></jumio-sdk>';
-                })
-                .catch(function(err) {
-                  errorEl.textContent = err.message;
-                  submitBtn.disabled = false;
-                  submitBtn.textContent = 'Start verification';
-                });
+          fetch('/api/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              apiKey: form.apiKey.value.trim(),
+              apiSecret: form.apiSecret.value.trim(),
+              region: form.region.value,
+              workflowKey: WORKFLOW_KEY,
+            }),
+          })
+            .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+            .then(function(res) {
+              if (!res.ok) throw new Error(res.data.error || 'Could not start verification');
+              mount.outerHTML = '<jumio-sdk dc="' + escAttr(res.data.sdkDc) + '" token="' + escAttr(res.data.sdkToken) + '" locale="' + escAttr(LOCALE) + '"></jumio-sdk>';
+            })
+            .catch(function(err) {
+              errorEl.textContent = err.message;
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Start verification';
             });
-          });
-        }
+        });
       })();
     </script>`;
 
-  return `    <div id="jumio-sdk-mount">${skeletonHtml()}</div>
-    <button type="button" class="start-verification" id="start-verification">Start verification</button>
+  return `    <div id="jumio-sdk-mount">${credFormHtml}</div>
     ${script}`;
 }

@@ -4,7 +4,7 @@
 // Looks up the brand profile stored by /api/publish.mjs in Vercel Blob and renders it
 // in "published" mode (visitors connect their own credentials to start the SDK).
 
-import { list } from '@vercel/blob';
+import { get } from '@vercel/blob';
 import { renderMicrosite } from '../microsite/render.mjs';
 
 function notFoundPage(message) {
@@ -44,16 +44,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { blobs } = await list({ prefix: `published/${slug}.json`, limit: 1 });
-    const blob = blobs[0];
+    const blob = await get(`published/${slug}.json`, { access: 'private' });
 
     if (!blob) {
       res.status(404).send(notFoundPage('Demo not found'));
       return;
     }
 
-    const blobRes = await fetch(blob.url);
-    const data = await blobRes.json();
+    const data = await new Response(blob.stream).json();
 
     if (Date.now() > data.expiresAt) {
       res.status(410).send(notFoundPage('This demo link has expired'));

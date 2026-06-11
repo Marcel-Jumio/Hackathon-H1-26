@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
   try {
     await put(`published/${slug}.json`, JSON.stringify(payload), {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       contentType: 'application/json',
     });
