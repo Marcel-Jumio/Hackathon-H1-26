@@ -197,10 +197,12 @@ ${skeletonStyle}
   </style>
 </head>
 <body>
-${journeyBarHtml()}
+${opts.published ? '' : journeyBarHtml()}
 
   <div class="sdk-area">
 ${(() => {
+      if (opts.published) return publishedSdkBlock(profile, opts);
+
       const jumioSdkHtml = `<jumio-sdk dc="${escapeHtml(session.dc ?? 'us')}" token="${escapeHtml(session.token ?? 'REPLACE_WITH_SESSION_TOKEN')}" locale="${escapeHtml(session.locale || profile.sdk?.locale || 'en')}"></jumio-sdk>`;
       const launchScript = `
     <script>
@@ -225,4 +227,16 @@ ${(() => {
 </body>
 </html>
 `;
+}
+
+/**
+ * Published-page SDK block: mounts <jumio-sdk> directly with the session token minted at
+ * publish time. The token is single-use and tied to one workflow execution.
+ */
+function publishedSdkBlock(profile, opts) {
+  const locale = escapeHtml(opts.locale || profile.sdk?.locale || 'en');
+  const dc = escapeHtml(opts.sdkDc ?? 'us');
+  const token = escapeHtml(opts.sdkToken ?? 'REPLACE_WITH_SESSION_TOKEN');
+
+  return `    <jumio-sdk dc="${dc}" token="${token}" locale="${locale}"></jumio-sdk>`;
 }

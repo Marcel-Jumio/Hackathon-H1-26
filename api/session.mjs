@@ -6,92 +6,15 @@
 // account/workflow execution and returns the <jumio-sdk> session token.
 // Credentials are used per-request only — never persisted server-side.
 
-const DC_MAP = { 'amer-1': 'us', 'emea-1': 'eu', 'apac-1': 'sgp' };
-
-function resolveDc(region) {
-  return DC_MAP[region] ?? 'sgp';
-}
-
-async function getAccessToken(apiKey, apiSecret, region) {
-  const url = `https://auth.${region}.jumio.ai/oauth2/token`;
-  const credentials = Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    },
-    body: 'grant_type=client_credentials',
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw Object.assign(new Error(`OAuth2 token request failed (${res.status}): ${body}`), { status: res.status });
-  }
-
-  const data = await res.json();
-  return data.access_token;
-}
-
-async function createAccount(accessToken, region, workflowKey, customerData) {
-  const url = `https://account.${region}.jumio.ai/api/v1/accounts`;
-
-  const body = {
-    customerInternalReference: `smartdemo-${Date.now()}`,
-    workflowDefinition: { key: workflowKey },
-    userConsent: {
-      userIp: '226.80.211.232',
-      userLocation: { country: 'MYS', state: 'IL' },
-      consent: { obtained: 'yes', obtainedAt: new Date().toISOString() },
-    },
-  };
-
-  if (customerData && (customerData.firstName || customerData.lastName || customerData.dateOfBirth)) {
-    body.customerInternalReference = `smartdemo-${customerData.lastName ?? ''}-${Date.now()}`;
-  }
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw Object.assign(new Error(data.title ?? `Jumio account API error (${res.status})`), { status: res.status, jumioError: data });
-  }
-  return data;
-}
-
-/** Upload PREPARED_DATA (customer info) to the DATA credential, if the workflow has one. */
-async function uploadPreparedData(accessToken, region, accountId, workflowExecutionId, credentialId, customerData) {
-  const url = `https://api.${region}.jumio.ai/api/v1/accounts/${accountId}/workflow-executions/${workflowExecutionId}/credentials/${credentialId}/parts/PREPARED_DATA`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({
-      firstName: customerData.firstName,
-      lastName: customerData.lastName,
-      dateOfBirth: customerData.dateOfBirth,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.warn(`[api/session] PREPARED_DATA upload failed (non-fatal): ${res.status} ${body}`);
-  }
-}
+import {
+  getAccessToken,
+  createAccount,
+  uploadPreparedData,
+  resolveDc,
+  parseTokenLifetimeMs,
+  TOKEN_LIFETIME_MIN_MS,
+  TOKEN_LIFETIME_MAX_MS,
+} from './_jumio.mjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -99,16 +22,25 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { apiKey, apiSecret, region, workflowKey, customerData } = req.body ?? {};
+  const { apiKey, apiSecret, region, workflowKey, customerData, tokenLifetime } = req.body ?? {};
 
   if (!apiKey || !apiSecret || !region || !workflowKey) {
     res.status(400).json({ error: 'apiKey, apiSecret, region and workflowKey are required' });
     return;
   }
 
+  let lifetimeMs = null;
+  if (tokenLifetime) {
+    lifetimeMs = parseTokenLifetimeMs(tokenLifetime);
+    if (lifetimeMs == null || lifetimeMs < TOKEN_LIFETIME_MIN_MS || lifetimeMs > TOKEN_LIFETIME_MAX_MS) {
+      res.status(400).json({ error: 'tokenLifetime must be between 5m and 60d' });
+      return;
+    }
+  }
+
   try {
     const accessToken = await getAccessToken(apiKey, apiSecret, region);
-    const account = await createAccount(accessToken, region, workflowKey, customerData);
+    const account = await createAccount(accessToken, region, workflowKey, customerData, tokenLifetime);
 
     if (customerData) {
       const dataCredential = account.workflowExecution?.credentials?.find((c) => c.category === 'DATA');
@@ -121,6 +53,7 @@ export default async function handler(req, res) {
       sdkToken: account.sdk?.token,
       sdkDc: resolveDc(region),
       accountId: account.account?.id,
+      expiresAt: lifetimeMs != null ? Date.now() + lifetimeMs : undefined,
     });
   } catch (err) {
     console.error('[api/session] Error:', err.message);

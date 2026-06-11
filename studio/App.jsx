@@ -428,6 +428,10 @@ export default function App() {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState('');
+  const [publishedUrl, setPublishedUrl] = useState('');
+  const [tokenLifetime, setTokenLifetime] = useState('30m');
   const [showPreIdvTeaser, setShowPreIdvTeaser] = useState(false);
   const [showPostIdvTeaser, setShowPostIdvTeaser] = useState(false);
 
@@ -552,17 +556,55 @@ export default function App() {
           region: creds.region,
           workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
           customerData: product === 'selfie' ? customerData : undefined,
+          tokenLifetime,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Session request failed (${res.status})`);
 
-      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc }));
+      setSession(s => ({ ...s, token: data.sdkToken, dc: data.sdkDc ?? s.dc, expiresAt: data.expiresAt }));
       setStarted(true);
     } catch (err) {
       setSessionError(String(err.message || err));
     } finally {
       setSessionLoading(false);
+    }
+  }
+
+  async function publishSite() {
+    const creds = getCredentials();
+    if (!creds) {
+      setCredentialsActive(false);
+      setPublishError('Credentials expired — reconnect to publish a demo link.');
+      return;
+    }
+
+    setPublishing(true);
+    setPublishError('');
+    setPublishedUrl('');
+    try {
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile,
+          workflowKey: PRODUCT_WORKFLOW_KEY[product] ?? PRODUCT_WORKFLOW_KEY['id-check-selfie'],
+          locale: session.locale,
+          apiKey: creds.apiKey,
+          apiSecret: creds.apiSecret,
+          region: creds.region,
+          tokenLifetime,
+          customerData: product === 'selfie' ? customerData : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Publish failed (${res.status})`);
+
+      setPublishedUrl(`${window.location.origin}${data.url}`);
+    } catch (err) {
+      setPublishError(String(err.message || err));
+    } finally {
+      setPublishing(false);
     }
   }
 
@@ -655,6 +697,18 @@ export default function App() {
                 <option value="id-check-selfie">ID Check + Selfie</option>
                 <option value="liveness">Liveness standalone</option>
                 <option value="selfie">Selfie.DONE</option>
+              </select>
+            </label>
+            <label className="field">
+              Token lifetime
+              <select value={tokenLifetime} onChange={e => setTokenLifetime(e.target.value)}>
+                <option value="5m">5 minutes</option>
+                <option value="30m">30 minutes (default)</option>
+                <option value="1h">1 hour</option>
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+                <option value="60d">60 days</option>
               </select>
             </label>
           </div>
@@ -994,6 +1048,30 @@ export default function App() {
           <button className="btn btn-primary apply-section__btn" onClick={() => setStarted(true)}>
             Apply →
           </button>
+
+          <div className="publish-row">
+            <button
+              className="btn btn-ghost publish-btn"
+              disabled={publishing}
+              onClick={publishSite}
+            >
+              {publishing ? 'Publishing…' : '🚀 Publish demo link'}
+            </button>
+            {publishError && <p className="field-error">{publishError}</p>}
+            {publishedUrl && (
+              <div className="publish-result">
+                <input type="text" readOnly value={publishedUrl} onFocus={e => e.target.select()} />
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => navigator.clipboard?.writeText(publishedUrl)}
+                >
+                  Copy
+                </button>
+                <p className="hint">Single-use — valid until the token expires ({tokenLifetime})</p>
+              </div>
+            )}
+          </div>
         </div>
 
       </aside>

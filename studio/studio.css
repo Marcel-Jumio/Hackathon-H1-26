@@ -586,6 +586,34 @@ body {
   justify-content: center;
 }
 
+.publish-row {
+  margin-top: 0.6rem;
+}
+
+.publish-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.publish-result {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.publish-result input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+}
+
+.publish-result .hint {
+  width: 100%;
+  margin: 0;
+}
+
 .config-panel .field {
   margin-top: 0;
 }
