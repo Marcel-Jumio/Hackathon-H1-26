@@ -1010,18 +1010,14 @@
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  What measurable impact could this create?<span class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">What measurable impact could this create?</p>
                 <p class="qa-a">
                   Branded demo turnaround cut from
-                  <b>days of engineering to under a minute, self-serve</b>.
-                  Leading indicators to track post-launch: demo-to-opportunity
-                  conversion, first-touch engagement, and SE hours saved per
-                  demo.
-                  <b>Confirm the specific metric the team will commit to.</b>
+                  <b>days of engineering to under a minute, self-serve</b>,
+                  directly inside the Studio. Leading indicators to track
+                  post-launch: number of demo links published per rep,
+                  demo-to-opportunity conversion lift, and SE/AE hours saved
+                  per demo.
                 </p>
               </div>
             </div>
@@ -1032,52 +1028,57 @@
               <div class="qa-item">
                 <p class="qa-q">Your solution in one sentence?</p>
                 <p class="qa-a">
-                  The <b>Jumio SmartDemo Tool</b> captures a prospect's brand
-                  from a URL, auto-themes the Jumio WebSDK to match, and embeds
-                  it in a shareable, brand-skinned onboarding microsite — in
-                  seconds.
+                  The <b>Jumio SmartDemo Tool</b> takes a prospect's brand —
+                  from a manually-curated preset today, with automatic
+                  URL-based capture as a near-term next step — auto-themes the
+                  real Jumio WebSDK to match, and produces a shareable,
+                  brand-skinned onboarding microsite with a live verification
+                  flow embedded, in seconds.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">What makes it unique or innovative?</p>
                 <p class="qa-a">
-                  It drives <b>customization channels 1–4</b> of the WebSDK (342
-                  design tokens, ~45 template slots, theme mode) from a single
-                  generated profile. A normal integration only gets channel 5:
-                  three server-side branding knobs. The differentiator is "three
-                  knobs vs. a full repaint."
+                  It drives the WebSDK's full theming surface — 342
+                  <code>--jumio-sdk-*</code> design tokens plus ~45 template
+                  slots — from a single generated brand profile, instead of the
+                  handful of branding knobs a normal integration exposes. One
+                  profile in → a fully repainted, working SDK out, with
+                  per-screen copy/string overrides and custom guidance text on
+                  top.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Why is it better than alternatives?</p>
                 <p class="qa-a">
-                  It's <b>real, not a mockup</b> — the embedded SDK is genuinely
-                  token-themeable and runs a live verification flow. And it's
-                  <b>self-serve</b> for the field: no engineering ticket, no
-                  integration sprint.
+                  It's <b>real, not a mockup</b> — <code>&lt;jumio-sdk&gt;</code>
+                  is genuinely live and runs an actual ID Check / Selfie /
+                  Liveness workflow against real Jumio credentials. And it's
+                  <b>self-serve</b>: a field rep with API credentials goes from
+                  "paste a URL" to a published, shareable link with no code and
+                  no engineering ticket.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Most creative aspect?</p>
                 <p class="qa-a">
-                  The <b>ramp generator</b>: one brand hex color expands into a
-                  7-step lightness ramp (<code>color-primary1..7</code>) that
-                  drives every interactive state of the SDK. One color in, a
-                  coherent themed product out.
+                  The <b>color-ramp generator</b> in <code>engine/brand-to-theme.mjs</code>:
+                  one brand primary hex expands into a 7-step lightness ramp
+                  (<code>color-primary1..7</code>) that drives every interactive
+                  state of the SDK. Paired with the <b>publish pipeline</b>,
+                  which mints a fresh single-use SDK token at publish time and
+                  stores the rendered microsite as a private Vercel Blob behind
+                  a slug URL — turning a "demo" into a real, time-boxed,
+                  securely shareable link.
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  If you had another month?<span class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">If you had another month?</p>
                 <p class="qa-a">
-                  Harden the crawler for full-auto across arbitrary sites, add
-                  dark-mode token generation, expand journey verticals beyond
-                  banking, and wire one-click publish + QR sharing into a hosted
-                  gallery of saved demos.
-                  <b>Confirm the team's actual roadmap.</b>
+                  Harden brand harvesting/analyze for arbitrary sites, add
+                  dark-mode token twins, expand journey templates beyond the
+                  current verticals, and add a hosted gallery of saved /
+                  published demos with open-rate and completion analytics.
                 </p>
               </div>
             </div>
@@ -1089,58 +1090,82 @@
                 <p class="qa-q">Walk us through the architecture.</p>
                 <p class="qa-a">
                   A single contract — <code>brand-profile.json</code> — connects
-                  every component. <b>Harvest</b> produces it; the
-                  <b>theming engine</b> maps it to
-                  <code>--jumio-sdk-*</code> CSS variables + logo/font
-                  templates; the <b>microsite</b> injects that styling and
-                  mounts the SDK at the verification step; the
-                  <b>studio UI</b> lets a human review and edit the profile.
-                  Full data-flow diagram is in the <b>How We Built It</b> tab.
+                  every component. The <b>Studio</b> (React/Vite,
+                  <code>studio/App.jsx</code>) lets a user pick or generate a
+                  brand profile, configure product/locale/credentials, and edit
+                  it live. The <b>theming engine</b>
+                  (<code>engine/brand-to-theme.mjs</code>) maps it to
+                  <code>--jumio-sdk-*</code> CSS variables and an HTML snippet
+                  (logo, fonts, color ramp, template overrides). The
+                  <b>microsite renderer</b> (<code>microsite/render.mjs</code>)
+                  assembles a full standalone page — a brand-skinned stepper
+                  with <code>&lt;jumio-sdk&gt;</code> mounted at the IDV step. A
+                  set of <b>Vercel serverless functions</b> (<code>/api</code>)
+                  handle the Jumio OAuth2/account/workflow flow for live
+                  previews and the publish pipeline, which mints a single-use
+                  SDK token, stores the rendered profile + token as a private
+                  Vercel Blob, and serves it back via a <code>/studio/:slug</code>
+                  rewrite.
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  Technologies, frameworks, APIs?<span class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">Technologies, frameworks, APIs?</p>
                 <p class="qa-a">
-                  Jumio WebSDK (token + template theming), JSON Schema (Draft
-                  2020-12) for the contract, vanilla HTML/CSS/JS for the
-                  microsite shell, and Playwright for the crawler/extractor
-                  track. <b>Confirm the final stack actually used.</b>
+                  React 19 + Vite 8 for the Studio; <code>@jumio/websdk</code>
+                  (vendored locally at install time) for the embedded
+                  verification flow; <code>@vercel/blob</code> for storing
+                  published microsites; <code>sonner</code> for UI feedback; and
+                  plain <code>.mjs</code> Vercel serverless functions calling
+                  Jumio's OAuth2 token endpoint, account/workflow-execution
+                  creation, and PREPARED_DATA upload APIs (region-aware:
+                  amer-1/emea-1/apac-1 → us/eu/sgp).
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  Most technically challenging part?<span class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">Most technically challenging part?</p>
                 <p class="qa-a">
-                  Generating a brand-faithful, accessible color ramp from a
-                  single primary hex, and injecting theming through the SDK's
-                  Shadow DOM cleanly. <b>Confirm with the engine owner.</b>
+                  The <b>publish pipeline</b>. A published demo link needs a
+                  working <code>&lt;jumio-sdk&gt;</code> session embedded in a
+                  page that can be opened standalone, days later — but Jumio SDK
+                  tokens are short-lived/single-use and credentials must never
+                  reach the client. We solved this by minting a fresh single-use
+                  token <b>at publish time</b>, storing it server-side in a
+                  private blob, and rendering the page on demand at request time
+                  via <code>/api/site</code>, with expiry enforced. The
+                  <b>color-ramp generator</b> — turning one brand hex into an
+                  accessible 7-step ramp that holds up across 342 tokens — was
+                  the other major piece.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Reliability / scalability / security?</p>
                 <p class="qa-a">
-                  An "always-green" design: the <b>manual path always works</b>,
-                  so a flaky crawl never breaks the demo. Hero-brand profiles
-                  are pre-cached so the live demo never depends on a network
-                  crawl. Theming is pure CSS-variable injection — no SDK fork,
-                  no build step.
+                  API credentials are used <b>per-request only and never
+                  persisted</b> — only the resulting short-lived/single-use SDK
+                  token is stored, and it's stored in a <b>private</b> blob.
+                  Published links carry an <code>expiresAt</code> and the site
+                  endpoint enforces it server-side, so stale links fail closed.
+                  Token lifetime is validated and clamped (5 min – 60 days). All
+                  brand-profile fields are HTML-escaped before injection into
+                  the rendered microsite. The whole thing is stateless
+                  serverless functions + blob storage, so it scales
+                  horizontally with no shared server state.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Trade-offs you made?</p>
                 <p class="qa-a">
-                  <b>Light mode only</b> for the hackathon (dark-mode token
-                  twins deferred). Don't clone the prospect's site — a clean
-                  brand-<b>skinned</b> 3-step stepper reads as "their flow" and
-                  is achievable in scope. Contract-first over speed-first, to
-                  unblock parallel work.
+                  <b>Contract-first</b> (<code>brand-profile.json</code> + JSON
+                  Schema) so the engine, microsite, and Studio could be built
+                  and iterated independently. A <b>curated set of pre-built
+                  brand profiles</b> (Bybit, Revolut, LinkedIn, Xbox, G2, Okada)
+                  over a fully general crawler — a reliable Quick Load beats a
+                  flaky live crawl during a pitch. We iterated twice on the
+                  publish token strategy (reuse session token → mint a fresh
+                  single-use token at publish) and chose the more secure option
+                  despite the extra API call. <b>No automated test suite</b>
+                  given the time budget — verified via repeated builds and
+                  manual live-preview testing.
                 </p>
               </div>
             </div>
@@ -1151,19 +1176,35 @@
               <div class="qa-item">
                 <p class="qa-q">Demonstrate the core workflow.</p>
                 <p class="qa-a">
-                  Provide brand inputs (manually, or crawler-prefilled) → press
-                  <b>Generate</b> → a themed Jumio WebSDK renders inside a
-                  brand-skinned onboarding microsite → share the link. The video
-                  walks this end-to-end.
+                  Open the Studio → connect Jumio API credentials → pick a brand
+                  (Quick Load preset — today these are manually-curated brand
+                  profiles, with the "Analyze" URL field as a preview of
+                  automatic capture) → choose product (ID Check / Selfie /
+                  Liveness / ID Check +
+                  Selfie), locale, and token lifetime → tweak colors, copy, and
+                  template slots in <b>Advanced customization</b> while watching
+                  the live <code>&lt;jumio-sdk&gt;</code> preview update → click
+                  <b>"Create session &amp; launch"</b> to run the real flow →
+                  click <b>"🚀 Publish demo link"</b> to get a shareable
+                  <code>/studio/{slug}</code> URL with a pre-baked, single-use
+                  session.
                   <b>[Insert demo video — placeholder link in the header.]</b>
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">Key feature that delivers the most value?</p>
                 <p class="qa-a">
-                  The <b>theming engine</b>: brand profile → fully themed, live
-                  SDK. It's the moment a prospect sees their own brand on a
-                  working verification flow.
+                  The combination of the <b>theming engine + live preview</b>: a
+                  brand profile turns into a fully re-skinned,
+                  <em>running</em> <code>&lt;jumio-sdk&gt;</code> instantly —
+                  the moment a prospect sees their own brand wrapped around a
+                  real verification flow — paired with <b>publish</b>, which
+                  turns that moment into a link the rep can actually send. For
+                  non-technical roles this is the whole win: an <b>AE or BDR
+                  with no code and no engineering ticket</b> can build and ship
+                  a fully branded, working demo themselves, in the time it takes
+                  to prep for a call — turning "let me get engineering to mock
+                  that up" into "here, click this link."
                 </p>
               </div>
               <div class="qa-item">
@@ -1180,35 +1221,37 @@
               <div class="qa-item">
                 <p class="qa-q">How does a new user get started?</p>
                 <p class="qa-a">
-                  Open the studio, paste a URL or fill the short brand form, hit
-                  Generate, share the resulting link. No install, no code.
+                  Enter Jumio API credentials (key, secret, region, workflow
+                  key) once in the credentials bar. From there, <b>Quick Load
+                  presets</b> give an immediately working branded demo with zero
+                  setup, so a new user can explore customization and publishing
+                  before ever building a profile from scratch. <b>Full reset</b>
+                  gives a clean slate at any point. No install, no code.
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  Assumptions validated during the hackathon?<span
-                    class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">Assumptions validated during the hackathon?</p>
                 <p class="qa-a">
-                  That the WebSDK is richly themeable from CSS variables alone
-                  (verified against <code>variables.scss</code>), and that a
-                  single contract file lets a distributed team build in parallel
-                  against mocks.
-                  <b>Confirm what was actually proven vs. assumed.</b>
+                  That the WebSDK is richly themeable from CSS custom properties
+                  and template slots alone (342 tokens / ~45 slots), that a
+                  single primary brand color is enough to derive a coherent full
+                  theme via an automated color ramp, that a debounced live
+                  preview with a real mounted SDK stays responsive, and that a
+                  single-use-token-minted-at-publish + private-blob pattern is
+                  enough to ship secure, shareable demo links without a
+                  database.
                 </p>
               </div>
               <div class="qa-item">
-                <p class="qa-q">
-                  How would you measure success at launch?<span class="assume"
-                    >ASSUMPTION</span
-                  >
-                </p>
+                <p class="qa-q">How would you measure success at launch?</p>
                 <p class="qa-a">
-                  Adoption by the field (demos generated per rep),
-                  demo-to-opportunity conversion lift, and SE hours saved.
-                  <b>Confirm the team's chosen north-star metric.</b>
+                  <b>Adoption</b> — demo links published per rep per week,
+                  distinct brand profiles created. <b>Engagement</b> — open rate
+                  on published links, completion of the embedded IDV step, and
+                  expiry-before-open rate. <b>Time-to-demo</b> — minutes from
+                  "paste URL" to "published link" vs. the days a hand-built
+                  branded demo takes today. Longer-term: demo-to-opportunity
+                  conversion lift attributable to branded links.
                 </p>
               </div>
             </div>
