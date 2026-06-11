@@ -356,6 +356,35 @@ function markPlaceholderHtml(slotId) {
   return `<div style="background:rgba(127,231,83,0.12);border:1.5px dashed rgba(127,231,83,0.55);padding:0.45em 1em;border-radius:5px;font-family:monospace;font-size:0.72em;color:#7fe753;text-align:center;letter-spacing:0.04em">✦ ${slotId}</div>`;
 }
 
+function plainTextToGuidanceHtml(text) {
+  if (!text.trim()) return '';
+  const lines = text.split('\n').filter(line => line.trim());
+  if (lines.length === 0) return '';
+
+  const title = lines[0];
+  const items = lines.slice(1);
+
+  let html = `<div style="background:var(--jumio-sdk-theme-light-card-bg-color,#fff);border-radius:10px;padding:1.1em 1.25em;margin-bottom:0.5em">
+  <p style="margin:0 0 0.6em;font-weight:700;font-size:1em">${escapeHtmlString(title)}</p>`;
+
+  if (items.length > 0) {
+    html += '\n  <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4em;font-size:0.85em;opacity:0.8">';
+    items.forEach(item => {
+      html += `\n    <li>${escapeHtmlString(item)}</li>`;
+    });
+    html += '\n  </ul>';
+  }
+
+  html += '\n</div>';
+  return html;
+}
+
+function escapeHtmlString(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 const TEXT_FIELDS = [
   ['brand.name',       'Name'],
   ['brand.logo',       'Logo URL'],
@@ -413,6 +442,8 @@ export default function App() {
   const [stringsLang, setStringsLang] = useState('en');
   const [templateSlotId, setTemplateSlotId] = useState('jumio-start-guidance');
   const [templateSnippetLabel, setTemplateSnippetLabel] = useState('');
+  const [customGuidanceText, setCustomGuidanceText] = useState('');
+  const [customVideoUrl, setCustomVideoUrl] = useState('');
   const [brandOpen, setBrandOpen] = useState(false);
   const [colorsOpen, setColorsOpen] = useState(false);
   const [finetunePanelOpen, setFinetunePanelOpen] = useState(false);
@@ -956,7 +987,94 @@ export default function App() {
                   </label>
                 </div>
                 <p className="template-zone-desc">{slot.description}</p>
-                <div style={{ marginTop: '0.5rem' }}>
+
+                {templateSlotId === 'jumio-start-guidance' && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(127,231,83,0.04)', borderRadius: '6px', border: '1px solid rgba(127,231,83,0.1)' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600', color: '#7fe753' }}>
+                      Write custom text (no HTML needed)
+                    </label>
+                    <textarea
+                      style={{
+                        width: '100%',
+                        minHeight: '80px',
+                        padding: '0.6rem',
+                        fontSize: '0.85em',
+                        fontFamily: 'inherit',
+                        border: '1px solid rgba(127,231,83,0.2)',
+                        borderRadius: '5px',
+                        background: 'rgba(0,0,0,0.2)',
+                        color: 'inherit',
+                        resize: 'vertical'
+                      }}
+                      placeholder="First line is the title&#10;Other lines become checklist items&#10;&#10;Example:&#10;Quick identity check&#10;Valid ID (passport or driver's license)&#10;Well-lit environment&#10;Camera ready for selfie"
+                      spellCheck={false}
+                      value={customGuidanceText}
+                      onChange={e => setCustomGuidanceText(e.target.value)}
+                    />
+                    <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem' }}>
+                      <button
+                        className="btn btn-ghost btn-apply"
+                        onClick={() => {
+                          const html = plainTextToGuidanceHtml(customGuidanceText);
+                          setField(slotPath, html);
+                          setTemplateSnippetLabel('');
+                        }}
+                      >Apply custom text</button>
+                      {customGuidanceText && (
+                        <button
+                          className="btn btn-ghost btn-apply"
+                          onClick={() => setCustomGuidanceText('')}
+                        >Clear</button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {templateSnippetLabel === 'Video intro' && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(127,231,83,0.04)', borderRadius: '6px', border: '1px solid rgba(127,231,83,0.1)' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600', color: '#7fe753' }}>
+                      YouTube URL (optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="https://www.youtube.com/embed/VIDEO_ID or with params: ?autoplay=1&mute=1&loop=1&..."
+                      value={customVideoUrl}
+                      onChange={e => setCustomVideoUrl(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem',
+                        fontSize: '0.85em',
+                        fontFamily: 'inherit',
+                        border: '1px solid rgba(127,231,83,0.2)',
+                        borderRadius: '5px',
+                        background: 'rgba(0,0,0,0.2)',
+                        color: 'inherit',
+                        marginBottom: '0.5rem'
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '0.35rem' }}>
+                      <button
+                        className="btn btn-ghost btn-apply"
+                        onClick={() => {
+                          const videoUrl = customVideoUrl.trim() || 'https://www.youtube.com/embed/w8Ito7HXzU4?start=0&end=15&autoplay=1&mute=1&loop=1&playlist=w8Ito7HXzU4&controls=0&rel=0&modestbranding=1';
+                          const videoHtml = `<div style="border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/9;margin-bottom:0.75em">
+  <iframe src="${escapeHtmlString(videoUrl)}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media" allowfullscreen></iframe>
+</div>`;
+                          setField(slotPath, videoHtml);
+                        }}
+                      >Apply video</button>
+                      {customVideoUrl && (
+                        <button
+                          className="btn btn-ghost btn-apply"
+                          onClick={() => setCustomVideoUrl('')}
+                        >Clear</button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '0.75rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '600' }}>Custom HTML (advanced)</label>
                   <textarea
                     className="template-override-textarea"
                     value={currentHtml}
@@ -1078,11 +1196,6 @@ export default function App() {
 
       {/* ── preview ── */}
       <main className="preview-pane">
-        <div className="preview-platform-header">
-          <span className="preview-platform-header__label">Jumio Platform</span>
-          <span className="preview-platform-header__arrow">↓</span>
-          <span className="preview-platform-header__core">Our CORE</span>
-        </div>
         <div className="preview-journey-nav">
           <button className="preview-journey-nav__item preview-journey-nav__item--pre" onClick={() => setShowPreIdvTeaser(true)}>
             <div className="preview-journey-nav__label">Risk Signals</div>

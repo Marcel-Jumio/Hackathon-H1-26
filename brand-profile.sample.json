@@ -4,7 +4,7 @@
   "brand": {
     "name": "Jumio",
     "sourceUrl": "https://www.jumio.com/",
-    "logo": "https://www.jumio.com/wp-content/themes/understrap-child/images-dark-jumio/Jumio23-RGB%201.svg",
+    "logo": "https://documentation.jumio.ai/img/Jumio-Logo-color/Jumio23-RGB.svg",
     "fontFamily": "Inter",
     "fontUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
     "colors": {
