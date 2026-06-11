@@ -1262,60 +1262,46 @@
               <div class="qa-item">
                 <p class="qa-q">How did the team divide responsibilities?</p>
                 <p class="qa-a">
-                  By work package, across timezones (follow-the-sun): Austria
-                  orchestrated the contract; Singapore built the engine;
-                  Colombia the microsite; India the studio UI; UK SE owned
-                  harvesting + QA; UK + US Pacific sales owned hero brands +
-                  pitch; Idaho owned messaging.
+                  We split the work around a single contract file, <code>brand-profile.json</code>, so eight people across various countries could build in parallel without waiting on each other. Dion (UK) and Dexter (India) identified well-suited brands, harvested brand profiles, and created the respective JSON files (contract). Marcel (Austria) owned the solution plan and set up the work infrastructure (GitHub, Vercel, etc.), migrated the initial Studio UI (html with inline styles) to React, cleaned up the UX, and wired string overrides and template overrides (fed by information from Dexter) into it. Teng Tjun (Singapore) built the theming engine that converts brand JSON into live WebSDK styling, and framed and developed the microsite infrastructure on Vercel, as well as providing the serverless API call infrastructure alongside local storage logic into Studio UI. Mike, Ian, and Abby (UK, US EST, and PT timezones) owned the review and delivery of the pitch. Sovio created the email template to connect Studio and Microsite. Abby (US PT) owned the core messaging woven through the solution overview and demo guide.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">
-                  Obstacles, and how you overcame them?<span class="assume"
-                    >ASSUMPTION</span
-                  >
+                  Obstacles, and how you overcame them?
                 </p>
                 <p class="qa-a">
-                  A distributed, mixed-skill, multi-timezone team — solved with
-                  a contract-first, mock-first model: lock
-                  <code>brand-profile.json</code> in hour 2, then every track
-                  builds independently against mocks. Handoffs ran through a
-                  daily log, not live sync.
-                  <b>Add the real obstacles the team hit.</b>
+                  The hard constraint was a distributed, mixed-skill team working across time zones with only two days. We locked in the technical requirements early and basically stayed with the initial brand scheme without changing it down the line, which set the tone and pace for everything that followed. The follow-the-sun model turned the time zone spread into near-round-the-clock progress, with a short end-of-day handoff note from each region. The harder question was scope: the line between what we would ship and what we would roadmap stayed blurry longer than it should have, which meant some energy went toward features we did not have time to finish. We worked through it by agreeing on a core demo that had to be green before anything else moved forward.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">
-                  What did you learn?<span class="assume">ASSUMPTION</span>
+                  What did you learn?
                 </p>
                 <p class="qa-a">
-                  How deeply the WebSDK can be re-skinned beyond the documented
-                  three branding knobs, and that a single well-designed contract
-                  is what makes a distributed team actually parallel.
-                  <b>Add the team's own takeaways.</b>
+                  The biggest lesson was that a strong contract is more valuable than constant coordination. By defining a single JSON file as the source of truth between teams, we enabled parallel workstreams without requiring continuous synchronization. While we still held a few alignment meetings, the architecture allowed teams to move independently and efficiently. Crucial was the intelligence gathered from the web-sdk-playground, which the web team uses to have "all info websk" in one place. This formed the basis and was identified BEFORE the actual hackathon. We also learned a lot about onboarding non-technical contributors. AI tools have created new opportunities for people outside traditional engineering roles to meaningfully participate in the development of solutions. Once the team had a clear understanding of how to leverage their skills and divide responsibilities, collaboration accelerated, and execution became highly effective.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">
-                  What would you do differently?<span class="assume"
-                    >ASSUMPTION</span
-                  >
+                  What would you do differently?
                 </p>
                 <p class="qa-a">
-                  <b>Team to fill in.</b> (Common honest answers: scope the
-                  crawler smaller earlier, lock hero brands on day 1, build the
-                  share path before polish.)
+                  From a technical perspective, we took the exact right choices in everything we chose to use. Take more time upfront to understand each team member's strengths before dividing the work. We came together well, but a clearer picture of everyone's skills from the start would have helped us assign the right work to the right people faster and get more out of the time we had. We also would have drawn the line between "what we ship" and "what we roadmap" earlier, so we could focus on nailing the core demo rather than chasing scope we did not have time to finish.
                 </p>
               </div>
               <div class="qa-item">
                 <p class="qa-q">
-                  Each member's proudest contribution?<span class="assume"
-                    >ASSUMPTION</span
-                  >
+                  Each member's proudest contribution?
                 </p>
                 <p class="qa-a">
-                  <b>One line per person — team to fill in.</b> Keep it specific
-                  and personal; judges remember these.
+                  <b>Marcel:</b> Transformed a concept into an actionable plan that succeeded.
+                  <br><b>Teng Tjun:</b> Built the theming engine and microsite infrastructure that turns a brand JSON file into a live, styled WebSDK experience, the technical core of the entire demo.
+                  <br><b>Sovio:</b> Designed the email template that bridges Studio and Microsite, giving every demo a polished, on-brand delivery mechanism out of the box.
+                  <br><b>Dion:</b> Identified the right hero brands and harvested their profiles into the contract JSON that every other work stream built against.
+                  <br><b>Dexter:</b> Sourced brand profiles and fed the string and template overrides that made each demo feel genuinely on-brand rather than generic.
+                  <br><b>Mike:</b> Built a quick working demo that showed off what the team had created.
+                  <br><b>Ian:</b> Tested the build and helped pull together the demo that showcased it end to end.
+                  <br><b>Abby:</b> Produced the solution overview site, the positioning and messaging, and demo guide.
                 </p>
               </div>
             </div>
