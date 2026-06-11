@@ -24,9 +24,12 @@
   },
   "homepage": "https://github.com/Marcel-Jumio/Hackathon-H1-26#readme",
   "dependencies": {
-    "@jumio/websdk": "^0.4.0"
+    "@jumio/websdk": "^0.4.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
     "vite": "^8.0.16"
   }
 }
