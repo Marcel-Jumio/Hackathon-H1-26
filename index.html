@@ -1297,6 +1297,24 @@
                 </p>
               </div>
             </div>
+
+            <!-- 6 -->
+            <div class="qa-block">
+              <h3><span class="num">6</span> AI Usage</h3>
+              <div class="qa-item">
+                <p class="qa-q">Which AI tools did you use?</p>
+                <p class="qa-a"><b>Claude Code</b> — Anthropic's agentic CLI, used throughout the entire hackathon.</p>
+              </div>
+              <div class="qa-item">
+                <p class="qa-q">How did you leverage AI for your initiative?</p>
+                <p class="qa-a">
+                  <b>(a) WebSDK exploration &amp; documentation.</b> Claude Code was used to systematically explore the <code>@jumio/websdk</code> package and all surrounding internal documentation — surfacing the 342 CSS custom properties, ~45 template slots, and the OAuth2 / account / workflow-execution API surface that the theming engine and publish pipeline are built on.<br><br>
+                  <b>(b) Project plan.</b> Claude Code assisted in structuring the overall solution plan — defining the work packages, the contract-first approach around <code>brand-profile.json</code>, and the follow-the-sun execution model that let a distributed team build in parallel.<br><br>
+                  <b>(c) Customisation reference file.</b> Claude Code generated a comprehensive customisation reference that maps every brand-profile field to its corresponding <code>--jumio-sdk-*</code> token, template slot, and microsite variable — the living spec the whole team built against.<br><br>
+                  <b>(d) General coding assistance.</b> Used for coding assistance across all development work: Studio UI (React / Vite), the theming engine, the microsite renderer, Vercel serverless functions, and this overview page.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
