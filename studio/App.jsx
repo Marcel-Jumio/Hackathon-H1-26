@@ -497,9 +497,30 @@ function escapeHtmlString(str) {
 const TEXT_FIELDS = [
   ["brand.name", "Name"],
   ["brand.logo", "Logo URL"],
-  ["brand.fontFamily", "Font family"],
-  ["brand.fontUrl", "Font URL (Google Fonts, etc.)"],
   ["brand.radius", "Corner radius", "12px"],
+];
+
+const GOOGLE_FONTS = [
+  { name: "Open Sans", url: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" },
+  { name: "Inter", url: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" },
+  { name: "Poppins", url: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" },
+  { name: "Roboto", url: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" },
+  { name: "Lato", url: "https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" },
+  { name: "Montserrat", url: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" },
+  { name: "Playfair Display", url: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" },
+  { name: "Lora", url: "https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" },
+  { name: "Source Sans Pro", url: "https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" },
+  { name: "Raleway", url: "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" },
+  { name: "Quicksand", url: "https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" },
+  { name: "Nunito", url: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" },
+  { name: "Slabo 27px", url: "https://fonts.googleapis.com/css2?family=Slabo+27px&display=swap" },
+  { name: "Dosis", url: "https://fonts.googleapis.com/css2?family=Dosis:wght@400;600;700&display=swap" },
+  { name: "Ubuntu", url: "https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" },
+  { name: "IBM Plex Sans", url: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" },
+  { name: "Work Sans", url: "https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" },
+  { name: "Mulish", url: "https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap" },
+  { name: "Outfit", url: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" },
+  { name: "Sora", url: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" },
 ];
 
 const COLOR_FIELDS = [
@@ -1248,18 +1269,50 @@ export default function App() {
                   {brandOpen ? "▲" : "▼"}
                 </span>
               </button>
-              {brandOpen &&
-                TEXT_FIELDS.map(([path, label, placeholder]) => (
-                  <label key={path} className="field">
-                    {label}
+              {brandOpen && (
+                <>
+                  {TEXT_FIELDS.map(([path, label, placeholder]) => (
+                    <label key={path} className="field">
+                      {label}
+                      <input
+                        type="text"
+                        value={getPath(profile, path) ?? ""}
+                        placeholder={placeholder ?? ""}
+                        onChange={(e) => setField(path, e.target.value)}
+                      />
+                    </label>
+                  ))}
+                  <label className="field">
+                    Font family
+                    <select
+                      value={getPath(profile, "brand.fontFamily") ?? ""}
+                      onChange={(e) => {
+                        const font = GOOGLE_FONTS.find((f) => f.name === e.target.value);
+                        if (font) {
+                          setField("brand.fontFamily", font.name);
+                          setField("brand.fontUrl", font.url);
+                        }
+                      }}
+                    >
+                      <option value="">Select a font…</option>
+                      {GOOGLE_FONTS.map((font) => (
+                        <option key={font.name} value={font.name}>
+                          {font.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="field">
+                    Font URL (custom)
                     <input
                       type="text"
-                      value={getPath(profile, path) ?? ""}
-                      placeholder={placeholder ?? ""}
-                      onChange={(e) => setField(path, e.target.value)}
+                      value={getPath(profile, "brand.fontUrl") ?? ""}
+                      placeholder="https://fonts.googleapis.com/css2?family=..."
+                      onChange={(e) => setField("brand.fontUrl", e.target.value)}
                     />
                   </label>
-                ))}
+                </>
+              )}
 
               <button
                 className="collapsible-header"
